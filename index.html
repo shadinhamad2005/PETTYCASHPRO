@@ -118,7 +118,8 @@
             top: 0;
             width: 297mm; /* A4 Landscape width */
             background: white;
-            z-index: -1;
+            z-index: 9999;
+            display: block !important;
         }
 
         .report-header { border-bottom: 3px solid #4f46e5; padding-bottom: 15px; margin-bottom: 20px; text-align: center; }
@@ -254,7 +255,7 @@
                                     <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Amount (AED)</label>
                                     <div class="relative">
                                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-                                        <input type="number" id="form-amount" step="0.01" required placeholder="0.00" oninput="window.checkAdvanceWallet(document.getElementById('form-person').value)" class="modern-input w-full pl-8 pr-4 py-4 rounded-xl text-xl font-bold text-slate-800">
+                                        <input type="number" id="form-amount" step="0.01" required placeholder="0.00" oninput="const el = document.getElementById('form-person'); if(el) window.checkAdvanceWallet(el.value)" class="modern-input w-full pl-8 pr-4 py-4 rounded-xl text-xl font-bold text-slate-800">
                                     </div>
                                 </div>
                                 <div class="space-y-2">
@@ -291,17 +292,17 @@
                                         <p id="advance-balance-text" class="text-[10px] text-amber-600 font-bold mt-0.5"></p>
                                     </div>
                                 </label>
-                            </div>
-                            
-                            <!-- Pay Remainder Toggle (Always available for expense) -->
-                            <div id="reimburse-option-container" class="hidden">
-                                <label class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors">
-                                    <input type="checkbox" id="reimburse-now" class="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
-                                    <div>
-                                        <p class="text-xs font-bold text-slate-800 uppercase tracking-wide">Pay from Cash Box?</p>
-                                        <p class="text-[10px] text-slate-500 font-bold mt-0.5">Checked = Pay Now (Deduct from Box) | Unchecked = Pay Later (Create Debt)</p>
-                                    </div>
-                                </label>
+                                
+                                <!-- Pay Remainder Toggle (Always available for expense) -->
+                                <div id="reimburse-option-container" class="hidden">
+                                    <label class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors">
+                                        <input type="checkbox" id="reimburse-now" class="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 uppercase tracking-wide">Pay from Cash Box?</p>
+                                            <p class="text-[10px] text-slate-500 font-bold mt-0.5">Checked = Pay Now (Deduct from Box) | Unchecked = Pay Later (Create Debt)</p>
+                                        </div>
+                                    </label>
+                                </div>
                             </div>
 
                             <div id="reimburse-fields" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
@@ -682,15 +683,19 @@
                 const bEl = document.getElementById('advance-balance-text');
                 if(tEl) tEl.innerText = `Deduct from ${person}'s Advance`;
                 if(bEl) bEl.innerText = `Available: ${wallet.toFixed(2)} AED`;
+                
+                // Show/Hide Reimburse option
+                const amount = parseFloat(document.getElementById('form-amount')?.value) || 0;
+                const reimContainer = document.getElementById('reimburse-option-container');
+                const useAdv = document.getElementById('use-advance-wallet')?.checked;
+                
+                if (useAdv && amount > wallet && reimContainer) {
+                    reimContainer.classList.remove('hidden');
+                } else if (reimContainer) {
+                    reimContainer.classList.add('hidden');
+                }
+
             } else { container.classList.add('hidden'); }
-            
-            // Always show reimburse option if active tab is expense, regardless of wallet
-            const reimContainer = document.getElementById('reimburse-option-container');
-            if (activeTab === 'expense') {
-                reimContainer.classList.remove('hidden');
-            } else {
-                reimContainer.classList.add('hidden');
-            }
         };
         
         window.toggleReimburseOption = function() {
@@ -904,11 +909,7 @@
 
         window.openReceiptModal = (type, amount, person, desc, paidFromAdv, addedToDebt) => {
             if (type !== 'advance' && type !== 'repayment' && type !== 'expense') return;
-            // Only trigger for expense if there is a split (advance used OR debt created) to avoid spam
-            if (type === 'expense' && !paidFromAdv && !addedToDebt) {
-                // If standard expense, maybe user still wants a receipt? 
-                // Let's enable it for ALL expenses for clarity
-            }
+            if (type === 'expense' && !paidFromAdv && !addedToDebt) return; // Only show expense receipt if complex
             
             const modal = document.getElementById('receipt-modal');
             const btn = document.getElementById('btn-send-whatsapp-receipt');
@@ -1340,9 +1341,67 @@
         };
 
         window.saveEdit = async () => {
-            const updateData = { amount: parseFloat(document.getElementById('edit-amount').value), subDate: document.getElementById('edit-date').value, desc: document.getElementById('edit-desc').value };
+            const t = txs.find(x => x.id === editingTxId);
+            if (!t) return;
+
+            const newAmount = parseFloat(document.getElementById('edit-amount').value);
+            const newDate = document.getElementById('edit-date').value;
+            const newDesc = document.getElementById('edit-desc').value;
+
+            const updateData = { 
+                amount: newAmount, 
+                subDate: newDate, 
+                desc: newDesc 
+            };
+
+            // INTELLIGENT RECALCULATION LOGIC
+            // 1. Handle Receive/Top-Up/Returns (Money In)
+            if (t.type === 'receive' || (t.type === 'repayment' && t.isAdvanceReturn)) {
+                updateData.paidFromBox = -newAmount;
+            } 
+            // 2. Handle Advances (Money Out)
+            else if (t.type === 'advance') {
+                updateData.paidFromBox = newAmount;
+            }
+            // 3. Handle Expenses (Money Out or Debt)
+            else if (t.type === 'expense') {
+                const oldAmount = t.amount || 0;
+                const oldPaid = t.paidFromBox || 0;
+                
+                // Case A: Was fully paid from box?
+                // (Allow slight float variance 0.01)
+                if (Math.abs(oldPaid - oldAmount) < 0.01) {
+                    updateData.paidFromBox = newAmount; // Update box deduction
+                }
+                // Case B: Was fully Pending Debt? (Box paid 0)
+                else if (oldPaid === 0 && (t.staffOwed > 0 || t.managerOwed > 0)) {
+                    updateData.paidFromBox = 0; // Ensure box stays 0
+                    const advanceUsed = t.advanceAmountUsed || 0;
+                    
+                    if (t.staffOwed > 0) updateData.staffOwed = newAmount - advanceUsed;
+                    if (t.managerOwed > 0) updateData.managerOwed = newAmount - advanceUsed;
+                }
+                // Case C: Was Pure Advance Deduction?
+                else if (t.isDeductedFromAdvance && oldPaid === 0 && !t.staffOwed) {
+                    updateData.advanceAmountUsed = newAmount;
+                }
+                // Case D: Partial/Mixed - Default to updating debt to preserve cash history
+                else if (t.staffOwed > 0) {
+                     const diff = newAmount - oldAmount;
+                     updateData.staffOwed = (t.staffOwed || 0) + diff;
+                }
+            }
+            // 4. Handle Repayments (Money Out to settle debt)
+            else if (t.type === 'repayment' && !t.isAdvanceReturn) {
+                 // Usually paid fully from box
+                 if (t.paidFromBox > 0) {
+                     updateData.paidFromBox = newAmount;
+                 }
+            }
+
             await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', editingTxId), updateData);
-            window.closeModal(); window.showStatus("Updated.");
+            window.closeModal(); 
+            window.showStatus("Record Updated Successfully");
         };
 
         window.processPartial = async (target) => {
@@ -1584,6 +1643,8 @@
                 } else {
                     cashOut = paidFromBox;
                 }
+                
+                // Update running balance line by line
                 currentBalance += (cashIn - cashOut);
                 
                 // Format Invoice Date
