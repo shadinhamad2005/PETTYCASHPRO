@@ -118,14 +118,29 @@
             top: 0;
             width: 297mm; /* A4 Landscape width */
             background: white;
-            z-index: 9999;
-            display: block !important;
+            z-index: -1;
         }
 
         .report-header { border-bottom: 3px solid #4f46e5; padding-bottom: 15px; margin-bottom: 20px; text-align: center; }
         .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px; }
         .report-table th, .report-table td { border: 1px solid #e2e8f0; padding: 6px; text-align: left; }
         .report-table th { background-color: #f8fafc; color: #475569; font-weight: 800; text-transform: uppercase; }
+
+        /* Loader Animation */
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 2px solid #3498db;
+            width: 14px;
+            height: 14px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
         @media print {
             .no-print { display: none !important; }
@@ -155,7 +170,7 @@
                     <label class="text-[11px] font-bold uppercase text-slate-500 tracking-wider ml-1">Password</label>
                     <input type="password" id="auth-password" placeholder="••••••••" class="w-full px-5 py-4 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-50 outline-none font-semibold text-slate-800 transition-all bg-slate-50 focus:bg-white">
                 </div>
-                <button id="auth-primary-btn" onclick="window.handleAuth()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-base hover:bg-indigo-600 hover:shadow-lg hover:shadow-indigo-200 transition-all transform active:scale-[0.98]">Sign In</button>
+                <button id="auth-primary-btn" onclick="window.handleAuth()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-base hover:bg-indigo-600 hover:shadow-lg hover:shadow-indigo-200 transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">Sign In</button>
                 
                 <div class="flex flex-col gap-4 pt-2">
                     <div class="flex items-center gap-3">
@@ -255,7 +270,7 @@
                                     <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Amount (AED)</label>
                                     <div class="relative">
                                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-                                        <input type="number" id="form-amount" step="0.01" required placeholder="0.00" oninput="const el = document.getElementById('form-person'); if(el) window.checkAdvanceWallet(el.value)" class="modern-input w-full pl-8 pr-4 py-4 rounded-xl text-xl font-bold text-slate-800">
+                                        <input type="number" id="form-amount" step="0.01" required placeholder="0.00" oninput="window.checkAdvanceWallet(document.getElementById('form-person').value)" class="modern-input w-full pl-8 pr-4 py-4 rounded-xl text-xl font-bold text-slate-800">
                                     </div>
                                 </div>
                                 <div class="space-y-2">
@@ -292,17 +307,17 @@
                                         <p id="advance-balance-text" class="text-[10px] text-amber-600 font-bold mt-0.5"></p>
                                     </div>
                                 </label>
-                                
-                                <!-- Pay Remainder Toggle (Always available for expense) -->
-                                <div id="reimburse-option-container" class="hidden">
-                                    <label class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors">
-                                        <input type="checkbox" id="reimburse-now" class="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
-                                        <div>
-                                            <p class="text-xs font-bold text-slate-800 uppercase tracking-wide">Pay from Cash Box?</p>
-                                            <p class="text-[10px] text-slate-500 font-bold mt-0.5">Checked = Pay Now (Deduct from Box) | Unchecked = Pay Later (Create Debt)</p>
-                                        </div>
-                                    </label>
-                                </div>
+                            </div>
+                            
+                            <!-- Pay Remainder Toggle (Always available for expense) -->
+                            <div id="reimburse-option-container" class="hidden">
+                                <label class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors">
+                                    <input type="checkbox" id="reimburse-now" class="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-800 uppercase tracking-wide">Pay from Cash Box?</p>
+                                        <p class="text-[10px] text-slate-500 font-bold mt-0.5">Checked = Pay Now (Deduct from Box) | Unchecked = Pay Later (Create Debt)</p>
+                                    </div>
+                                </label>
                             </div>
 
                             <div id="reimburse-fields" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
@@ -321,7 +336,7 @@
                                 <input type="text" id="form-desc" required placeholder="What is this transaction for?" class="modern-input w-full px-4 py-3 rounded-xl font-medium text-sm text-slate-800">
                             </div>
 
-                            <button type="submit" id="process-btn" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-base hover:bg-indigo-600 hover:shadow-lg hover:shadow-indigo-200 transition-all transform active:scale-[0.99] flex items-center justify-center gap-2">
+                            <button type="submit" id="process-btn" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-base hover:bg-indigo-600 hover:shadow-lg hover:shadow-indigo-200 transition-all transform active:scale-[0.99] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                                 <i data-lucide="check-circle" class="w-5 h-5"></i> Confirm Transaction
                             </button>
                         </form>
@@ -683,19 +698,15 @@
                 const bEl = document.getElementById('advance-balance-text');
                 if(tEl) tEl.innerText = `Deduct from ${person}'s Advance`;
                 if(bEl) bEl.innerText = `Available: ${wallet.toFixed(2)} AED`;
-                
-                // Show/Hide Reimburse option
-                const amount = parseFloat(document.getElementById('form-amount')?.value) || 0;
-                const reimContainer = document.getElementById('reimburse-option-container');
-                const useAdv = document.getElementById('use-advance-wallet')?.checked;
-                
-                if (useAdv && amount > wallet && reimContainer) {
-                    reimContainer.classList.remove('hidden');
-                } else if (reimContainer) {
-                    reimContainer.classList.add('hidden');
-                }
-
             } else { container.classList.add('hidden'); }
+            
+            // Always show reimburse option if active tab is expense, regardless of wallet
+            const reimContainer = document.getElementById('reimburse-option-container');
+            if (activeTab === 'expense') {
+                reimContainer.classList.remove('hidden');
+            } else {
+                reimContainer.classList.add('hidden');
+            }
         };
         
         window.toggleReimburseOption = function() {
@@ -909,7 +920,11 @@
 
         window.openReceiptModal = (type, amount, person, desc, paidFromAdv, addedToDebt) => {
             if (type !== 'advance' && type !== 'repayment' && type !== 'expense') return;
-            if (type === 'expense' && !paidFromAdv && !addedToDebt) return; // Only show expense receipt if complex
+            // Only trigger for expense if there is a split (advance used OR debt created) to avoid spam
+            if (type === 'expense' && !paidFromAdv && !addedToDebt) {
+                // If standard expense, maybe user still wants a receipt? 
+                // Let's enable it for ALL expenses for clarity
+            }
             
             const modal = document.getElementById('receipt-modal');
             const btn = document.getElementById('btn-send-whatsapp-receipt');
@@ -1187,97 +1202,122 @@
 
         window.handleInitialSubmit = async (e) => {
             e.preventDefault();
-            if (!currentUser) return;
-            const amountInput = document.getElementById('form-amount');
-            const descInput = document.getElementById('form-desc');
-            const dateInput = document.getElementById('form-sub-date');
-            if(!amountInput || !descInput || !dateInput) return;
+            const btn = document.getElementById('process-btn');
+            if(btn.disabled) return;
 
-            const amount = parseFloat(amountInput.value);
-            const totals = getTotals();
-            const personSelect = document.getElementById('form-person');
-            const person = personSelect ? personSelect.value : '';
-            const useAdv = document.getElementById('use-advance-wallet')?.checked;
-            const reimburseNow = document.getElementById('reimburse-now')?.checked; // Default false
-            
-            // Capture Invoice Data
-            const invNo = document.getElementById('form-inv-no')?.value || '';
-            const invDate = document.getElementById('form-inv-date')?.value || '';
+            btn.disabled = true;
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> Processing...`;
+            lucide.createIcons();
 
-            let deductionUsed = 0;
-            if (activeTab === 'expense' && useAdv) deductionUsed = Math.min(amount, getAdvanceWalletFor(person));
-            
-            // Box Amount Needed is the remainder after advance deduction
-            const boxAmountNeeded = amount - deductionUsed;
-            
-            let paidFromBox = 0;
-            let staffOwed = 0;
-            let settled = false;
+            try {
+                if (!currentUser) throw new Error("Not logged in");
+                const amountInput = document.getElementById('form-amount');
+                const descInput = document.getElementById('form-desc');
+                const dateInput = document.getElementById('form-sub-date');
+                if(!amountInput || !descInput || !dateInput) throw new Error("Missing inputs");
 
-            // Logic for "Reimburse Immediately" vs "Pending Debt"
-            if (activeTab === 'expense') {
-                if (reimburseNow) {
-                    // Pay the excess immediately from box
-                    paidFromBox = boxAmountNeeded;
-                    settled = true; // Fully settled as cash was given
-                } else {
-                    // Do NOT pay from box, create a Debt
-                    paidFromBox = 0;
-                    if (boxAmountNeeded > 0) {
-                        staffOwed = boxAmountNeeded;
-                        settled = false; 
+                const amount = parseFloat(amountInput.value);
+                const totals = getTotals();
+                const personSelect = document.getElementById('form-person');
+                const person = personSelect ? personSelect.value : '';
+                const useAdv = document.getElementById('use-advance-wallet')?.checked;
+                const reimburseNow = document.getElementById('reimburse-now')?.checked; // Default false
+                
+                // Capture Invoice Data
+                const invNo = document.getElementById('form-inv-no')?.value || '';
+                const invDate = document.getElementById('form-inv-date')?.value || '';
+
+                let deductionUsed = 0;
+                if (activeTab === 'expense' && useAdv) deductionUsed = Math.min(amount, getAdvanceWalletFor(person));
+                
+                // Box Amount Needed is the remainder after advance deduction
+                const boxAmountNeeded = amount - deductionUsed;
+                
+                let paidFromBox = 0;
+                let staffOwed = 0;
+                let settled = false;
+
+                // Logic for "Reimburse Immediately" vs "Pending Debt"
+                if (activeTab === 'expense') {
+                    if (reimburseNow) {
+                        // Pay the excess immediately from box
+                        paidFromBox = boxAmountNeeded;
+                        settled = true; // Fully settled as cash was given
                     } else {
-                        settled = true; // Fully covered by advance
+                        // Do NOT pay from box, create a Debt
+                        paidFromBox = 0;
+                        if (boxAmountNeeded > 0) {
+                            staffOwed = boxAmountNeeded;
+                            settled = false; 
+                        } else {
+                            settled = true; // Fully covered by advance
+                        }
                     }
+                } else if (activeTab === 'receive') {
+                     // Adding funds to box
+                     paidFromBox = -amount; // Negative paidFromBox means adding to balance
+                     settled = true;
+                } else {
+                     // Advance giving
+                     paidFromBox = amount;
+                     settled = true;
                 }
-            } else if (activeTab === 'receive') {
-                 // Adding funds to box
-                 paidFromBox = -amount; // Negative paidFromBox means adding to balance
-                 settled = true;
-            } else {
-                 // Advance giving
-                 paidFromBox = amount;
-                 settled = true;
-            }
 
-            // Deficit Check only if Paying from Box
-            if (paidFromBox > 0 && paidFromBox > (totals.balance + 0.01)) {
-                 pendingTxData = { type: activeTab, amount, person, desc: descInput.value, invoiceNo: invNo, invoiceDate: invDate, subDate: dateInput.value, timestamp: new Date().toISOString(), paidFromBox: 0, allocations: activeTab === 'expense' ? JSON.parse(JSON.stringify(currentAllocations)) : [], isDeductedFromAdvance: deductionUsed > 0, advanceAmountUsed: deductionUsed, settled: false };
-                 document.getElementById('deficit-value').innerText = `${(paidFromBox - totals.balance).toFixed(2)} AED`;
-                 document.getElementById('funds-modal').classList.remove('hidden');
-                 return;
-            }
-            
-            const data = { 
-                type: activeTab, 
-                amount, 
-                person, 
-                desc: descInput.value, 
-                invoiceNo: invNo, 
-                invoiceDate: invDate, 
-                subDate: dateInput.value, 
-                timestamp: new Date().toISOString(), 
-                paidFromBox: paidFromBox, 
-                staffOwed: staffOwed, // New Field
-                allocations: activeTab === 'expense' ? JSON.parse(JSON.stringify(currentAllocations)) : [], 
-                isDeductedFromAdvance: deductionUsed > 0, 
-                advanceAmountUsed: deductionUsed, 
-                settled: settled 
-            };
-            
-            await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), data);
-            
-            // Trigger Receipt Modal for Advances OR Expenses that cause debt
-            if (activeTab === 'advance' || (activeTab === 'expense' && staffOwed > 0)) {
-                window.openReceiptModal(activeTab, amount, person, descInput.value, deductionUsed, staffOwed);
-            }
+                // Deficit Check only if Paying from Box
+                if (paidFromBox > 0 && paidFromBox > (totals.balance + 0.01)) {
+                     pendingTxData = { type: activeTab, amount, person, desc: descInput.value, invoiceNo: invNo, invoiceDate: invDate, subDate: dateInput.value, timestamp: new Date().toISOString(), paidFromBox: 0, allocations: activeTab === 'expense' ? JSON.parse(JSON.stringify(currentAllocations)) : [], isDeductedFromAdvance: deductionUsed > 0, advanceAmountUsed: deductionUsed, settled: false };
+                     document.getElementById('deficit-value').innerText = `${(paidFromBox - totals.balance).toFixed(2)} AED`;
+                     document.getElementById('funds-modal').classList.remove('hidden');
+                     // Re-enable button since flow stopped at modal
+                     btn.disabled = false;
+                     btn.innerHTML = originalContent;
+                     lucide.createIcons();
+                     return;
+                }
+                
+                const data = { 
+                    type: activeTab, 
+                    amount, 
+                    person, 
+                    desc: descInput.value, 
+                    invoiceNo: invNo, 
+                    invoiceDate: invDate, 
+                    subDate: dateInput.value, 
+                    timestamp: new Date().toISOString(), 
+                    paidFromBox: paidFromBox, 
+                    staffOwed: staffOwed, // New Field
+                    allocations: activeTab === 'expense' ? JSON.parse(JSON.stringify(currentAllocations)) : [], 
+                    isDeductedFromAdvance: deductionUsed > 0, 
+                    advanceAmountUsed: deductionUsed, 
+                    settled: settled 
+                };
+                
+                await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), data);
+                
+                // Trigger Receipt Modal for Advances OR Expenses that cause debt
+                if (activeTab === 'advance' || (activeTab === 'expense' && staffOwed > 0)) {
+                    window.openReceiptModal(activeTab, amount, person, descInput.value, deductionUsed, staffOwed);
+                }
 
-            document.getElementById('entry-form').reset(); 
-            document.getElementById('form-sub-date').value = new Date().toISOString().split('T')[0];
-            window.showStatus("Recorded.");
-            
-            // Re-render to hide option
-            if(person) window.checkAdvanceWallet(person);
+                document.getElementById('entry-form').reset(); 
+                document.getElementById('form-sub-date').value = new Date().toISOString().split('T')[0];
+                window.showStatus("Recorded.");
+                
+                // Re-render to hide option
+                if(person) window.checkAdvanceWallet(person);
+
+            } catch(e) {
+                console.error(e);
+                window.showStatus("Error: " + e.message, true);
+            } finally {
+                // Ensure button is re-enabled if not returned early
+                if(btn.disabled) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
+                    lucide.createIcons();
+                }
+            }
         };
 
         window.deleteTransaction = async (id) => {
@@ -1287,22 +1327,39 @@
         };
 
         window.confirmSettlement = async () => {
-            if (!currentUser) return;
-            const val = parseFloat(document.getElementById('settle-amount-input').value) || 0;
-            const target = txs.find(t => t.id === settlingId); if (!target) return;
-            const targetRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', target.id);
-            if (settlementType === 'advance') {
-                await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), { type: 'repayment', isAdvanceReturn: true, amount: val, person: target.person, desc: `Cash Return`, subDate: new Date().toISOString().split('T')[0], paidFromBox: -val, timestamp: new Date().toISOString() });
-                // Trigger Receipt Modal for Repayments
-                window.openReceiptModal('repayment', val, target.person, 'Cash Return');
-            } else {
-                // Paying off debt
-                const newRepaid = (target.repaidAmount || 0) + val;
-                await updateDoc(targetRef, { repaidAmount: newRepaid, settled: newRepaid >= ((target.managerOwed || target.staffOwed) - 0.01) });
-                // Create a payment record (money leaving box)
-                await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), { type: 'repayment', amount: val, person: target.person, desc: `Pay: ${target.desc}`, subDate: new Date().toISOString().split('T')[0], paidFromBox: val, timestamp: new Date().toISOString() });
+            const btn = document.querySelector('#settle-modal button.bg-indigo-600'); // Find the confirm button
+            if(btn) {
+                btn.disabled = true;
+                btn.innerText = "Processing...";
             }
-            window.showStatus("Settled."); window.closeModal();
+
+            try {
+                if (!currentUser) return;
+                const val = parseFloat(document.getElementById('settle-amount-input').value) || 0;
+                const target = txs.find(t => t.id === settlingId); if (!target) return;
+                const targetRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', target.id);
+                
+                if (settlementType === 'advance') {
+                    await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), { type: 'repayment', isAdvanceReturn: true, amount: val, person: target.person, desc: `Cash Return`, subDate: new Date().toISOString().split('T')[0], paidFromBox: -val, timestamp: new Date().toISOString() });
+                    // Trigger Receipt Modal for Repayments
+                    window.openReceiptModal('repayment', val, target.person, 'Cash Return');
+                } else {
+                    // Paying off debt
+                    const newRepaid = (target.repaidAmount || 0) + val;
+                    await updateDoc(targetRef, { repaidAmount: newRepaid, settled: newRepaid >= ((target.managerOwed || target.staffOwed) - 0.01) });
+                    // Create a payment record (money leaving box)
+                    await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), { type: 'repayment', amount: val, person: target.person, desc: `Pay: ${target.desc}`, subDate: new Date().toISOString().split('T')[0], paidFromBox: val, timestamp: new Date().toISOString() });
+                }
+                window.showStatus("Settled."); 
+                window.closeModal();
+            } catch(e) {
+                console.error(e);
+            } finally {
+                if(btn) {
+                    btn.disabled = false;
+                    btn.innerText = "Confirm Payment";
+                }
+            }
         };
 
         window.addItem = async (type) => { 
@@ -1405,19 +1462,32 @@
         };
 
         window.processPartial = async (target) => {
-            if (!currentUser) return;
-            const available = Math.max(0, getTotals().balance);
-            const remaining = pendingTxData.amount - (pendingTxData.advanceAmountUsed || 0);
-            const gap = remaining - available;
+            const btnA = document.querySelector('#funds-modal button:first-child');
+            const btnB = document.querySelector('#funds-modal button:last-child');
             
-            // This is for deficits during IMMEDIATE PAYMENT
-            pendingTxData.paidFromBox = available;
-            if (target === 'manager') pendingTxData.managerOwed = gap; else pendingTxData.staffOwed = gap;
-            
-            await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), pendingTxData);
-            window.closeModal(); 
-            document.getElementById('entry-form').reset(); 
-            document.getElementById('form-sub-date').value = new Date().toISOString().split('T')[0];
+            if(btnA) btnA.disabled = true;
+            if(btnB) btnB.disabled = true;
+
+            try {
+                if (!currentUser) return;
+                const available = Math.max(0, getTotals().balance);
+                const remaining = pendingTxData.amount - (pendingTxData.advanceAmountUsed || 0);
+                const gap = remaining - available;
+                
+                // This is for deficits during IMMEDIATE PAYMENT
+                pendingTxData.paidFromBox = available;
+                if (target === 'manager') pendingTxData.managerOwed = gap; else pendingTxData.staffOwed = gap;
+                
+                await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), pendingTxData);
+                window.closeModal(); 
+                document.getElementById('entry-form').reset(); 
+                document.getElementById('form-sub-date').value = new Date().toISOString().split('T')[0];
+            } catch(e) {
+                console.error(e);
+            } finally {
+                if(btnA) btnA.disabled = false;
+                if(btnB) btnB.disabled = false;
+            }
         };
 
         window.updateAllocRow = (idx, key, val) => { currentAllocations[idx][key] = val; if(key === 'category') window.renderAllocationRows(); };
@@ -1643,8 +1713,6 @@
                 } else {
                     cashOut = paidFromBox;
                 }
-                
-                // Update running balance line by line
                 currentBalance += (cashIn - cashOut);
                 
                 // Format Invoice Date
