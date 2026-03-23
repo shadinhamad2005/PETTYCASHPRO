@@ -1132,9 +1132,9 @@
             }
 
             function getDebtToStaff(person) {
-                return txs.filter(t => t.person === person && (t.managerOwed || t.staffOwed) && !t.settled)
+                return txs.filter(t => t.person === person && (t.staffOwed > 0.01) && !t.settled)
                     .reduce((acc, t) => {
-                        const owed = (t.managerOwed || 0) + (t.staffOwed || 0);
+                        const owed = t.staffOwed || 0;
                         const repaid = t.repaidAmount || 0;
                         return acc + Math.max(0, owed - repaid);
                     }, 0);
@@ -1230,12 +1230,12 @@
                 const cleanNumber = cleanPhone(phone);
 
                 // Collect all pending debt items
-                const debts = txs.filter(t => t.person === personName && (t.managerOwed || t.staffOwed) && !t.settled);
+                const debts = txs.filter(t => t.person === personName && (t.staffOwed > 0.01) && !t.settled);
                 let totalOwed = 0;
                 let msg = `Hi ${personName}, here is a summary of the amounts currently owed to you by the company:\n\n`;
 
                 debts.forEach((d, idx) => {
-                    const amount = (d.managerOwed || 0) + (d.staffOwed || 0) - (d.repaidAmount || 0);
+                    const amount = (d.staffOwed || 0) - (d.repaidAmount || 0);
                     totalOwed += amount;
                     if (amount > 0.01) {
                         const total = d.amount || 0;
