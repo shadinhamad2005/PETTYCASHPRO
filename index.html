@@ -1822,6 +1822,7 @@
                     const target = txs.find(t => t.id === settlingId); if (!target) return;
 
                     if (settlementType === 'advance') {
+                        // Deficit check for Advance Settlement returning cash? No, return means money in.
                         await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), {
                             type: 'repayment',
                             is_deducted_from_advance: false,
@@ -1837,6 +1838,12 @@
                         window.openReceiptModal('repayment', val, target.person, 'Cash Return');
                     } else {
                         // Paying off debt
+                        const totals = getTotals();
+                        if (val > (totals.balance + 0.01)) {
+                            window.showStatus("Error: Insufficient Funds in Cash Box to settle this amount.", true);
+                            return;
+                        }
+
                         const newRepaid = (target.repaidAmount || 0) + val;
                         await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', target.id), {
                             repaid_amount: newRepaid,
@@ -2028,6 +2035,7 @@
                     // Update snake_case keys
                     pendingTxData.paid_from_box = available;
                     if (target === 'manager') pendingTxData.manager_owed = gap; else pendingTxData.staff_owed = gap;
+                    pendingTxData.settled = false;
 
                     // Ensure user_id is set
                     pendingTxData.user_id = currentUser.uid;
@@ -2628,7 +2636,7 @@
                     allocations: dbTx.allocations || [],
                     isDeductedFromAdvance: dbTx.is_deducted_from_advance,
                     advanceAmountUsed: dbTx.advance_amount_used,
-                    settled: dbTx.settled,
+                    settled: ((dbTx.manager_owed || 0) + (dbTx.staff_owed || 0) > 0) ? ((dbTx.repaid_amount || 0) >= ((dbTx.manager_owed || 0) + (dbTx.staff_owed || 0) - 0.01)) : dbTx.settled,
                     taxAmount: dbTx.tax_amount,
                     netAmount: dbTx.net_amount,
                     paymentMethod: dbTx.payment_method,
