@@ -758,6 +758,10 @@
                         class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all mb-3 shadow-lg shadow-emerald-200">
                         Run System Health Check
                     </button>
+                    <button onclick="window.fixAndNormalizeTypes()"
+                        class="w-full py-3 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-all mb-3 shadow-lg shadow-amber-200 flex items-center justify-center gap-2">
+                        <i data-lucide="wrench" class="w-4 h-4"></i> Fix &amp; Normalize All Types
+                    </button>
                     <button
                         onclick="window.fetchTransactions(); document.getElementById('diag-modal').classList.add('hidden'); window.showStatus('Refreshing...')"
                         class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all">
@@ -1122,10 +1126,11 @@
             function getAdvanceWalletFor(person) {
                 let given = 0, used = 0, refunded = 0;
                 txs.forEach(t => {
+                    const ttype = (t.type || '').toLowerCase();
                     if (t.person === person) {
-                        if (t.type === 'advance') given += (parseFloat(t.amount) || 0);
+                        if (ttype === 'advance') given += (parseFloat(t.amount) || 0);
                         if (t.isDeductedFromAdvance) used += (parseFloat(t.advanceAmountUsed) || 0);
-                        if (t.type === 'return_advance') refunded += (parseFloat(t.amount) || 0);
+                        if (ttype === 'return_advance') refunded += (parseFloat(t.amount) || 0);
                     }
                 });
                 return Math.max(0, given - used - refunded);
@@ -1147,20 +1152,19 @@
                 txs.forEach(t => {
                     const amt = parseFloat(t.amount) || 0;
                     const boxPart = parseFloat(t.paidFromBox) || 0;
+                    const ttype = (t.type || '').toLowerCase();
 
-                    if (t.type === 'receive') {
-                        res.balance = add(res.balance, amt); // Always positive
+                    if (ttype === 'receive') {
+                        res.balance = add(res.balance, amt); // Cash IN
                     }
-                    else if (t.type === 'return_advance') {
-                        // Employee returned cash to the box
-                        res.balance = add(res.balance, amt);
+                    else if (ttype === 'return_advance') {
+                        res.balance = add(res.balance, amt); // Cash returned to box
                     }
-                    else if (t.type === 'settle_debt') {
-                        // Company paid an employee or manager
-                        res.balance = add(res.balance, -amt);
+                    else if (ttype === 'settle_debt') {
+                        res.balance = add(res.balance, -amt); // Cash OUT — paying a debt
                     }
                     else {
-                        // For Expense/Advance, rely on paidFromBox
+                        // advance & expense: only deduct what actually left the physical box
                         res.balance = add(res.balance, -boxPart);
                     }
 
@@ -1492,12 +1496,14 @@
 
 
             window.getTypeStyles = (type) => {
-                switch (type) {
-                    case 'expense': return 'bg-rose-100 text-rose-700 border border-rose-200';
-                    case 'advance': return 'bg-amber-100 text-amber-700 border border-amber-200';
-                    case 'receive': return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
-                    case 'repayment': return 'bg-blue-100 text-blue-700 border border-blue-200';
-                    default: return 'bg-slate-100 text-slate-700 border border-slate-200';
+                switch ((type || '').toLowerCase()) {
+                    case 'expense':        return 'bg-rose-100 text-rose-700 border border-rose-200';
+                    case 'advance':        return 'bg-amber-100 text-amber-700 border border-amber-200';
+                    case 'receive':        return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
+                    case 'return_advance': return 'bg-teal-100 text-teal-700 border border-teal-200';
+                    case 'settle_debt':    return 'bg-indigo-100 text-indigo-700 border border-indigo-200';
+                    case 'repayment':      return 'bg-blue-100 text-blue-700 border border-blue-200';
+                    default:               return 'bg-slate-100 text-slate-700 border border-slate-200';
                 }
             };
 
@@ -1541,22 +1547,20 @@
                     sorted.forEach(t => {
                         const pfb = parseFloat(t.paidFromBox) || 0;
                         const amt = parseFloat(t.amount) || 0;
+                        const ttype = (t.type || '').toLowerCase(); // CASE-INSENSITIVE FIX
                         let flow = 0;
 
-                        // ROBUST LOGIC V4
-                        if (t.type === 'receive' || t.type === 'return_advance') {
-                            flow = amt; // Money In
-                        } else if (t.type === 'settle_debt' || t.type === 'advance') {
-                            flow = -amt; // Money Out (Amount)
-                        } else if (t.type === 'expense') {
-                            flow = -pfb; // Money Out (Paid From Box)
+                        // ROBUST LOGIC V5 (Case-Insensitive, consistent with getTotals)
+                        if (ttype === 'receive' || ttype === 'return_advance') {
+                            flow = amt; // Cash IN
+                        } else if (ttype === 'settle_debt') {
+                            flow = -amt; // Cash OUT — paying a debt (full amount)
+                        } else {
+                            flow = -pfb; // advance & expense: only what left the physical box
                         }
 
                         curr += flow;
-                        rbMap[t.id] = curr;
-
-                        // DEBUG LOG (Keep for verification)
-                        // console.log(`RenderAll: ID=${t.id} Type=${t.type} Desc=${t.desc} Flow=${flow} RunBal=${curr}`);
+                        rbMap[t.id] = Math.round(curr * 100) / 100;
                     });
 
                     const filtered = txs.filter(t => {
@@ -1586,28 +1590,33 @@
 
                             const allocs = (t.allocations && Array.isArray(t.allocations)) ? t.allocations.map(a => `<span class="bg-slate-100 text-[9px] font-bold px-1.5 py-0.5 rounded text-slate-600 border border-slate-200">${a.category} #${a.propertyNo}</span>`).join(' ') : '';
 
+                            // Advance-paid tag: shown when the expense was covered (fully or partially) by a staff advance
+                            const advUsed = parseFloat(t.advanceAmountUsed) || 0;
+                            const advTag = (t.isDeductedFromAdvance && advUsed > 0)
+                                ? `<span class="inline-flex items-center gap-1 bg-amber-100 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase">
+                                     <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                     Advance Used: ${advUsed.toFixed(2)} AED
+                                   </span>`
+                                : '';
 
                             const escapedName = escapeQuotes(t.person || '');
-
-                            const isExpense = t.type === 'expense';
-                            const isActive = t.status === 'Active' || !t.status;
-
+                            const typeLabel = (t.type || '').toLowerCase().replace('_', ' ');
 
                             return `<tr class="hover:bg-slate-50 transition-colors group">
                             <td class="px-6 py-4 font-bold text-slate-500 font-mono text-xs">${new Date(t.subDate).toLocaleDateString()}</td>
                             <td class="px-6 py-4 font-bold text-slate-700 text-xs">${t.person || '-'}</td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md ${window.getTypeStyles(t.type)}">${t.type}</span>
+                                    <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md ${window.getTypeStyles((t.type||'').toLowerCase())}">${typeLabel}</span>
                                     <span class="font-bold text-slate-700">${t.desc || 'No Desc'}</span>
                                 </div>
-                                <div class="mt-1.5 flex flex-wrap gap-1">${allocs}</div>
+                                <div class="mt-1.5 flex flex-wrap gap-1">${allocs}${advTag}</div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="font-bold text-slate-900">${(t.amount || 0).toFixed(2)}</div>
                                 ${debtTag}
                             </td>
-                            <td class="px-6 py-4 font-bold text-indigo-600 font-mono">${(rbMap[t.id] || 0).toFixed(2)}</td>
+                            <td class="px-6 py-4 font-bold font-mono ${(rbMap[t.id] || 0) < 0 ? 'text-rose-600' : 'text-indigo-600'}">${(rbMap[t.id] || 0).toFixed(2)}</td>
                             <td class="text-right px-6 py-4">
                                 <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onclick="window.editTx('${t.id}')" class="text-slate-400 hover:text-indigo-600 p-1.5 hover:bg-indigo-50 rounded-lg transition-colors"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
@@ -2217,43 +2226,98 @@
                 sorted.forEach(tx => {
                     const pfb = parseFloat(tx.paidFromBox || 0);
                     const amt = parseFloat(tx.amount || 0);
+                    const ttype = (tx.type || '').toLowerCase(); // CASE-INSENSITIVE FIX
 
-                    // Logic Mirror (Robust V4)
+                    // Logic Mirror (Robust V5 - Case-Insensitive)
                     let flow = 0;
-                    let typeLabel = tx.type;
+                    let typeLabel = tx.type || 'unknown';
+                    const isWrongCase = tx.type && tx.type !== ttype;
 
-                    if (tx.type === 'receive' || tx.type === 'return_advance') {
+                    if (ttype === 'receive' || ttype === 'return_advance') {
                         flow = amt;
                         typeLabel += " (Amt IN)";
-                    } else if (tx.type === 'settle_debt' || tx.type === 'advance') {
+                    } else if (ttype === 'settle_debt') {
                         flow = -amt;
                         typeLabel += " (Amt OUT)";
-                    } else if (tx.type === 'expense') {
+                    } else if (ttype === 'advance' || ttype === 'expense') {
                         flow = -pfb;
                         typeLabel += " (PFB OUT)";
+                    } else {
+                        typeLabel += " (UNKNOWN - needs fix)";
                     }
 
-                    runBal += flow;
+                    runBal = Math.round((runBal + flow) * 100) / 100;
 
                     let color = "text-slate-500";
                     if (flow > 0) color = "text-emerald-600";
                     if (flow < 0) color = "text-rose-600";
 
-                    // Highlight the problematic transaction
-                    const bg = (tx.id === 'y7QhkqBIu70MYs5c54Rf') ? 'bg-yellow-100' : '';
+                    const bg = isWrongCase ? 'bg-yellow-100' : (runBal < 0 ? 'bg-rose-50' : '');
 
                     list.innerHTML += `
                         <tr class="border-b border-slate-50 last:border-0 ${bg} text-xs">
                             <td class="p-1 font-mono text-slate-400">${tx.subDate}</td>
                             <td class="p-1 font-bold capitalize truncate max-w-[100px]" title="${tx.desc}">${tx.desc}</td>
-                            <td class="p-1">${typeLabel}</td>
+                            <td class="p-1 ${isWrongCase ? 'text-amber-600 font-bold' : ''}">${typeLabel}${isWrongCase ? ' ⚠️' : ''}</td>
                             <td class="p-1 font-mono text-right text-slate-400">${pfb.toFixed(2)}</td>
                             <td class="p-1 font-mono text-right text-slate-400">${amt.toFixed(2)}</td>
                             <td class="p-1 font-mono text-right ${color} font-bold">${flow.toFixed(2)}</td>
-                            <td class="p-1 font-mono text-right font-bold">${runBal.toFixed(2)}</td>
+                            <td class="p-1 font-mono text-right font-bold ${runBal < 0 ? 'text-rose-600' : 'text-slate-700'}">${runBal.toFixed(2)}</td>
                         </tr>
                     `;
                 });
+                // Show warning count for type issues
+                const badTypes = txs.filter(tx => tx.type && tx.type !== tx.type.toLowerCase());
+                if (badTypes.length > 0) {
+                    const warn = document.createElement('div');
+                    warn.className = 'mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-800 flex items-center gap-2';
+                    warn.innerHTML = `⚠️ Found ${badTypes.length} transaction(s) with incorrect type casing. Click "Fix & Normalize All Types" to repair them.`;
+                    list.parentElement.appendChild(warn);
+                }
+            };
+
+            window.fixAndNormalizeTypes = async () => {
+                if (!currentUser) { window.showStatus('Not logged in', true); return; }
+
+                const badTxs = txs.filter(tx => tx.type && tx.type !== tx.type.toLowerCase());
+
+                if (badTxs.length === 0) {
+                    window.showStatus('✅ All types are already correct — no fix needed!', false);
+                    return;
+                }
+
+                const confirmed = confirm(`Found ${badTxs.length} transaction(s) with incorrect type casing (e.g. "RETURN_ADVANCE" instead of "return_advance").\n\nClick OK to fix and normalize all of them in Firestore now.`);
+                if (!confirmed) return;
+
+                try {
+                    window.showStatus('Fixing type casing...', false);
+
+                    const chunkSize = 100;
+                    let fixed = 0;
+
+                    for (let i = 0; i < badTxs.length; i += chunkSize) {
+                        const chunk = badTxs.slice(i, i + chunkSize);
+                        const batch = writeBatch(db);
+                        chunk.forEach(tx => {
+                            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', tx.id);
+                            batch.update(docRef, { type: tx.type.toLowerCase() });
+                        });
+                        await batch.commit();
+                        fixed += chunk.length;
+                    }
+
+                    window.showStatus(`✅ Fixed ${fixed} transaction(s). Refreshing...`, false);
+
+                    // Refresh data and reopen diagnostics
+                    setTimeout(() => {
+                        window.fetchTransactions();
+                        setTimeout(() => window.openDiagnostics(), 1500);
+                    }, 800);
+
+                } catch (err) {
+                    console.error('fixAndNormalizeTypes error:', err);
+                    window.showStatus('Fix Failed: ' + err.message, true);
+                }
             };
 
             window.resetData = async () => {
@@ -2311,12 +2375,13 @@
                             let flow = 0;
 
                             // Robust Fix V5
-                            if (t.type === 'receive' || t.type === 'return_advance') {
+                            const ttype = (t.type || '').toLowerCase();
+                            if (ttype === 'receive' || ttype === 'return_advance') {
                                 flow = amt;
-                            } else if (t.type === 'settle_debt' || t.type === 'advance') {
+                            } else if (ttype === 'settle_debt') {
                                 flow = -amt;
-                            } else if (t.type === 'expense') {
-                                flow = -pfb;
+                            } else {
+                                flow = -pfb; // advance & expense: paidFromBox only
                             }
                             openingBalance += flow;
                         }
@@ -2360,12 +2425,13 @@
                     let cashIn = 0;
                     let cashOut = 0;
 
-                    if (t.type === 'receive' || t.type === 'return_advance') {
+                    const ettype = (t.type || '').toLowerCase();
+                    if (ettype === 'receive' || ettype === 'return_advance') {
                         cashIn = amount;
-                    } else if (t.type === 'settle_debt' || t.type === 'advance') {
+                    } else if (ettype === 'settle_debt') {
                         cashOut = amount;
-                    } else if (t.type === 'expense') {
-                        cashOut = paidFromBox;
+                    } else {
+                        cashOut = paidFromBox; // advance & expense: paidFromBox only
                     }
 
                     // Update running balance
