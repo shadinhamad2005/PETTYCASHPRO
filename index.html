@@ -9,6 +9,8 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Professional PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Image Capture -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Excel generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Supabase SDK -->
@@ -293,6 +295,14 @@
                             class="flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all text-slate-500 hover:text-slate-700 hover:bg-white/60 font-bold text-xs"><i
                                 data-lucide="file-bar-chart-2" class="w-4 h-4"></i> <span
                                 class="hidden sm:inline">Reports</span></button>
+                        <button onclick="window.switchView('ledger')" id="nav-ledger"
+                            class="flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all text-slate-500 hover:text-slate-700 hover:bg-white/60 font-bold text-xs"><i
+                                data-lucide="users" class="w-4 h-4"></i> <span
+                                class="hidden sm:inline">Staff Ledger</span></button>
+                        <button onclick="window.switchView('reimbursements')" id="nav-reimbursements"
+                            class="flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all text-slate-500 hover:text-slate-700 hover:bg-white/60 font-bold text-xs"><i
+                                data-lucide="refresh-cw" class="w-4 h-4"></i> <span
+                                class="hidden sm:inline">Reimbursements</span></button>
                         <button onclick="window.switchView('settings')" id="nav-settings"
                             class="flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all text-slate-500 hover:text-slate-700 hover:bg-white/60 font-bold text-xs"><i
                                 data-lucide="settings-2" class="w-4 h-4"></i> <span
@@ -361,7 +371,7 @@
                     </div>
                 </div>
 
-                <!-- Main Action & Tracking Area -->
+                <!-- Action Center -->
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
 
                     <!-- Left: Entry Form -->
@@ -398,10 +408,6 @@
                                     <div class="flex justify-between items-center ml-1">
                                         <label
                                             class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Beneficiary</label>
-                                        <button type="button" onclick="window.sendDailySummary()"
-                                            class="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 uppercase tracking-wide transition-colors"
-                                            title="Send today's transaction summary via WhatsApp"><i
-                                                data-lucide="message-circle" class="w-3 h-3"></i> Daily Summary</button>
                                     </div>
                                     <div id="person-select-wrapper">
                                         <!-- Injected via JS -->
@@ -524,6 +530,40 @@
                 </div>
             </div>
 
+            <!-- View: Staff Ledger -->
+            <div id="view-ledger" class="space-y-8 hidden animate-in fade-in duration-500">
+                <div class="bg-indigo-600 text-white p-8 rounded-[2rem] shadow-xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-8 opacity-10"><i data-lucide="users" class="w-48 h-48"></i></div>
+                    <div class="relative z-10">
+                        <h2 class="text-3xl font-black mb-2 tracking-tight">Staff Ledger</h2>
+                        <p class="text-indigo-100 font-bold opacity-80 uppercase text-[10px] tracking-widest">Individual spending & advance tracking</p>
+                    </div>
+                </div>
+                <div id="staff-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Staff cards injected via JS -->
+                </div>
+            </div>
+
+            <!-- View: Reimbursements -->
+            <div id="view-reimbursements" class="space-y-8 hidden animate-in fade-in duration-500">
+                <div class="bg-blue-600 text-white p-8 rounded-[2rem] shadow-xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-8 opacity-10"><i data-lucide="refresh-cw" class="w-48 h-48"></i></div>
+                    <div class="relative z-10 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-3xl font-black mb-2 tracking-tight">Reimbursements</h2>
+                            <p class="text-blue-100 font-bold opacity-80 uppercase text-[10px] tracking-widest">Submit & track batches for Accounts replenishment</p>
+                        </div>
+                        <button onclick="window.submitToAccounts()" class="bg-white text-blue-600 px-6 py-3 rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all flex items-center gap-2">
+                            <i data-lucide="send" class="w-5 h-5"></i> Submit New Batch
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="reimbursement-batches" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Batches injected via JS -->
+                </div>
+            </div>
+
             <!-- View: History (Reports) -->
             <div id="view-history" class="space-y-6 hidden animate-in fade-in duration-500">
                 <div
@@ -633,6 +673,18 @@
             </div>
 
 
+
+            <!-- View: Staff Ledger -->
+            <div id="view-ledger" class="hidden space-y-6 animate-in fade-in duration-500">
+                <div class="mb-4">
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">Staff Ledger &amp; Analytics</h2>
+                    <p class="text-xs font-bold text-slate-500 mt-1">Select a staff member to view their detailed spending and balances.</p>
+                </div>
+                
+                <div id="staff-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Cards injected via JS -->
+                </div>
+            </div>
 
             <!-- View: Setup -->
             <div id="view-settings" class="hidden space-y-8 animate-in fade-in duration-500">
@@ -837,6 +889,7 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
+                        <input type="hidden" id="stmt-person-hidden">
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-slate-400 uppercase">From</label>
                             <input type="date" id="stmt-start"
@@ -852,8 +905,12 @@
                         class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all flex items-center justify-center gap-2">
                         <i data-lucide="message-circle" class="w-4 h-4"></i> Send WhatsApp
                     </button>
+                    </button>
+                </div>
                 </div>
             </div>
+        </div>
+
         </div>
 
         <!-- Receipt Modal -->
@@ -867,15 +924,82 @@
                         <i data-lucide="check" class="w-8 h-8"></i>
                     </div>
                     <h3 class="text-xl font-black uppercase tracking-tight text-slate-800">Transaction Recorded</h3>
-                    <p class="text-xs text-slate-500 font-bold" id="receipt-message">Notify the beneficiary via
-                        WhatsApp?</p>
+                    
+                    <!-- Mini Receipt Preview -->
+                    <div id="receipt-preview-container" class="mt-4 p-4 bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden">
+                        <div id="mini-receipt" class="bg-white p-6 shadow-sm text-left font-mono text-[10px] leading-tight border border-slate-200">
+                            <div class="text-center border-b border-dashed border-slate-300 pb-2 mb-2">
+                                <p class="font-black text-[12px]">PETTYCASH PRO</p>
+                                <p id="rec-date">DATE: --/--/----</p>
+                            </div>
+                            <div class="space-y-1 mb-2">
+                                <p><strong>PERSON:</strong> <span id="rec-person">---</span></p>
+                                <p><strong>TYPE:</strong> <span id="rec-type">---</span></p>
+                                <p><strong>MEMO:</strong> <span id="rec-desc">---</span></p>
+                            </div>
+                            <div class="border-t border-dashed border-slate-300 pt-2 flex justify-between font-black text-[12px]">
+                                <span>TOTAL:</span>
+                                <span id="rec-amount">0.00 AED</span>
+                            </div>
+                            <div id="rec-adv-section" class="mt-1 text-[9px] text-slate-500 hidden">
+                                <p>Advance Used: <span id="rec-adv-used">0.00</span></p>
+                                <p>Debt Added: <span id="rec-debt">0.00</span></p>
+                            </div>
+                            <div class="mt-4 text-center text-[8px] text-slate-400">
+                                <p>*** THANK YOU ***</p>
+                            </div>
+                        </div>
+                    </div>
 
-                    <button id="btn-send-whatsapp-receipt"
-                        class="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold text-sm hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all flex items-center justify-center gap-2">
-                        <i data-lucide="message-circle" class="w-5 h-5"></i> Send Notification
-                    </button>
+                    <div class="grid grid-cols-2 gap-2 mt-4">
+                        <button id="btn-copy-receipt-img" onclick="window.copyReceiptAsImage()"
+                            class="bg-indigo-50 text-indigo-600 py-3 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="copy" class="w-4 h-4"></i> Copy Image
+                        </button>
+                        <button id="btn-send-whatsapp-receipt"
+                            class="bg-emerald-600 text-white py-3 rounded-xl font-bold text-xs hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
+                        </button>
+                    </div>
                     <button onclick="window.closeModal()"
-                        class="w-full py-3 text-slate-400 font-bold text-xs hover:text-slate-600 transition-all">Close</button>
+                        class="w-full py-2 text-slate-400 font-bold text-[10px] hover:text-slate-600 transition-all">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- WhatsApp Format Selection Modal -->
+        <div id="wa-format-modal"
+            class="hidden fixed inset-0 z-[6000] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/40 backdrop-blur-sm">
+            <div
+                class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
+                <div class="p-6 bg-emerald-600 text-white">
+                    <h3 class="font-black uppercase tracking-tight text-white">Choose Format</h3>
+                    <p class="text-[10px] text-emerald-100 font-bold uppercase tracking-widest mt-1">Select your message style</p>
+                </div>
+                <div class="p-6 space-y-3">
+                    <button onclick="window.executeWhatsAppSend('table')"
+                        class="w-full p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left group">
+                        <div class="flex justify-between items-center mb-1">
+                            <p class="text-[10px] font-black text-slate-400 uppercase group-hover:text-emerald-600">Option 1</p>
+                            <span class="bg-slate-200 text-slate-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase">Monospace</span>
+                        </div>
+                        <p class="text-sm font-bold text-slate-800">Professional Table</p>
+                        <p class="text-[10px] text-slate-500 mt-1 leading-tight">Structured text table using monospace fonts for alignment.</p>
+                    </button>
+                    
+                    <button onclick="window.executeWhatsAppSend('emoji')"
+                        class="w-full p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left group">
+                        <div class="flex justify-between items-center mb-1">
+                            <p class="text-[10px] font-black text-slate-400 uppercase group-hover:text-emerald-600">Option 2</p>
+                            <span class="bg-emerald-100 text-emerald-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase">Visual</span>
+                        </div>
+                        <p class="text-sm font-bold text-slate-800">Emoji Summary</p>
+                        <p class="text-[10px] text-slate-500 mt-1 leading-tight">Rich formatting with emojis, perfect for quick scanning on mobile.</p>
+                    </button>
+                </div>
+                <div class="px-6 pb-6">
+                    <button onclick="document.getElementById('wa-format-modal').classList.add('hidden')"
+                        class="w-full py-2 text-slate-400 font-bold text-[10px] hover:text-slate-600 transition-all uppercase tracking-widest">Cancel</button>
                 </div>
             </div>
         </div>
@@ -962,6 +1086,11 @@
                         <input type="text" id="edit-desc"
                             class="modern-input w-full px-4 py-3 rounded-xl font-medium text-sm">
                     </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-bold text-rose-500 uppercase tracking-widest">Reason for Edit <span class="text-rose-400">*</span></label>
+                        <input type="text" id="edit-reason" required placeholder="Why are you changing this record? (Required)"
+                            class="modern-input w-full px-4 py-3 rounded-xl font-medium text-sm border-rose-200 focus:border-rose-500 focus:ring-rose-50 bg-rose-50/30">
+                    </div>
                 </div>
                 <div class="p-8 pt-0 flex gap-3 transition-smooth"><button onclick="window.closeModal()"
                         class="flex-1 py-4 font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-all">Cancel</button><button
@@ -1005,6 +1134,146 @@
                         Transaction</button></div>
             </div>
         </div>
+        <div id="staff-modal" class="fixed inset-0 modal-overlay hidden flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                    <div class="flex flex-col">
+                        <h3 id="staff-modal-name" class="font-black text-2xl text-slate-800 tracking-tight">Staff Name</h3>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Detailed Ledger &amp; Analytics</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button id="btn-staff-whatsapp" class="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-2">
+                            <i data-lucide="message-square" class="w-4 h-4"></i> Send Statement
+                        </button>
+                        <button onclick="document.getElementById('staff-modal').classList.add('hidden')" class="p-2 hover:bg-slate-200 rounded-full transition-colors"><i data-lucide="x" class="text-slate-500 w-5 h-5"></i></button>
+                    </div>
+                </div>
+                
+                <div class="p-6 flex-grow overflow-y-auto no-scrollbar space-y-6">
+                    <!-- Analytics Grid -->
+                    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Spending</p>
+                            <h4 id="sm-total" class="text-xl font-black text-slate-800">0.00</h4>
+                        </div>
+                        <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-2xl">
+                            <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">This Month</p>
+                            <h4 id="sm-this-month" class="text-xl font-black text-indigo-800">0.00</h4>
+                        </div>
+                        <div class="p-4 bg-rose-50 border border-rose-100 rounded-2xl">
+                            <p class="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-1">Pending Owed</p>
+                            <h4 id="sm-debt" class="text-xl font-black text-rose-800">0.00</h4>
+                        </div>
+                        <div class="p-4 bg-blue-50 border border-blue-100 rounded-2xl">
+                            <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1">Monthly Avg</p>
+                            <h4 id="sm-avg" class="text-xl font-black text-blue-800">0.00</h4>
+                        </div>
+                        <div class="p-4 bg-amber-50 border border-amber-100 rounded-2xl">
+                            <p class="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">Current Balance</p>
+                            <h4 id="sm-balance" class="text-xl font-black text-amber-700">0.00</h4>
+                            <p id="sm-balance-label" class="text-[9px] font-bold text-amber-600 mt-1 uppercase">Pending Advance</p>
+                        </div>
+                    </div>
+
+                    <!-- Ledger Table -->
+                    <div class="border border-slate-100 rounded-2xl overflow-hidden">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                <tr>
+                                    <th class="px-4 py-3">Date</th>
+                                    <th class="px-4 py-3">Type</th>
+                                    <th class="px-4 py-3">Description</th>
+                                    <th class="px-4 py-3 text-right">In (+)</th>
+                                    <th class="px-4 py-3 text-right">Out (-)</th>
+                                    <th class="px-4 py-3 text-right">Running Bal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staff-modal-body" class="divide-y divide-slate-100 bg-white">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REIMBURSEMENT SELECTION MODAL -->
+        <div id="reimburse-select-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-overlay no-print transition-smooth">
+            <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
+                <div class="p-6 bg-blue-600 text-white flex justify-between items-center">
+                    <div>
+                        <h3 class="text-xl font-black uppercase tracking-tight">Select Expenses for Reimbursement</h3>
+                        <p class="text-[10px] text-blue-200 mt-1 uppercase font-bold tracking-wider">Choose which unbatched expenses to process</p>
+                    </div>
+                    <button onclick="window.closeModal()" class="text-blue-200 hover:text-white transition-smooth"><i data-lucide="x"></i></button>
+                </div>
+                <div class="p-6 overflow-y-auto no-scrollbar flex-grow bg-slate-50">
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-white">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-100 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                <tr>
+                                    <th class="p-3 w-10 text-center"><input type="checkbox" id="reimburse-select-all" class="w-4 h-4 rounded text-blue-600 cursor-pointer" onchange="window.toggleAllReimburse(this.checked)"></th>
+                                    <th class="p-3">Date</th>
+                                    <th class="p-3">Description</th>
+                                    <th class="p-3">Person</th>
+                                    <th class="p-3 text-right">Amount (AED)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reimburse-select-body" class="divide-y divide-slate-100 text-sm">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="p-6 bg-white border-t border-slate-100 flex justify-between items-center">
+                    <button onclick="window.markLegacyProcessed()" class="text-[10px] font-bold text-slate-400 hover:text-rose-600 uppercase tracking-widest transition-colors flex items-center gap-1.5"><i data-lucide="archive" class="w-3.5 h-3.5"></i> Mark Selected as Legacy (Hide)</button>
+                    <div class="flex items-center gap-4">
+                        <div class="text-right">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Selected Total</p>
+                            <p id="reimburse-selected-total" class="text-xl font-black text-blue-600">0.00 AED</p>
+                        </div>
+                        <button onclick="window.confirmBatchSubmission()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
+                            <i data-lucide="check-circle-2" class="w-5 h-5"></i> Create Batch
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CASH COUNT AUTOMATION MODAL -->
+        <div id="cash-count-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/95 backdrop-blur-md">
+            <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
+                <div class="p-8 bg-indigo-600 text-white text-center">
+                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="wallet" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-black uppercase tracking-tight text-white">7-Day Cash Count</h3>
+                    <p class="text-xs font-bold text-indigo-200 uppercase tracking-widest mt-2">Mandatory Reconciliation</p>
+                </div>
+                <div class="p-8 space-y-6">
+                    <div class="bg-slate-50 border border-slate-100 p-4 rounded-xl text-center">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">System Expected Balance</p>
+                        <p id="cc-expected" class="text-3xl font-black text-slate-800">0.00 <span class="text-base text-slate-400">AED</span></p>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Actual Physical Cash</label>
+                        <input type="number" id="cc-actual" step="0.01" placeholder="Enter amount..." class="modern-input w-full px-4 py-4 rounded-xl text-xl font-bold text-slate-800 text-center" oninput="window.evalCashCount()">
+                    </div>
+                    <div id="cc-discrepancy-section" class="hidden space-y-4 pt-4 border-t border-slate-100">
+                        <div class="p-4 rounded-xl text-center" id="cc-discrepancy-box">
+                            <p class="text-[10px] font-bold uppercase tracking-widest mb-1 text-rose-500" id="cc-discrepancy-label">Shortage</p>
+                            <p id="cc-discrepancy-amt" class="text-2xl font-black text-rose-600"></p>
+                            <p id="cc-discrepancy-desc" class="text-xs text-rose-500 mt-1 font-bold"></p>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Reason / Explanation</label>
+                            <input type="text" id="cc-reason" placeholder="Required explanation..." class="modern-input w-full px-4 py-3 rounded-xl font-medium text-sm">
+                        </div>
+                    </div>
+                </div>
+                <div class="p-8 pt-0 flex gap-3">
+                    <button id="btn-cc-verify" onclick="window.verifyCashCount()" class="w-full bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition-all text-lg">Verify & Record</button>
+                </div>
+            </div>
+        </div>
     </div>
 
 
@@ -1042,10 +1311,124 @@
             let currentAllocations = [];
             let isSignupMode = false;
             let currentUser = null;
+            let lastCashCountDate = null;
+            let cashCountChecked = false;
+            let pendingWhatsAppPayload = null; // Store data for the selection modal
 
 
 
             // --- GLOBAL UI HELPERS ---
+
+            window.updateCashCountDate = async (dateStr) => {
+                lastCashCountDate = dateStr;
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), {
+                        staff, sources, categories, last_cash_count_date: lastCashCountDate
+                    }, { merge: true });
+                } catch (e) { console.error("Error updating date", e); }
+            };
+
+            window.evalCashCount = () => {
+                const expected = getTotals().balance;
+                const actual = parseFloat(document.getElementById('cc-actual').value);
+                const section = document.getElementById('cc-discrepancy-section');
+                const amtEl = document.getElementById('cc-discrepancy-amt');
+                const labelEl = document.getElementById('cc-discrepancy-label');
+                const descEl = document.getElementById('cc-discrepancy-desc');
+                const btn = document.getElementById('btn-cc-verify');
+
+                if (isNaN(actual)) {
+                    section.classList.add('hidden');
+                    btn.innerText = "Verify Count";
+                    return;
+                }
+
+                const diff = actual - expected;
+
+                if (Math.abs(diff) < 0.01) {
+                    section.classList.add('hidden');
+                    btn.innerText = "Count Matches - Complete";
+                } else {
+                    section.classList.remove('hidden');
+                    if (diff < 0) {
+                        labelEl.innerText = "Shortage Detected";
+                        labelEl.className = "text-[10px] font-bold uppercase tracking-widest mb-1 text-rose-500";
+                        amtEl.innerText = `${Math.abs(diff).toFixed(2)} AED`;
+                        amtEl.className = "text-2xl font-black text-rose-600";
+                        descEl.innerText = "This amount will be recorded as an Advance to Admin.";
+                        btn.innerText = "Record Shortage & Complete";
+                    } else {
+                        labelEl.innerText = "Surplus Detected";
+                        labelEl.className = "text-[10px] font-bold uppercase tracking-widest mb-1 text-emerald-500";
+                        amtEl.innerText = `${Math.abs(diff).toFixed(2)} AED`;
+                        amtEl.className = "text-2xl font-black text-emerald-600";
+                        descEl.innerText = "This amount will be recorded as received cash.";
+                        btn.innerText = "Record Surplus & Complete";
+                    }
+                }
+            };
+
+            window.verifyCashCount = async () => {
+                if (!currentUser) return;
+                const expected = getTotals().balance;
+                const actual = parseFloat(document.getElementById('cc-actual').value);
+                
+                if (isNaN(actual)) {
+                    alert("Please enter the actual physical cash amount.");
+                    return;
+                }
+
+                const diff = actual - expected;
+
+                try {
+                    document.getElementById('btn-cc-verify').disabled = true;
+                    document.getElementById('btn-cc-verify').innerText = "Processing...";
+
+                    if (Math.abs(diff) >= 0.01) {
+                        const reason = document.getElementById('cc-reason').value.trim();
+                        if (!reason) {
+                            alert("A Reason/Explanation is required for any discrepancies.");
+                            document.getElementById('btn-cc-verify').disabled = false;
+                            document.getElementById('btn-cc-verify').innerText = diff < 0 ? "Record Shortage & Complete" : "Record Surplus & Complete";
+                            return;
+                        }
+
+                        if (diff < 0) {
+                            await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), {
+                                type: 'advance',
+                                amount: Math.abs(diff),
+                                person: 'Admin',
+                                desc_text: `Cash Count Shortage: ${reason}`,
+                                sub_date: window.getLocalDate(),
+                                timestamp: new Date().toISOString(),
+                                user_id: currentUser.uid,
+                                paid_from_box: Math.abs(diff),
+                                status: 'Active'
+                            });
+                        } else {
+                            await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), {
+                                type: 'receive',
+                                amount: diff,
+                                person: 'Admin',
+                                desc_text: `Cash Count Surplus: ${reason}`,
+                                sub_date: window.getLocalDate(),
+                                timestamp: new Date().toISOString(),
+                                user_id: currentUser.uid,
+                                paid_from_box: -diff,
+                                status: 'Active'
+                            });
+                        }
+                    }
+
+                    await window.updateCashCountDate(window.getLocalDate());
+                    document.getElementById('cash-count-modal').classList.add('hidden');
+                    window.showStatus("Cash Count Reconciled Successfully!");
+                } catch (e) {
+                    console.error("Cash Count Error", e);
+                    window.showStatus("Error: " + e.message, true);
+                    document.getElementById('btn-cc-verify').disabled = false;
+                }
+            };
 
             window.showStatus = function (m, isErr = false) {
                 const c = document.getElementById('status-container');
@@ -1063,7 +1446,6 @@
                 setTimeout(() => { if (c) c.classList.add('hidden'); }, 1000);
             };
 
-            // Moved to TOP for global availability
             window.checkAdvanceWallet = function (person) {
                 const container = document.getElementById('advance-deduction-container');
                 const reimContainer = document.getElementById('reimburse-option-container');
@@ -1082,7 +1464,6 @@
                     if (bEl) bEl.innerText = `Available: ${wallet.toFixed(2)} AED`;
                 } else { container.classList.add('hidden'); }
 
-                // Always show reimburse option if active tab is expense, regardless of wallet
                 if (reimContainer) {
                     if (activeTab === 'expense') {
                         reimContainer.classList.remove('hidden');
@@ -1098,7 +1479,7 @@
             }
 
             window.closeModal = function () {
-                ['funds-modal', 'settle-modal', 'edit-modal', 'receipt-modal', 'statement-modal'].forEach(id => {
+                ['funds-modal', 'settle-modal', 'edit-modal', 'receipt-modal', 'statement-modal', 'reimburse-select-modal', 'wa-format-modal', 'receipt-preview-modal'].forEach(id => {
                     const el = document.getElementById(id); if (el) el.classList.add('hidden');
                 });
             };
@@ -1113,19 +1494,15 @@
                 return s[type] || 'bg-slate-50 text-slate-500';
             };
 
-            // --- DATA HELPERS ---
-            // SAFE GUARDS against null/undefined data from Firestore
             const getStaffName = (s) => (s && typeof s === 'object') ? s.name : (s || '');
             const getStaffPhone = (s) => (s && typeof s === 'object') ? s.phone : '';
             const escapeQuotes = (str) => str ? str.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
-            // NEW: Helper to clean phone numbers (removes spaces, +, dashes)
             const cleanPhone = (p) => p ? p.toString().replace(/\D/g, '') : '';
-
-            // --- ACCOUNTING ENGINE ---
 
             function getAdvanceWalletFor(person) {
                 let given = 0, used = 0, refunded = 0;
                 txs.forEach(t => {
+                    if (t.status === 'Voided') return;
                     const ttype = (t.type || '').toLowerCase();
                     if (t.person === person) {
                         if (ttype === 'advance') given += (parseFloat(t.amount) || 0);
@@ -1137,7 +1514,7 @@
             }
 
             function getDebtToStaff(person) {
-                return txs.filter(t => t.person === person && (t.staffOwed > 0.01) && !t.settled)
+                return txs.filter(t => t.person === person && (t.staffOwed > 0.01) && !t.settled && t.status !== 'Voided')
                     .reduce((acc, t) => {
                         const owed = t.staffOwed || 0;
                         const repaid = t.repaidAmount || 0;
@@ -1150,21 +1527,22 @@
                 const add = (a, b) => Math.round((a + b) * 100) / 100;
 
                 txs.forEach(t => {
+                    if (t.status === 'Voided') return;
+                    
                     const amt = parseFloat(t.amount) || 0;
                     const boxPart = parseFloat(t.paidFromBox) || 0;
                     const ttype = (t.type || '').toLowerCase();
 
                     if (ttype === 'receive') {
-                        res.balance = add(res.balance, amt); // Cash IN
+                        res.balance = add(res.balance, amt); 
                     }
                     else if (ttype === 'return_advance') {
-                        res.balance = add(res.balance, amt); // Cash returned to box
+                        res.balance = add(res.balance, amt);
                     }
                     else if (ttype === 'settle_debt') {
-                        res.balance = add(res.balance, -amt); // Cash OUT — paying a debt
+                        res.balance = add(res.balance, -amt);
                     }
                     else {
-                        // advance & expense: only deduct what actually left the physical box
                         res.balance = add(res.balance, -boxPart);
                     }
 
@@ -1202,71 +1580,118 @@
             }
 
             window.sendWhatsApp = (personName) => {
-                const staffObj = staff.find(s => getStaffName(s) === personName);
-                let phone = getStaffPhone(staffObj);
-
-                if (!phone) {
-                    phone = prompt(`Enter WhatsApp number for ${personName} (e.g., 971501234567):`);
-                    if (!phone) return;
-                    savePhoneNumber(personName, phone);
-                }
-
-                // Clean the phone number before sending
-                const cleanNumber = cleanPhone(phone);
-
                 const balance = getAdvanceWalletFor(personName);
-                const msg = `Hi ${personName}, records show you are currently holding a Petty Cash Advance of ${balance.toFixed(2)} AED. Please submit receipts or settle the cash.`;
-
-                const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
-                window.open(url, '_blank');
+                pendingWhatsAppPayload = {
+                    person: personName,
+                    type: 'advance_alert',
+                    data: { balance }
+                };
+                document.getElementById('wa-format-modal').classList.remove('hidden');
             };
 
             window.sendDebtSummaryWhatsApp = (personName) => {
-                const staffObj = staff.find(s => getStaffName(s) === personName);
+                const debts = txs.filter(t => t.person === personName && (t.staffOwed > 0.01) && !t.settled && t.status !== 'Voided');
+                if (debts.length === 0) return window.showStatus("No pending debts", true);
+                
+                pendingWhatsAppPayload = {
+                    person: personName,
+                    type: 'debt_summary',
+                    data: { debts }
+                };
+                document.getElementById('wa-format-modal').classList.remove('hidden');
+            };
+
+            window.executeWhatsAppSend = (format) => {
+                if (!pendingWhatsAppPayload) return;
+                const { person, type, data } = pendingWhatsAppPayload;
+                const staffObj = staff.find(s => getStaffName(s) === person);
                 let phone = getStaffPhone(staffObj);
 
                 if (!phone) {
-                    phone = prompt(`Enter WhatsApp number for ${personName} (e.g., 971501234567):`);
+                    phone = prompt(`Enter WhatsApp number for ${person}:`);
                     if (!phone) return;
-                    savePhoneNumber(personName, phone);
+                    savePhoneNumber(person, phone);
                 }
 
                 const cleanNumber = cleanPhone(phone);
+                let msg = "";
 
-                // Collect all pending debt items
-                const debts = txs.filter(t => t.person === personName && (t.staffOwed > 0.01) && !t.settled);
-                let totalOwed = 0;
-                let msg = `Hi ${personName}, here is a summary of the amounts currently owed to you by the company:\n\n`;
-
-                debts.forEach((d, idx) => {
-                    const amount = (d.staffOwed || 0) - (d.repaidAmount || 0);
-                    totalOwed += amount;
-                    if (amount > 0.01) {
-                        const total = d.amount || 0;
-                        const paid = total - amount;
-
-                        msg += `${idx + 1}. Inv #${d.invoiceNo || 'N/A'} - ${d.desc}\n`;
-                        if (paid > 0.01) {
-                            msg += `   Total: ${total.toFixed(2)} | Paid: ${paid.toFixed(2)} | *Pending: ${amount.toFixed(2)} AED*\n`;
-                        } else {
-                            msg += `   *Pending: ${amount.toFixed(2)} AED*\n`;
-                        }
+                if (type === 'advance_alert') {
+                    if (format === 'table') {
+                        msg = `PETTY CASH ALERT\n--------------------\nStaff: ${person}\nStatus: PENDING ADVANCE\n--------------------\nBALANCE: ${data.balance.toFixed(2)} AED\n--------------------\nPlease settle soon.`;
+                    } else {
+                        msg = `💰 *PETTY CASH UPDATE*\n\nHi *${person}*,\nRecords show a pending advance of *${data.balance.toFixed(2)} AED*.\n\n⏳ Please submit your receipts or settle the balance soon. Thank you!`;
                     }
-                });
-
-                msg += `\n*Total Pending: ${totalOwed.toFixed(2)} AED*`;
+                } 
+                else if (type === 'debt_summary') {
+                    let total = 0;
+                    if (format === 'table') {
+                        msg = `DEBT SUMMARY: ${person}\n----------------------------\nDATE       | DESC       | PENDING\n`;
+                        data.debts.forEach(d => {
+                            const rem = (d.staffOwed || 0) - (d.repaidAmount || 0);
+                            total += rem;
+                            msg += `${new Date(d.subDate).toLocaleDateString().padEnd(10)} | ${d.desc.substring(0,10).padEnd(10)} | ${rem.toFixed(2)}\n`;
+                        });
+                        msg += `----------------------------\nTOTAL OWE: ${total.toFixed(2)} AED`;
+                    } else {
+                        msg = `💵 *PAYMENT SUMMARY*\n\nHi *${person}*, here are the amounts currently owed to you:\n\n`;
+                        data.debts.forEach(d => {
+                            const rem = (d.staffOwed || 0) - (d.repaidAmount || 0);
+                            total += rem;
+                            msg += `• *${new Date(d.subDate).toLocaleDateString()}*: ${d.desc} (*${rem.toFixed(2)} AED*)\n`;
+                        });
+                        msg += `\n${String.fromCodePoint(0x1F4B0)} *Total Pending: ${total.toFixed(2)} AED*`;
+                    }
+                }
+                else if (type === 'receipt') {
+                    if (format === 'table') {
+                        msg = `RECEIPT: ${data.type.toUpperCase()}\n--------------------\nPerson: ${person}\nDate: ${new Date().toLocaleDateString()}\nNote: ${data.desc}\n--------------------\nTOTAL: ${data.amount.toFixed(2)} AED`;
+                        if (data.paidFromAdv) msg += `\nFrom Adv: ${data.paidFromAdv.toFixed(2)}`;
+                        if (data.addedToDebt) msg += `\nOwed: ${data.addedToDebt.toFixed(2)}`;
+                    } else {
+                        msg = `${String.fromCodePoint(0x2705)} *TRANSACTION RECORDED*\n\n${String.fromCodePoint(0x1F464)} *Person:* ${person}\n${String.fromCodePoint(0x1F4DD)} *Type:* ${data.type.toUpperCase()}\n${String.fromCodePoint(0x1F4B0)} *Amount:* ${data.amount.toFixed(2)} AED\n${String.fromCodePoint(0x1F4C5)} *Date:* ${new Date().toLocaleDateString()}\n\n*Note:* ${data.desc}`;
+                        if (data.paidFromAdv) msg += `\n\n${String.fromCodePoint(0x1F4A1)} _Deducted from Advance: ${data.paidFromAdv.toFixed(2)} AED_`;
+                        if (data.addedToDebt) msg += `\n\n${String.fromCodePoint(0x26A0)} _Added to Pending Owed: ${data.addedToDebt.toFixed(2)} AED_`;
+                    }
+                }
 
                 const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
                 window.open(url, '_blank');
-            }
+                document.getElementById('wa-format-modal').classList.add('hidden');
+                pendingWhatsAppPayload = null;
+            };
 
-            // --- NEW STATEMENT LOGIC ---
+            window.copyReceiptAsImage = async () => {
+                const receipt = document.getElementById('mini-receipt');
+                if (!receipt) return;
+                
+                const btn = document.getElementById('btn-copy-receipt-img');
+                const orig = btn.innerHTML;
+                btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Processing...`;
+                lucide.createIcons();
+
+                try {
+                    const canvas = await html2canvas(receipt, { scale: 3, backgroundColor: '#ffffff' });
+                    canvas.toBlob(async (blob) => {
+                        const item = new ClipboardItem({ "image/png": blob });
+                        await navigator.clipboard.write([item]);
+                        window.showStatus("Receipt Image Copied!");
+                        btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Copied!`;
+                        setTimeout(() => { btn.innerHTML = orig; lucide.createIcons(); }, 2000);
+                    });
+                } catch (err) {
+                    console.error(err);
+                    window.showStatus("Copy Failed", true);
+                    btn.innerHTML = orig;
+                    lucide.createIcons();
+                }
+            };
+
             window.openStatementModal = () => {
                 const personSelect = document.getElementById('form-person');
                 if (!personSelect || !personSelect.value) return window.showStatus("Select a person first", true);
 
                 document.getElementById('statement-modal').classList.remove('hidden');
-                // Default to today
                 window.setStatementPeriod(0);
             };
 
@@ -1280,10 +1705,12 @@
             };
 
             window.sendCustomStatement = () => {
-                const personName = document.getElementById('form-person').value;
+                const personName = document.getElementById('stmt-person-hidden').value || document.getElementById('form-person').value;
                 const start = document.getElementById('stmt-start').value;
                 const end = document.getElementById('stmt-end').value;
 
+                if (!personName) return window.showStatus("Select a person first", true);
+                
                 const staffObj = staff.find(s => getStaffName(s) === personName);
                 let phone = getStaffPhone(staffObj);
 
@@ -1294,90 +1721,391 @@
                 }
                 const cleanNumber = cleanPhone(phone);
 
-                // Filter
-                const reportTxs = txs.filter(t => t.person === personName && t.subDate >= start && t.subDate <= end);
-                reportTxs.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+                // Deduplicate by ID
+                const uniqueTxs = [];
+                const seenIds = new Set();
+                txs.forEach(t => {
+                    if (t.person === personName && t.status !== 'Voided' && !seenIds.has(t.id)) {
+                        uniqueTxs.push(t);
+                        seenIds.add(t.id);
+                    }
+                });
 
-                let msg = `*Statement for ${personName}*\nPeriod: ${start} to ${end}\n\n`;
+                const periodTxs = uniqueTxs.filter(t => {
+                    const dateMatch = (!start || t.subDate >= start) && (!end || t.subDate <= end);
+                    return dateMatch;
+                }).sort((a, b) => (a.subDate || '').localeCompare(b.subDate || ''));
 
-                if (reportTxs.length === 0) {
-                    msg += "No transactions found in this period.\n";
-                } else {
-                    reportTxs.forEach(t => {
-                        let line = `• ${t.subDate}: ${t.amount.toFixed(2)} AED`;
-                        if (t.type === 'expense') line += ` (${t.desc})`;
-                        else line += ` [${t.type.toUpperCase()}]`;
-                        msg += `${line}\n`;
+                if (periodTxs.length === 0) return alert("No transactions found for this period");
+
+                let openingBal = 0;
+                if (start) {
+                    uniqueTxs.forEach(t => {
+                        if (t.subDate < start) {
+                            const amt = parseFloat(t.amount) || 0;
+                            const ttype = (t.type || '').toLowerCase();
+                            if (ttype === 'advance') openingBal += amt;
+                            else if (ttype === 'return_advance') openingBal -= amt;
+                            else if (ttype === 'expense' && t.isDeductedFromAdvance) openingBal -= (parseFloat(t.advanceAmountUsed) || 0);
+                        }
                     });
                 }
 
-                // Balances
-                const advance = getAdvanceWalletFor(personName);
-                const debt = getDebtToStaff(personName);
+                let currentBal = openingBal;
+                let msg = `${String.fromCodePoint(0x1F4DC)} *PETTY CASH STATEMENT*\n`;
+                msg += `${String.fromCodePoint(0x1F464)} *Beneficiary:* ${personName}\n`;
+                msg += `${String.fromCodePoint(0x1F4C5)} *Period:* ${start ? new Date(start).toLocaleDateString('en-GB') : 'All'} to ${end ? new Date(end).toLocaleDateString('en-GB') : 'Today'}\n\n`;
+                msg += `----------------------------\n`;
+                
+                periodTxs.forEach(t => {
+                    const amt = parseFloat(t.amount) || 0;
+                    const ttype = (t.type || '').toLowerCase();
+                    const dateStr = new Date(t.subDate).toLocaleDateString('en-GB');
+                    let flow = 0;
+                    let symbol = "";
 
-                msg += `\n*Current Status:*`;
-                if (advance > 0.01) msg += `\nAdvance Held by You: ${advance.toFixed(2)} AED`;
-                if (debt > 0.01) msg += `\nPending Owed to You: ${debt.toFixed(2)} AED`;
-                if (advance < 0.01 && debt < 0.01) msg += `\nAll Clear (0.00)`;
+                    if (ttype === 'advance') { flow = amt; symbol = "+"; }
+                    else if (ttype === 'return_advance') { flow = -amt; symbol = "-"; }
+                    else if (ttype === 'expense' && t.isDeductedFromAdvance) {
+                        flow = -(parseFloat(t.advanceAmountUsed) || 0);
+                        symbol = "-";
+                    }
+
+                    currentBal += flow;
+                    if (flow !== 0) {
+                        msg += `${String.fromCodePoint(0x1F539)} *${dateStr}*\n`;
+                        msg += `   *Item:* ${t.desc || t.desc_text || '-'}\n`;
+                        msg += `   *Amount:* ${symbol}${Math.abs(flow).toFixed(2)} AED\n\n`;
+                    }
+                });
+                msg += `----------------------------\n\n`;
+                msg += `${String.fromCodePoint(0x1F3E6)} *Opening Balance:* ${openingBal.toFixed(2)} AED\n`;
+                msg += `${String.fromCodePoint(0x1F4B0)} *Closing Balance:* *${currentBal.toFixed(2)} AED*`;
 
                 const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
                 window.open(url, '_blank');
                 window.closeModal();
             };
 
-            // Old Daily Summary mapped to new logic (optional backward compat)
+            window.downloadStaffStatementPDF = () => {
+                const name = document.getElementById('stmt-person-hidden').value || document.getElementById('form-person').value;
+                const start = document.getElementById('stmt-start').value;
+                const end = document.getElementById('stmt-end').value;
+
+                if (!name) return alert("Select a person first");
+
+                const sortedAll = [...txs].sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
+                let openingBalance = 0;
+                
+                if (start) {
+                    sortedAll.forEach(t => {
+                        if (t.person === name && t.subDate < start && t.status !== 'Voided') {
+                            const amt = parseFloat(t.amount) || 0;
+                            const ttype = (t.type || '').toLowerCase();
+                            if (ttype === 'advance') openingBalance += amt;
+                            else if (ttype === 'return_advance') openingBalance -= amt;
+                            else if (ttype === 'expense' && t.isDeductedFromAdvance) openingBalance -= (parseFloat(t.advanceAmountUsed) || 0);
+                        }
+                    });
+                }
+
+                const filtered = sortedAll.filter(t => {
+                    const dateMatch = (!start || t.subDate >= start) && (!end || t.subDate <= end);
+                    return t.person === name && dateMatch;
+                });
+
+                let currentBal = openingBalance;
+                const rows = filtered.map(t => {
+                    const ttype = (t.type || '').toLowerCase();
+                    const isVoided = t.status === 'Voided';
+                    const amt = parseFloat(t.amount) || 0;
+                    
+                    let flowIn = 0;
+                    let flowOut = 0;
+                    
+                    if (!isVoided) {
+                        if (ttype === 'advance') flowIn = amt;
+                        else if (ttype === 'return_advance') flowOut = amt;
+                        else if (ttype === 'expense' && t.isDeductedFromAdvance) flowOut = (parseFloat(t.advanceAmountUsed) || 0);
+                    }
+                    
+                    currentBal += (flowIn - flowOut);
+                    
+                    return `
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 8px; font-size: 10px;">${new Date(t.subDate).toLocaleDateString()}</td>
+                            <td style="padding: 8px; font-size: 10px;">
+                                <strong>${ttype.replace('_', ' ').toUpperCase()}</strong><br/>
+                                <span style="color: #666;">${t.desc || '-'}</span>
+                            </td>
+                            <td style="padding: 8px; font-size: 10px; text-align: right; color: #059669;">${flowIn > 0 ? flowIn.toFixed(2) : '-'}</td>
+                            <td style="padding: 8px; font-size: 10px; text-align: right; color: #dc2626;">${flowOut > 0 ? flowOut.toFixed(2) : '-'}</td>
+                            <td style="padding: 8px; font-size: 10px; text-align: right; font-weight: bold;">${currentBal.toFixed(2)}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                const container = document.createElement('div');
+                container.innerHTML = `
+                    <div style="padding: 40px; font-family: sans-serif; color: #333;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #4f46e5; padding-bottom: 20px; margin-bottom: 30px;">
+                            <div>
+                                <h1 style="margin: 0; color: #4f46e5; font-size: 28px;">PettyCash <span style="font-weight: 300;">Pro</span></h1>
+                                <p style="margin: 5px 0 0 0; font-size: 12px; color: #666; letter-spacing: 2px; font-weight: bold;">OFFICIAL STATEMENT</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <p style="margin: 0; font-size: 10px; color: #999;">Generated on: ${new Date().toLocaleString()}</p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 10px;">
+                            <div>
+                                <p style="margin: 0 0 5px 0; font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">Beneficiary</p>
+                                <h2 style="margin: 0; font-size: 18px; font-weight: 900; color: #1e293b;">${name}</h2>
+                            </div>
+                            <div style="text-align: right;">
+                                <p style="margin: 0 0 5px 0; font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">Reporting Period</p>
+                                <p style="margin: 0; font-size: 14px; font-weight: bold; color: #1e293b;">${start || 'Beginning'} &rarr; ${end || 'Present'}</p>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+                            <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px;">
+                                <p style="margin: 0 0 5px 0; font-size: 9px; color: #64748b; font-weight: bold; text-transform: uppercase;">Opening Advance</p>
+                                <p style="margin: 0; font-size: 16px; font-weight: bold;">${openingBalance.toFixed(2)} <span style="font-size: 10px; color: #999;">AED</span></p>
+                            </div>
+                            <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px;">
+                                <p style="margin: 0 0 5px 0; font-size: 9px; color: #64748b; font-weight: bold; text-transform: uppercase;">Net Transactions</p>
+                                <p style="margin: 0; font-size: 16px; font-weight: bold;">${(currentBal - openingBalance).toFixed(2)} <span style="font-size: 10px; color: #999;">AED</span></p>
+                            </div>
+                            <div style="border: 1px solid #4f46e5; background: #eef2ff; padding: 15px; border-radius: 8px;">
+                                <p style="margin: 0 0 5px 0; font-size: 9px; color: #4f46e5; font-weight: bold; text-transform: uppercase;">Closing Balance</p>
+                                <p style="margin: 0; font-size: 16px; font-weight: 900; color: #4f46e5;">${currentBal.toFixed(2)} <span style="font-size: 10px; color: #4f46e5;">AED</span></p>
+                            </div>
+                        </div>
+
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
+                                    <th style="padding: 12px 8px; text-align: left; font-size: 9px; color: #475569; text-transform: uppercase; font-weight: bold;">Date</th>
+                                    <th style="padding: 12px 8px; text-align: left; font-size: 9px; color: #475569; text-transform: uppercase; font-weight: bold;">Transaction Description</th>
+                                    <th style="padding: 12px 8px; text-align: right; font-size: 9px; color: #475569; text-transform: uppercase; font-weight: bold;">Advance (In)</th>
+                                    <th style="padding: 12px 8px; text-align: right; font-size: 9px; color: #475569; text-transform: uppercase; font-weight: bold;">Spent (Out)</th>
+                                    <th style="padding: 12px 8px; text-align: right; font-size: 9px; color: #475569; text-transform: uppercase; font-weight: bold;">Running Bal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rows}
+                            </tbody>
+                        </table>
+                        
+                        <div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
+                            <p style="font-size: 10px; color: #999;">This is a computer-generated document and does not require a physical signature.</p>
+                            <p style="font-size: 10px; font-weight: bold; color: #4f46e5; margin-top: 5px;">&copy; ${new Date().getFullYear()} PettyCash Pro</p>
+                        </div>
+                    </div>
+                `;
+
+                const opt = {
+                    margin: 0,
+                    filename: `Statement_${name}_${window.getLocalDate()}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(container).save();
+            };
+
             window.sendDailySummary = () => {
                 window.openStatementModal();
             };
 
             window.openReceiptModal = (type, amount, person, desc, paidFromAdv, addedToDebt) => {
                 if (type !== 'advance' && type !== 'repayment' && type !== 'expense') return;
-                // Only trigger for expense if there is a split (advance used OR debt created) to avoid spam
-                if (type === 'expense' && !paidFromAdv && !addedToDebt) {
-                    // If standard expense, maybe user still wants a receipt? 
-                    // Let's enable it for ALL expenses for clarity
-                }
 
                 const modal = document.getElementById('receipt-modal');
                 const btn = document.getElementById('btn-send-whatsapp-receipt');
-                const txt = document.getElementById('receipt-message');
+
+                document.getElementById('rec-date').innerText = `DATE: ${new Date().toLocaleDateString()}`;
+                document.getElementById('rec-person').innerText = person;
+                document.getElementById('rec-type').innerText = type.toUpperCase();
+                document.getElementById('rec-desc').innerText = desc || '-';
+                document.getElementById('rec-amount').innerText = `${amount.toFixed(2)} AED`;
+
+                const advSect = document.getElementById('rec-adv-section');
+                if (paidFromAdv || addedToDebt) {
+                    advSect.classList.remove('hidden');
+                    document.getElementById('rec-adv-used').innerText = (paidFromAdv || 0).toFixed(2);
+                    document.getElementById('rec-debt').innerText = (addedToDebt || 0).toFixed(2);
+                } else {
+                    advSect.classList.add('hidden');
+                }
 
                 modal.classList.remove('hidden');
 
                 btn.onclick = () => {
-                    const staffObj = staff.find(s => getStaffName(s) === person);
-                    let phone = getStaffPhone(staffObj);
-
-                    if (!phone) {
-                        phone = prompt(`Enter WhatsApp number for ${person} (e.g., 971501234567):`);
-                        if (!phone) return;
-                        savePhoneNumber(person, phone);
-                    }
-
-                    // Clean the phone number
-                    const cleanNumber = cleanPhone(phone);
-
-                    let msg = `Transaction Recorded:\nType: ${type.toUpperCase()}\nTotal Amount: ${amount.toFixed(2)} AED\nNote: ${desc}\nDate: ${new Date().toLocaleDateString()}`;
-
-                    if (paidFromAdv) {
-                        msg += `\n(Deducted from Advance: ${paidFromAdv.toFixed(2)} AED`;
-                        if (addedToDebt) {
-                            msg += ` | Pending Owed to You: ${addedToDebt.toFixed(2)} AED)`;
-                        } else {
-                            msg += `)`;
-                        }
-                    } else if (addedToDebt) {
-                        msg += `\n(Pending Owed to You: ${addedToDebt.toFixed(2)} AED)`;
-                    }
-
-
-                    const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
-                    window.open(url, '_blank');
-                    window.closeModal();
+                    pendingWhatsAppPayload = {
+                        person,
+                        type: 'receipt',
+                        data: { type, amount, desc, paidFromAdv, addedToDebt }
+                    };
+                    document.getElementById('wa-format-modal').classList.remove('hidden');
                 };
             };
 
-            // --- RENDERERS ---
+            window.renderStaffCards = () => {
+                const grid = document.getElementById('staff-cards-grid');
+                if (!grid) return;
+
+                if (staff.length === 0) {
+                    grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-400 font-bold text-xs uppercase bg-slate-50 border-2 border-dashed border-slate-100 rounded-2xl">No staff found. Add staff in Config.</div>';
+                    return;
+                }
+
+                grid.innerHTML = staff.map(s => {
+                    const name = getStaffName(s);
+                    let totalSpent = 0;
+
+                    txs.forEach(t => {
+                        if (t.person === name && (t.type || '').toLowerCase() === 'expense') {
+                            totalSpent += (parseFloat(t.amount) || 0);
+                        }
+                    });
+
+                    const balance = getAdvanceWalletFor(name);
+
+                    return `
+                        <div onclick="window.openStaffModal('${escapeQuotes(name)}')" class="bg-white border border-slate-200 hover:border-indigo-300 p-6 rounded-3xl cursor-pointer hover:shadow-xl hover:shadow-indigo-100 transition-all group relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-bl-[100px] -z-10 group-hover:bg-indigo-100 transition-colors"></div>
+                            
+                            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-4">
+                                <i data-lucide="user" class="w-6 h-6"></i>
+                            </div>
+                            
+                            <h3 class="font-black text-xl text-slate-800 tracking-tight mb-1">${name}</h3>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Staff Member</p>
+                            
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-end border-b border-slate-50 pb-2">
+                                    <span class="text-xs font-bold text-slate-500">Total Spent</span>
+                                    <span class="text-sm font-black text-slate-700">${totalSpent.toFixed(2)} AED</span>
+                                </div>
+                                <div class="flex justify-between items-end border-b border-slate-50 pb-2">
+                                    <span class="text-xs font-bold text-slate-500">Active Advance</span>
+                                    <span class="text-sm font-black ${balance > 0 ? 'text-amber-600' : 'text-emerald-600'}">${balance.toFixed(2)} AED</span>
+                                </div>
+                                <div class="flex justify-between items-end">
+                                    <span class="text-xs font-bold text-slate-500">Pending Owed</span>
+                                    <span class="text-sm font-black ${getDebtToStaff(name) > 0 ? 'text-rose-600' : 'text-slate-400'}">${getDebtToStaff(name).toFixed(2)} AED</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                lucide.createIcons();
+            };
+
+            window.openStaffModal = (name) => {
+                const modal = document.getElementById('staff-modal');
+                document.getElementById('staff-modal-name').innerText = name;
+                
+                let totalSpent = 0;
+                let thisMonthSpent = 0;
+                let lastMonthSpent = 0;
+                
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
+                
+                const lastMonthDate = new Date(currentYear, currentMonth - 1, 1);
+                const lastMonth = lastMonthDate.getMonth();
+                const lastMonthYear = lastMonthDate.getFullYear();
+
+                let firstExpenseDate = null;
+                
+                const personalTxs = txs.filter(t => t.person === name).sort((a, b) => (b.subDate || '').localeCompare(a.subDate || ''));
+
+                personalTxs.forEach(t => {
+                    const ttype = (t.type || '').toLowerCase();
+                    const amt = parseFloat(t.amount) || 0;
+                    
+                    if (ttype === 'expense') {
+                        totalSpent += amt;
+                        
+                        const tDate = new Date(t.subDate);
+                        if (!firstExpenseDate || tDate < firstExpenseDate) firstExpenseDate = tDate;
+
+                        if (tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear) {
+                            thisMonthSpent += amt;
+                        } else if (tDate.getMonth() === lastMonth && tDate.getFullYear() === lastMonthYear) {
+                            lastMonthSpent += amt;
+                        }
+                    }
+                });
+
+                let avgSpent = 0;
+                if (firstExpenseDate && totalSpent > 0) {
+                    const monthsDiff = (now.getFullYear() - firstExpenseDate.getFullYear()) * 12 + (now.getMonth() - firstExpenseDate.getMonth()) + 1;
+                    avgSpent = totalSpent / monthsDiff;
+                }
+
+                const balance = getAdvanceWalletFor(name);
+                const debt = getDebtToStaff(name);
+
+                document.getElementById('sm-total').innerText = totalSpent.toFixed(2);
+                document.getElementById('sm-this-month').innerText = thisMonthSpent.toFixed(2);
+                document.getElementById('sm-debt').innerText = debt.toFixed(2);
+                document.getElementById('sm-avg').innerText = avgSpent.toFixed(2);
+                document.getElementById('sm-balance').innerText = balance.toFixed(2);
+                
+                let runBal = 0;
+                const tbody = document.getElementById('staff-modal-body');
+                
+                const chronoTxs = [...personalTxs].reverse();
+                
+                tbody.innerHTML = chronoTxs.length === 0 ? `<tr><td colspan="6" class="text-center py-8 text-xs font-bold text-slate-400 uppercase">No transactions</td></tr>` : chronoTxs.map(t => {
+                    const amt = parseFloat(t.amount) || 0;
+                    const pfb = parseFloat(t.paidFromBox) || 0;
+                    const ttype = (t.type || '').toLowerCase();
+                    
+                    let flowIn = 0;
+                    let flowOut = 0;
+                    let runFlow = 0;
+
+                    if (ttype === 'advance') { flowIn = amt; runFlow = amt; }
+                    else if (ttype === 'return_advance') { flowOut = amt; runFlow = -amt; }
+                    else if (ttype === 'expense' && t.isDeductedFromAdvance) {
+                        const used = parseFloat(t.advanceAmountUsed) || 0;
+                        flowOut = used;
+                        runFlow = -used;
+                    }
+                    
+                    runBal += runFlow;
+                    
+                    return `
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 font-mono text-[10px] text-slate-500">${new Date(t.subDate).toLocaleDateString()}</td>
+                            <td class="px-4 py-3"><span class="text-[9px] font-black uppercase px-2 py-1 rounded-md ${window.getTypeStyles(ttype)}">${ttype.replace('_', ' ')}</span></td>
+                            <td class="px-4 py-3 font-bold text-xs text-slate-700 truncate max-w-[200px]" title="${t.desc}">${t.desc || '-'}</td>
+                            <td class="px-4 py-3 font-mono text-xs text-right text-emerald-600 font-bold">${flowIn > 0 ? flowIn.toFixed(2) : '-'}</td>
+                            <td class="px-4 py-3 font-mono text-xs text-right text-rose-600 font-bold">${flowOut > 0 ? flowOut.toFixed(2) : '-'}</td>
+                            <td class="px-4 py-3 font-mono text-xs text-right text-slate-800 font-bold">${runBal.toFixed(2)}</td>
+                        </tr>
+                    `;
+                }).reverse().join(''); 
+
+                const btnWa = document.getElementById('btn-staff-whatsapp');
+                btnWa.onclick = () => {
+                    document.getElementById('staff-modal').classList.add('hidden');
+                    document.getElementById('stmt-person-hidden').value = name;
+                    document.getElementById('stmt-start').value = '';
+                    document.getElementById('stmt-end').value = window.getLocalDate();
+                    document.getElementById('statement-modal').classList.remove('hidden');
+                };
+
+                modal.classList.remove('hidden');
+            };
 
             function renderRegistry() {
                 const listFn = (id, items, type) => {
@@ -1400,7 +2128,6 @@
                     filterCat.value = current;
                 }
 
-                // Populate Staff Filter in Report
                 const filterPerson = document.getElementById('filter-person');
                 if (filterPerson) {
                     const current = filterPerson.value;
@@ -1422,7 +2149,6 @@
                         return;
                     }
                     wrapper.innerHTML = `<select id="form-person" onchange="window.checkAdvanceWallet(this.value)" class="modern-input w-full px-4 py-4 rounded-xl font-bold text-sm text-slate-800 uppercase outline-none focus:border-indigo-600">${list.map(i => `<option value="${i}">${i}</option>`).join('')}</select>`;
-                    // Safely check wallet for first item if it exists
                     if (list[0]) window.checkAdvanceWallet(list[0]);
                 } catch (e) {
                     console.error("Render Select Error", e);
@@ -1446,7 +2172,6 @@
 
             window.renderAdvancesAndDebts = function () {
                 try {
-                    // 1. Staff Advances
                     const advList = document.getElementById('advances-list');
                     const advSect = document.getElementById('advances-section');
                     if (advList && advSect) {
@@ -1460,13 +2185,12 @@
                             <div><p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">${a.name}</p><p class="text-sm font-black text-slate-800">${a.balance.toFixed(2)} <span class="text-[10px] text-slate-400 font-normal">AED</span></p></div>
                             <div class="flex gap-2">
                                 <button onclick="window.sendWhatsApp('${escapedName}')" class="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-[10px] font-bold uppercase text-emerald-600 hover:bg-emerald-100 transition-all flex items-center gap-1"><i data-lucide="message-circle" class="w-3 h-3"></i> WhatsApp</button>
-                                <button onclick="window.openSettle('${txs.find(t => t.person === a.name && t.type === 'advance')?.id || ''}', 'return_advance')" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold uppercase text-amber-600 hover:bg-amber-50 hover:border-amber-200 transition-all">Settle</button>
+                                <button onclick="window.openSettle('${txs.find(t => t.person === a.name && t.type === 'advance')?.id || ''}', 'return_advance', '${escapedName}')" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold uppercase text-amber-600 hover:bg-amber-50 hover:border-amber-200 transition-all">Settle</button>
                             </div>
                         </div>
                     `}).join('');
                     }
 
-                    // 2. Box Debts
                     const debtList = document.getElementById('debts-container');
                     const debtSect = document.getElementById('pending-debts-section');
                     if (debtList && debtSect) {
@@ -1477,8 +2201,6 @@
                         debtSect.classList.toggle('hidden', debts.length === 0);
                         debtList.innerHTML = debts.map(d => {
                             const escapedName = escapeQuotes(d.person || '');
-                            const remAmount = d.remaining;
-                            const desc = escapeQuotes(d.desc || 'Expense');
                             return `
                         <div class="bg-rose-50/50 p-4 rounded-xl border border-rose-100 flex justify-between items-center group hover:bg-rose-50 transition-all">
                             <div><p class="text-[10px] font-black text-rose-400 uppercase tracking-wider">${d.managerOwed ? 'Owed to Me' : 'Owe: ' + d.person}</p><p class="text-sm font-black text-rose-900">${d.remaining.toFixed(2)} AED</p></div>
@@ -1518,7 +2240,6 @@
                     if (aEl) aEl.innerHTML = `${totals.advances.toFixed(2)} <span class="text-base text-slate-400 font-normal">AED</span>`;
                     if (pEl) pEl.innerHTML = `${(totals.owedToMe + totals.owedToStaff).toFixed(2)} <span class="text-base text-slate-400 font-normal">AED</span>`;
 
-                    // Populate filter dropdowns
                     const categorySelect = document.getElementById('filter-category');
                     const personSelect = document.getElementById('filter-person-history');
 
@@ -1545,18 +2266,22 @@
                     const sorted = [...txs].sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
                     let curr = 0; const rbMap = {};
                     sorted.forEach(t => {
+                        if (t.status === 'Voided') {
+                            rbMap[t.id] = Math.round(curr * 100) / 100;
+                            return;
+                        }
+
                         const pfb = parseFloat(t.paidFromBox) || 0;
                         const amt = parseFloat(t.amount) || 0;
-                        const ttype = (t.type || '').toLowerCase(); // CASE-INSENSITIVE FIX
+                        const ttype = (t.type || '').toLowerCase(); 
                         let flow = 0;
 
-                        // ROBUST LOGIC V5 (Case-Insensitive, consistent with getTotals)
                         if (ttype === 'receive' || ttype === 'return_advance') {
-                            flow = amt; // Cash IN
+                            flow = amt; 
                         } else if (ttype === 'settle_debt') {
-                            flow = -amt; // Cash OUT — paying a debt (full amount)
+                            flow = -amt; 
                         } else {
-                            flow = -pfb; // advance & expense: only what left the physical box
+                            flow = -pfb; 
                         }
 
                         curr += flow;
@@ -1565,7 +2290,6 @@
 
                     const filtered = txs.filter(t => {
                         const dateMatch = (!start || t.subDate >= start) && (!end || t.subDate <= end);
-                        // Safe guard allocations check
                         const hasAllocations = t.allocations && Array.isArray(t.allocations);
                         const catMatch = (!filterCat || (hasAllocations && t.allocations.some(a => a.category === filterCat)));
 
@@ -1579,18 +2303,19 @@
                         return dateMatch && catMatch && searchMatch && personMatch;
                     });
 
-                    const maxDisplay = 150;
+                    const maxDisplay = 1000;
                     const displayData = filtered.slice(0, maxDisplay);
 
                     const body = document.getElementById('audit-body');
                     if (body) {
                         body.innerHTML = displayData.length ? displayData.map(t => {
+                            const isVoided = t.status === 'Voided';
+                            
                             const rem = (t.managerOwed || t.staffOwed) ? ((t.managerOwed || t.staffOwed) - (t.repaidAmount || 0)) : 0;
                             const debtTag = rem > 0.01 ? `<div class="mt-1 inline-flex items-center gap-1 bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase">Pending: ${rem.toFixed(2)}</div>` : '';
 
                             const allocs = (t.allocations && Array.isArray(t.allocations)) ? t.allocations.map(a => `<span class="bg-slate-100 text-[9px] font-bold px-1.5 py-0.5 rounded text-slate-600 border border-slate-200">${a.category} #${a.propertyNo}</span>`).join(' ') : '';
 
-                            // Advance-paid tag: shown when the expense was covered (fully or partially) by a staff advance
                             const advUsed = parseFloat(t.advanceAmountUsed) || 0;
                             const advTag = (t.isDeductedFromAdvance && advUsed > 0)
                                 ? `<span class="inline-flex items-center gap-1 bg-amber-100 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase">
@@ -1599,28 +2324,34 @@
                                    </span>`
                                 : '';
 
-                            const escapedName = escapeQuotes(t.person || '');
                             const typeLabel = (t.type || '').toLowerCase().replace('_', ' ');
+                            const voidStyle = isVoided ? 'opacity-50 grayscale bg-slate-50' : '';
+                            const voidStrikethrough = isVoided ? 'line-through text-slate-400' : 'text-slate-900';
+                            
+                            const voidTag = isVoided ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest"><i data-lucide="ban" class="w-2.5 h-2.5"></i> VOIDED: ${t.voidReason || 'No reason'}</div>` : '';
+                            const editTag = (!isVoided && t.editReason) ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-0.5 border border-indigo-100 rounded text-[9px] font-black uppercase tracking-widest" title="Edit Reason: ${t.editReason}"><i data-lucide="pencil" class="w-2.5 h-2.5"></i> EDITED</div>` : '';
 
-                            return `<tr class="hover:bg-slate-50 transition-colors group">
-                            <td class="px-6 py-4 font-bold text-slate-500 font-mono text-xs">${new Date(t.subDate).toLocaleDateString()}</td>
-                            <td class="px-6 py-4 font-bold text-slate-700 text-xs">${t.person || '-'}</td>
+                            return `<tr class="hover:bg-slate-50 transition-colors group ${voidStyle}">
+                            <td class="px-6 py-4 font-bold text-slate-500 font-mono text-xs ${isVoided ? 'line-through' : ''}">${new Date(t.subDate).toLocaleDateString()}</td>
+                            <td class="px-6 py-4 font-bold text-slate-700 text-xs ${isVoided ? 'line-through' : ''}">${t.person || '-'}</td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
                                     <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md ${window.getTypeStyles((t.type||'').toLowerCase())}">${typeLabel}</span>
-                                    <span class="font-bold text-slate-700">${t.desc || 'No Desc'}</span>
+                                    <span class="font-bold text-slate-700 ${isVoided ? 'line-through' : ''}">${t.desc || 'No Desc'}</span>
                                 </div>
-                                <div class="mt-1.5 flex flex-wrap gap-1">${allocs}${advTag}</div>
+                                <div class="mt-1.5 flex flex-wrap gap-1">${allocs}${advTag}${editTag}</div>
+                                ${voidTag}
                             </td>
                             <td class="px-6 py-4">
-                                <div class="font-bold text-slate-900">${(t.amount || 0).toFixed(2)}</div>
-                                ${debtTag}
+                                <div class="font-bold ${voidStrikethrough}">${(t.amount || 0).toFixed(2)}</div>
+                                ${!isVoided ? debtTag : ''}
                             </td>
                             <td class="px-6 py-4 font-bold font-mono ${(rbMap[t.id] || 0) < 0 ? 'text-rose-600' : 'text-indigo-600'}">${(rbMap[t.id] || 0).toFixed(2)}</td>
                             <td class="text-right px-6 py-4">
                                 <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onclick="window.editTx('${t.id}')" class="text-slate-400 hover:text-indigo-600 p-1.5 hover:bg-indigo-50 rounded-lg transition-colors"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                                    <button onclick="window.deleteTransaction('${t.id}')" class="text-slate-400 hover:text-rose-600 p-1.5 hover:bg-rose-50 rounded-lg transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                                    ${!isVoided ? `<button onclick="window.sendAlertWhatsApp('${t.id}')" class="text-slate-400 hover:text-emerald-600 p-1.5 hover:bg-emerald-50 rounded-lg transition-colors" title="Send WhatsApp Receipt"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i></button>` : ''}
+                                    ${!isVoided ? `<button onclick="window.voidTransaction('${t.id}')" class="text-slate-400 hover:text-rose-600 p-1.5 hover:bg-rose-50 rounded-lg transition-colors" title="Void Transaction"><i data-lucide="ban" class="w-3.5 h-3.5"></i></button>` : ''}
                                 </div>
                             </td>
                         </tr>`;
@@ -1630,22 +2361,63 @@
                     const lc = document.getElementById('log-count');
                     if (lc) lc.innerText = filtered.length;
 
+                    const batchMap = {};
+                    txs.forEach(t => {
+                        const ttype = (t.type || '').toLowerCase();
+                        if (ttype === 'expense' && t.batch_id) {
+                            if (!batchMap[t.batch_id]) batchMap[t.batch_id] = { id: t.batch_id, count: 0, total: 0, received: false, date: t.subDate };
+                            batchMap[t.batch_id].count++;
+                            batchMap[t.batch_id].total += (parseFloat(t.paidFromBox) || 0);
+                            if (t.subDate < batchMap[t.batch_id].date) batchMap[t.batch_id].date = t.subDate;
+                        }
+                        if (ttype === 'receive' && t.batch_id) {
+                            if (!batchMap[t.batch_id]) batchMap[t.batch_id] = { id: t.batch_id, count: 0, total: 0, received: true, date: t.subDate };
+                            batchMap[t.batch_id].received = true;
+                        }
+                    });
+
+                    const pendingBatches = Object.values(batchMap).filter(b => !b.received && b.total > 0).sort((a,b) => b.id.localeCompare(a.id));
+
+                    const batchContainer = document.getElementById('reimbursement-batches');
+                    if (batchContainer) {
+                        if (pendingBatches.length === 0) {
+                            batchContainer.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 font-bold text-xs border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50">No pending reimbursement batches</div>';
+                        } else {
+                            batchContainer.innerHTML = pendingBatches.map(b => `
+                                <div class="bg-blue-50/50 border border-blue-100 p-5 rounded-2xl relative overflow-hidden group">
+                                    <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] font-black px-3 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">Processing</div>
+                                    <div class="text-[10px] text-blue-400 font-bold mb-1 uppercase tracking-wider">${new Date(parseInt(b.id.split('-')[1])).toLocaleDateString()}</div>
+                                    <div class="text-2xl font-black text-blue-900 mb-0.5 tracking-tight">${b.total.toFixed(2)} <span class="text-xs text-blue-500 font-bold">AED</span></div>
+                                    <div class="text-[10px] font-bold text-blue-600 uppercase tracking-wide mb-5 bg-blue-100/50 inline-block px-2 py-0.5 rounded-md">${b.count} Expenses</div>
+                                    <button onclick="window.receiveBatchCash('${b.id}', ${b.total})" class="w-full bg-white border-2 border-blue-200 text-blue-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+                                        <i data-lucide="download" class="w-4 h-4"></i> Receive Cash
+                                    </button>
+                                </div>
+                            `).join('');
+                        }
+                    }
+
                     renderRegistry();
                     window.renderAdvancesAndDebts();
+                    window.renderStaffCards();
                     lucide.createIcons();
                 } catch (e) {
                     console.error("Render All Error", e);
                 }
             };
 
-            // --- GLOBAL INTERACTIVE HELPERS ---
-
             window.switchView = (v) => {
-                ['dashboard', 'history', 'settings'].forEach(id => {
+                ['dashboard', 'history', 'ledger', 'reimbursements', 'settings'].forEach(id => {
                     const el = document.getElementById(`view-${id}`);
                     if (el) el.classList.toggle('hidden', id !== v);
                     const btn = document.getElementById(`nav-${id}`);
-                    if (btn) btn.className = id === v ? 'flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-bold text-xs shadow-sm bg-white text-indigo-600' : 'flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all text-slate-500 hover:text-slate-700 hover:bg-white/60 font-bold text-xs';
+                    if (btn) {
+                        if (id === v) {
+                            btn.className = 'flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-bold text-xs shadow-sm bg-white text-indigo-600';
+                        } else {
+                            btn.className = 'flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all text-slate-500 hover:text-slate-700 hover:bg-white/60 font-bold text-xs';
+                        }
+                    }
                 });
                 window.renderAll();
             };
@@ -1700,53 +2472,45 @@
                     const personSelect = document.getElementById('form-person');
                     const person = personSelect ? personSelect.value : '';
                     const useAdv = document.getElementById('use-advance-wallet')?.checked;
-                    const reimburseNow = document.getElementById('reimburse-now')?.checked; // Default false
+                    const reimburseNow = document.getElementById('reimburse-now')?.checked; 
 
                     let deductionUsed = 0;
                     if (activeTab === 'expense' && useAdv) deductionUsed = Math.min(amount, getAdvanceWalletFor(person));
 
-                    // Capture Invoice Data and Tax
                     const invNo = document.getElementById('form-inv-no')?.value || '';
                     const invDate = document.getElementById('form-inv-date')?.value || '';
                     const taxAmount = parseFloat(document.getElementById('form-tax-amount')?.value) || 0;
                     const netAmount = amount - taxAmount;
                     const paymentMethod = deductionUsed > 0 ? 'Advance' : 'Cash';
 
-
-                    // Box Amount Needed is the remainder after advance deduction
                     const boxAmountNeeded = amount - deductionUsed;
 
                     let paidFromBox = 0;
                     let staffOwed = 0;
                     let settled = false;
 
-                    // Logic for "Reimburse Immediately" vs "Pending Debt"
                     if (activeTab === 'expense') {
                         if (reimburseNow) {
-                            // Pay the excess immediately from box
                             paidFromBox = boxAmountNeeded;
-                            settled = true; // Fully settled as cash was given
+                            settled = true;
                         } else {
-                            // Do NOT pay from box, create a Debt
                             paidFromBox = 0;
                             if (boxAmountNeeded > 0) {
                                 staffOwed = boxAmountNeeded;
                                 settled = false;
                             } else {
-                                settled = true; // Fully covered by advance
+                                settled = true;
                             }
                         }
                     } else if (activeTab === 'receive') {
-                        // Adding funds to box
-                        paidFromBox = -amount; // Negative paidFromBox means adding to balance
+                        paidFromBox = -amount; 
                         settled = true;
                     } else {
-                        // Advance giving
                         paidFromBox = amount;
                         settled = true;
                     }
 
-                    const commonData = {
+                    const tx = {
                         type: activeTab,
                         amount,
                         person,
@@ -1771,37 +2535,33 @@
                         repaid_amount: 0
                     };
 
-                    // Deficit Check only if Paying from Box
                     if (paidFromBox > 0 && paidFromBox > (totals.balance + 0.01)) {
-                        pendingTxData = commonData;
+                        pendingTxData = tx;
                         document.getElementById('deficit-value').innerText = `${(paidFromBox - totals.balance).toFixed(2)} AED`;
                         document.getElementById('funds-modal').classList.remove('hidden');
-                        // Re-enable button since flow stopped at modal
                         btn.disabled = false;
                         btn.innerHTML = originalContent;
                         lucide.createIcons();
                         return;
                     }
 
-                    await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), commonData);
-
-                    // Trigger Receipt Modal for Advances OR Expenses that cause debt
-                    if (activeTab === 'advance' || (activeTab === 'expense' && staffOwed > 0)) {
-                        window.openReceiptModal(activeTab, amount, person, descInput.value, deductionUsed, staffOwed);
+                    const docRef = await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), tx);
+                    window.showStatus("Transaction Saved!");
+                    
+                    if (confirm("Send WhatsApp Alert?")) {
+                        window.sendAlertWhatsApp(docRef.id);
                     }
-
+                    
+                    window.fetchTransactions();
                     document.getElementById('entry-form').reset();
                     document.getElementById('form-sub-date').value = window.getLocalDate();
-                    window.showStatus("Recorded.");
 
-                    // Re-render to hide option
                     if (person) window.checkAdvanceWallet(person);
 
                 } catch (e) {
                     console.error(e);
                     window.showStatus("Error: " + e.message, true);
                 } finally {
-                    // Ensure button is re-enabled if not returned early
                     if (btn.disabled) {
                         btn.disabled = false;
                         btn.innerHTML = originalContent;
@@ -1810,23 +2570,178 @@
                 }
             };
 
-            window.deleteTransaction = async (id) => {
-                if (!currentUser || !confirm("Delete transaction?")) return;
-                try {
-                    const tx = txs.find(t => t.id === id);
-                    if (tx && tx.settledTxId) {
-                        const originalTx = txs.find(t => t.id === tx.settledTxId);
-                        if (originalTx) {
-                            const newRepaid = Math.max(0, (originalTx.repaidAmount || 0) - (tx.amount || 0));
-                            const settled = newRepaid >= ((originalTx.managerOwed || originalTx.staffOwed) - 0.01);
-                            await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', originalTx.id), {
-                                repaid_amount: newRepaid,
-                                settled: settled
-                            });
-                        }
+            window.fetchTransactions = () => {
+                const q = query(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'));
+                onSnapshot(q, (snapshot) => {
+                    txs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    window.renderAll();
+                });
+            };
+
+            window.fetchSettings = () => {
+                onSnapshot(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), (doc) => {
+                    if (doc.exists()) {
+                        const d = doc.data();
+                        staff = d.staff || [];
+                        sources = d.sources || [];
+                        categories = d.categories || categories;
+                        lastCashCountDate = d.last_cash_count_date || null;
+                        renderRegistry();
                     }
-                    await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', id));
-                    window.showStatus("Deleted.");
+                });
+            };
+
+            window.submitToAccounts = async () => {
+                if (!currentUser) return;
+                let currentUnbatchedExpenses = txs.filter(t => (t.type || '').toLowerCase() === 'expense' && !t.batch_id && t.status !== 'Voided');
+                
+                if (currentUnbatchedExpenses.length === 0) {
+                    alert("No pending expenses to submit to accounts.");
+                    return;
+                }
+
+                currentUnbatchedExpenses.sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
+                
+                const body = document.getElementById('reimburse-select-body');
+                body.innerHTML = currentUnbatchedExpenses.map(t => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 text-center"><input type="checkbox" class="reimburse-checkbox w-4 h-4 rounded text-blue-600 cursor-pointer" value="${t.id}" onchange="window.updateReimburseTotal()"></td>
+                        <td class="p-3 font-mono text-xs text-slate-500">${new Date(t.subDate).toLocaleDateString()}</td>
+                        <td class="p-3 font-bold text-slate-800">${t.desc || '-'}</td>
+                        <td class="p-3 font-bold text-slate-600">${t.person || '-'}</td>
+                        <td class="p-3 font-mono font-bold text-right text-slate-800" data-amt="${t.amount || 0}">${(t.amount || 0).toFixed(2)}</td>
+                    </tr>
+                `).join('');
+
+                document.getElementById('reimburse-select-all').checked = false;
+                window.updateReimburseTotal();
+                document.getElementById('reimburse-select-modal').classList.remove('hidden');
+                lucide.createIcons();
+            };
+
+            window.toggleAllReimburse = (checked) => {
+                document.querySelectorAll('.reimburse-checkbox').forEach(cb => cb.checked = checked);
+                window.updateReimburseTotal();
+            };
+
+            window.updateReimburseTotal = () => {
+                let total = 0;
+                let count = 0;
+                document.querySelectorAll('.reimburse-checkbox:checked').forEach(cb => {
+                    const row = cb.closest('tr');
+                    const amtCell = row.querySelector('[data-amt]');
+                    if (amtCell) {
+                        total += parseFloat(amtCell.getAttribute('data-amt')) || 0;
+                        count++;
+                    }
+                });
+                document.getElementById('reimburse-selected-total').innerText = `${total.toFixed(2)} AED (${count} items)`;
+            };
+
+            window.getSelectedReimburseIds = () => {
+                const ids = [];
+                document.querySelectorAll('.reimburse-checkbox:checked').forEach(cb => ids.push(cb.value));
+                return ids;
+            };
+
+            window.markLegacyProcessed = async () => {
+                const ids = window.getSelectedReimburseIds();
+                if (ids.length === 0) {
+                    alert("Please select at least one expense to mark as legacy.");
+                    return;
+                }
+                
+                if (!confirm(`Are you sure you want to mark ${ids.length} expenses as Legacy Processed?`)) return;
+
+                try {
+                    window.showStatus("Archiving...", true);
+                    const batch = writeBatch(db);
+                    ids.forEach(id => {
+                        const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', id);
+                        batch.update(docRef, { batch_id: 'legacy' });
+                    });
+                    await batch.commit();
+                    window.showStatus("Marked as legacy successfully.");
+                    window.closeModal();
+                } catch (err) {
+                    window.showStatus("Error: " + err.message, true);
+                }
+            };
+
+            window.confirmBatchSubmission = async () => {
+                const ids = window.getSelectedReimburseIds();
+                if (ids.length === 0) {
+                    alert("Please select at least one expense to batch.");
+                    return;
+                }
+
+                if (!confirm(`Are you sure you want to group these ${ids.length} expenses into a Reimbursement Batch?`)) return;
+
+                try {
+                    window.showStatus("Submitting Batch...", true);
+                    const batchId = 'BATCH-' + Date.now();
+                    const batch = writeBatch(db);
+                    
+                    const chunkSize = 100;
+                    for (let i = 0; i < ids.length; i += chunkSize) {
+                        const chunk = ids.slice(i, i + chunkSize);
+                        chunk.forEach(id => {
+                            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', id);
+                            batch.update(docRef, { batch_id: batchId });
+                        });
+                    }
+                    
+                    await batch.commit();
+                    window.showStatus("Batch created successfully!");
+                    window.closeModal();
+                } catch (err) {
+                    console.error("Submit Error", err);
+                    window.showStatus("Error submitting: " + err.message, true);
+                }
+            };
+
+            window.receiveBatchCash = async (batchId, amount) => {
+                if (!currentUser) return;
+                if (!confirm(`Mark ${amount.toFixed(2)} AED as received from Accounts for this batch?`)) return;
+                
+                try {
+                    window.showStatus("Receiving Funds...", true);
+                    const data = {
+                        type: 'receive',
+                        amount: amount,
+                        person: 'Accounts Dept',
+                        desc_text: 'Reimbursement for ' + batchId,
+                        sub_date: window.getLocalDate(),
+                        timestamp: new Date().toISOString(),
+                        batch_id: batchId,
+                        paid_from_box: -amount,
+                        status: 'Active',
+                        user_id: currentUser.uid,
+                        is_deducted_from_advance: false
+                    };
+                    await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), data);
+                    window.showStatus("Funds Received!");
+                } catch(err) {
+                    window.showStatus("Error: " + err.message, true);
+                }
+            };
+
+            window.voidTransaction = async (id) => {
+                if (!currentUser) return;
+                const tx = txs.find(t => t.id === id);
+                if (!tx) return;
+                
+                const reason = prompt(`Why are you voiding this transaction (${tx.amount} AED)? Reason:`);
+                if (!reason) return; 
+                
+                try {
+                    window.showStatus("Voiding...", true);
+                    await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', id), {
+                        status: 'Voided',
+                        void_reason: reason
+                    });
+                    
+                    window.showStatus("Transaction Voided.");
                 } catch (error) { window.showStatus("Error: " + error.message, true); return; }
             };
 
@@ -1840,29 +2755,40 @@
                 try {
                     if (!currentUser) return;
                     const val = Math.abs(parseFloat(document.getElementById('settle-amount-input').value)) || 0;
-                    const target = txs.find(t => t.id === settlingId); if (!target) return;
+                    const target = txs.find(t => t.id === settlingId);
 
                     if (settlementType === 'advance') {
-                        // Deficit check for Advance Settlement returning cash? No, return means money in.
+                        const pName = settlementTargetName || (target ? target.person : '');
+                        if (!pName) throw new Error("No person identified for settlement.");
+
                         await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), {
                             type: 'return_advance',
                             is_deducted_from_advance: false,
                             amount: val,
-                            person: target.person,
+                            person: pName,
                             desc_text: `Cash Return`,
                             sub_date: window.getLocalDate(),
-                            paid_from_box: val, 
+                            paid_from_box: -val, 
                             timestamp: new Date().toISOString(),
                             user_id: currentUser.uid,
-                            settled_tx_id: target.id
+                            settled_tx_id: target ? target.id : null
                         });
-                        // Trigger Receipt Modal for Repayments
-                        window.openReceiptModal('repayment', val, target.person, 'Cash Return');
+                        
+                        const mockTx = {
+                            type: 'return_advance',
+                            amount: val,
+                            person: pName,
+                            desc: 'Cash Return',
+                            subDate: window.getLocalDate(),
+                            isDeductedFromAdvance: false,
+                            advanceAmountUsed: 0
+                        };
+                        window.openReceiptPreview(null, mockTx);
                     } else {
-                        // Paying off debt
+                        if (!target) throw new Error("Original transaction not found for debt settlement.");
                         const totals = getTotals();
                         if (val > (totals.balance + 0.01)) {
-                            window.showStatus("Error: Insufficient Funds in Cash Box to settle this amount.", true);
+                            window.showStatus("Error: Insufficient Funds in Cash Box.", true);
                             return;
                         }
 
@@ -1872,20 +2798,29 @@
                             settled: newRepaid >= ((target.managerOwed || target.staffOwed) - 0.01)
                         });
 
-                        // Create a payment record (money leaving box)
                         const receiverName = target.managerOwed ? 'Admin' : target.person;
                         await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), {
                             type: 'settle_debt',
                             amount: val,
                             person: receiverName,
-                            desc_text: `Pay: ${target.desc}`,
+                            desc_text: `Pay: ${target.desc || target.desc_text}`,
                             sub_date: window.getLocalDate(),
-                            paid_from_box: val,
+                            paid_from_box: val, 
                             timestamp: new Date().toISOString(),
                             user_id: currentUser.uid,
                             settled_tx_id: target.id
                         });
-                        window.openReceiptModal('repayment', val, receiverName, `Pay: ${target.desc}`);
+                        
+                        const mockTx = {
+                            type: 'settle_debt',
+                            amount: val,
+                            person: receiverName,
+                            desc: `Pay: ${target.desc || target.desc_text}`,
+                            subDate: window.getLocalDate(),
+                            isDeductedFromAdvance: false,
+                            advanceAmountUsed: 0
+                        };
+                        window.openReceiptPreview(null, mockTx);
                     }
                     window.showStatus("Settled.");
                     window.closeModal();
@@ -1921,7 +2856,7 @@
                     await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { staff, sources, categories });
                 } catch (error) {
                     window.showStatus("Error: " + error.message, true);
-                    if (type === 'staff') staff.pop(); else if (type === 'source') sources.pop(); else categories.pop(); // Revert on error
+                    if (type === 'staff') staff.pop(); else if (type === 'source') sources.pop(); else categories.pop(); 
                 }
             };
 
@@ -1940,6 +2875,7 @@
                 document.getElementById('edit-amount').value = t.amount;
                 document.getElementById('edit-date').value = t.subDate;
                 document.getElementById('edit-desc').value = t.desc;
+                document.getElementById('edit-reason').value = ''; 
             };
 
             window.saveEdit = async () => {
@@ -1949,84 +2885,27 @@
                 const amountInput = document.getElementById('edit-amount');
                 const dateInput = document.getElementById('edit-date');
                 const descInput = document.getElementById('edit-desc');
+                const reasonInput = document.getElementById('edit-reason');
 
-                if (!amountInput || !dateInput || !descInput) return;
+                if (!amountInput || !dateInput || !descInput || !reasonInput) return;
+                
+                if (!reasonInput.value.trim()) {
+                    alert("A Reason for Edit is required.");
+                    reasonInput.focus();
+                    return;
+                }
 
                 const newAmount = parseFloat(amountInput.value);
-                const newDate = dateInput.value;
-                const newDesc = descInput.value;
-
-                // Helper for precision
-                const toFixed2 = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
-
                 const updateData = {
                     amount: newAmount,
-                    sub_date: newDate,
-                    desc_text: newDesc
+                    sub_date: dateInput.value,
+                    desc_text: descInput.value,
+                    edit_reason: reasonInput.value.trim()
                 };
 
-                // INTELLIGENT RECALCULATION LOGIC 2.0 (Robust Split)
-
-                // 1. Handle Receive & Returns 
-                if (t.type === 'receive' || t.type === 'return_advance') {
-                    updateData.paid_from_box = newAmount;
-                }
-                // 2. Handle Advance & Settle Debts
-                else if (t.type === 'advance' || t.type === 'settle_debt') {
-                    updateData.paid_from_box = newAmount;
-                }
-                // 3. Handle Expenses (Complex: Box, Advance, Debt mix)
-                else if (t.type === 'expense') {
-                    const currentWallet = getAdvanceWalletFor(t.person);
-                    const oldAdvanceUsed = t.advanceAmountUsed || 0;
-                    const effectiveWallet = currentWallet + oldAdvanceUsed;
-
-                    let remainingToCover = newAmount;
-                    let newAdvanceUsed = 0;
-                    let newPaidFromBox = 0;
-                    let newStaffOwed = 0;
-                    let newManagerOwed = 0;
-
-                    // 1. Deduct from Advance (if originally deducted)
-                    if (t.isDeductedFromAdvance) {
-                        newAdvanceUsed = Math.min(remainingToCover, effectiveWallet);
-                        remainingToCover = toFixed2(remainingToCover - newAdvanceUsed);
-                    }
-
-                    // 2. Pay from Box (if originally paid from box)
-                    const wasPaidFromBox = (t.paidFromBox || 0) > 0.01;
-
-                    if (remainingToCover > 0) {
-                        if (wasPaidFromBox) {
-                            newPaidFromBox = remainingToCover;
-                            remainingToCover = 0;
-                        }
-                    }
-
-                    // 3. Remainder goes to Debt
-                    if (remainingToCover > 0) {
-                        if ((t.managerOwed || 0) > 0) {
-                            newManagerOwed = remainingToCover;
-                        } else {
-                            newStaffOwed = remainingToCover;
-                        }
-                    }
-
-                    updateData.advance_amount_used = newAdvanceUsed;
-                    updateData.paid_from_box = newPaidFromBox;
-                    updateData.staff_owed = newStaffOwed;
-                    updateData.manager_owed = newManagerOwed;
-                    updateData.settled = (newStaffOwed < 0.01 && newManagerOwed < 0.01);
-                }
-
                 try {
-                    const btn = document.querySelector('#edit-modal button.bg-indigo-600');
-                    if (btn) btn.disabled = true;
-
                     await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', editingTxId), updateData);
-
                     window.closeModal();
-                    if (btn) btn.disabled = false;
                 } catch (e) {
                     console.error(e);
                     window.showStatus("Error Saving: " + e.message, true);
@@ -2036,47 +2915,25 @@
             window.processPartial = async (target) => {
                 const btnA = document.querySelector('#funds-modal button:first-child');
                 const btnB = document.querySelector('#funds-modal button:last-child');
-
-                if (btnA) btnA.disabled = true;
-                if (btnB) btnB.disabled = true;
+                btnA.disabled = true; btnB.disabled = true;
 
                 try {
                     if (!currentUser) return;
                     const available = Math.max(0, getTotals().balance);
-                    // This is for deficits during IMMEDIATE PAYMENT
-                    // IMPORTANT: pendingTxData comes from 'commonData' in saveTransaction.
-                    // I ALREADY updated saveTransaction to use snake_case for commonData!
-                    // So pendingTxData SHOULD already be snake_case.
-                    // Let's verify line 1645 in saveTransaction.
-                    // logical check:
-                    // pendingTxData = commonData (line 1670)
-                    // commonData now uses snake_case (e.g. paid_from_box)
-                    // So pendingTxData has paid_from_box, staff_owed, etc.
-
-                    // PendingTxData is strictly snake_case mapped for the DB insertion
                     const remaining = pendingTxData.amount - (pendingTxData.advance_amount_used || 0);
                     const gap = remaining - available;
 
-                    // Update snake_case keys
                     pendingTxData.paid_from_box = available;
                     if (target === 'manager') pendingTxData.manager_owed = gap; else pendingTxData.staff_owed = gap;
                     pendingTxData.settled = false;
-
-                    // Ensure user_id is set
                     pendingTxData.user_id = currentUser.uid;
 
                     await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), pendingTxData);
-
                     window.closeModal();
-                    document.getElementById('entry-form').reset();
-                    document.getElementById('form-sub-date').value = window.getLocalDate();
-                    window.showStatus("Recorded.");
                 } catch (e) {
-                    console.error(e);
                     window.showStatus("Error: " + e.message, true);
                 } finally {
-                    if (btnA) btnA.disabled = false;
-                    if (btnB) btnB.disabled = false;
+                    btnA.disabled = false; btnB.disabled = false;
                 }
             };
 
@@ -2084,14 +2941,16 @@
             window.addAllocationRow = () => { currentAllocations.push({ id: Date.now(), category: categories[0], propertyNo: '' }); window.renderAllocationRows(); };
             window.removeAllocationRow = (idx) => { if (currentAllocations.length > 1) { currentAllocations.splice(idx, 1); window.renderAllocationRows(); } };
 
-            window.openSettle = (id, intentionalType) => {
-                settlingId = id; const t = txs.find(x => x.id === id); if (!t) return;
+            window.openSettle = (id, intentionalType, personName = null) => {
+                let t = txs.find(x => x.id === id);
+                let name = personName || (t ? t.person : '');
+                if (!name && !t) return;
+                
+                settlingId = id || ''; 
+                settlementTargetName = name; // Use a global to store the name for confirmSettle
+
                 
                 let rem = 0;
-                if (!intentionalType) {
-                    intentionalType = (t.type === 'advance' && !(t.managerOwed || t.staffOwed)) ? 'return_advance' : 'pay_debt';
-                }
-
                 if (intentionalType === 'return_advance') {
                     rem = getAdvanceWalletFor(t.person);
                     settlementType = 'advance';
@@ -2102,378 +2961,13 @@
                     document.getElementById('settle-title').innerText = "Settle Debt";
                 }
 
-                if (rem <= 0) {
-                     window.showStatus("Nothing to settle.", true);
-                     return;
-                }
+                if (rem <= 0) { window.showStatus("Nothing to settle.", true); return; }
 
                 document.getElementById('settle-modal').classList.remove('hidden');
                 document.getElementById('settle-subtitle').innerText = `Outstanding: ${rem.toFixed(2)} AED`;
                 document.getElementById('settle-amount-input').value = rem.toFixed(2);
             };
 
-            // --- BACKUP & RESTORE ---
-
-            window.exportFullDatabase = async () => {
-                const data = { txs, staff, sources, categories };
-                const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' })); a.download = 'pettycash_backup.json'; a.click();
-            };
-
-            window.importFullDatabase = async (event) => {
-                if (!currentUser) return;
-                const file = event.target.files[0]; if (!file) return;
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    try {
-                        const d = JSON.parse(e.target.result);
-                        window.showStatus("Restoring Data...", false);
-
-                        // 1. Import Settings
-                        if (d.staff || d.sources || d.categories) {
-                            staff = d.staff || staff;
-                            sources = d.sources || sources;
-                            categories = d.categories || categories;
-                            await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { staff, sources, categories });
-                        }
-
-                        // 2. Import Transactions
-                        if (d.txs && Array.isArray(d.txs)) {
-                            // Strict whitelist of columns based on correct snake_case schema
-                            const txData = d.txs.map(data => {
-                                let type = data.type || 'expense';
-                                const amt = Math.abs(parseFloat(data.amount || 0));
-                                const pfb = Math.abs(parseFloat(data.paidFromBox || data.paid_from_box || 0));
-                                const descText = data.desc || data.desc_text || '';
-
-                                // V4 Fix: strictly map legacy arrays immediately up insertion
-                                if (type === 'repayment') {
-                                    type = descText.toLowerCase().includes('return') ? 'return_advance' : 'settle_debt';
-                                }
-
-                                return {
-                                    user_id: currentUser.uid || null,
-                                    type: type || 'expense',
-                                    amount: amt || 0,
-                                    person: data.person || null,
-                                    desc_text: descText || '',
-                                    sub_date: data.subDate || data.sub_date || null,
-                                    timestamp: data.timestamp || new Date().toISOString(),
-                                    paid_from_box: pfb || 0,
-                                    staff_owed: data.staffOwed || data.staff_owed || 0,
-                                    manager_owed: data.managerOwed || data.manager_owed || 0,
-                                    allocations: data.allocations || [],
-                                    is_deducted_from_advance: !!(data.isDeductedFromAdvance || data.is_deducted_from_advance),
-                                    advance_amount_used: data.advanceAmountUsed || data.advance_amount_used || 0,
-                                    settled: !!data.settled,
-                                    tax_amount: data.taxAmount || data.tax_amount || 0,
-                                    net_amount: data.netAmount || data.net_amount || 0,
-                                    payment_method: data.paymentMethod || data.payment_method || 'Cash',
-                                    status: data.status || 'Active',
-                                    repaid_amount: data.repaidAmount || data.repaid_amount || 0,
-                                    invoice_no: data.invoiceNo || data.invoice_no || null,
-                                    invoice_date: data.invoiceDate || data.invoice_date || null,
-                                    batch_id: data.batchId || data.batch_id || null
-                                };
-                            });
-
-                            const cleanTxData = txData;
-
-                            // Batch insert (chunking 100)
-                            const chunkSize = 100;
-                            for (let i = 0; i < cleanTxData.length; i += chunkSize) {
-                                const chunk = cleanTxData.slice(i, i + chunkSize);
-                                const batch = writeBatch(db);
-                                chunk.forEach(tx => {
-                                    const docRef = doc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'));
-                                    batch.set(docRef, tx);
-                                });
-                                await batch.commit();
-                            }
-                        }
-
-                        window.showStatus("Restore Complete", false);
-                        // Refresh Data
-                        fetchTransactions();
-                    } catch (err) {
-                        console.error(err);
-                        alert("Restore Failed Exception: " + err.message);
-                        window.showStatus("Restore Failed: " + err.message, true);
-                    } finally {
-                        event.target.disabled = false;
-                        event.target.value = '';
-                    }
-                };
-                event.target.disabled = true;
-                reader.readAsText(file);
-            };
-
-            window.openDiagnostics = () => {
-                const modal = document.getElementById('diag-modal');
-                modal.classList.remove('hidden');
-
-                const t = getTotals();
-                document.getElementById('diag-tx-count').innerText = txs.length;
-                document.getElementById('diag-balance').innerText = t.balance.toFixed(2);
-
-                const list = document.getElementById('diag-tx-list');
-                list.innerHTML = "";
-
-                // FULL DEBUG LEDGER
-                // Sort by date (Oldest first) to show true running balance
-                const sorted = [...txs].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-                let runBal = 0;
-
-                sorted.forEach(tx => {
-                    const pfb = parseFloat(tx.paidFromBox || 0);
-                    const amt = parseFloat(tx.amount || 0);
-                    const ttype = (tx.type || '').toLowerCase(); // CASE-INSENSITIVE FIX
-
-                    // Logic Mirror (Robust V5 - Case-Insensitive)
-                    let flow = 0;
-                    let typeLabel = tx.type || 'unknown';
-                    const isWrongCase = tx.type && tx.type !== ttype;
-
-                    if (ttype === 'receive' || ttype === 'return_advance') {
-                        flow = amt;
-                        typeLabel += " (Amt IN)";
-                    } else if (ttype === 'settle_debt') {
-                        flow = -amt;
-                        typeLabel += " (Amt OUT)";
-                    } else if (ttype === 'advance' || ttype === 'expense') {
-                        flow = -pfb;
-                        typeLabel += " (PFB OUT)";
-                    } else {
-                        typeLabel += " (UNKNOWN - needs fix)";
-                    }
-
-                    runBal = Math.round((runBal + flow) * 100) / 100;
-
-                    let color = "text-slate-500";
-                    if (flow > 0) color = "text-emerald-600";
-                    if (flow < 0) color = "text-rose-600";
-
-                    const bg = isWrongCase ? 'bg-yellow-100' : (runBal < 0 ? 'bg-rose-50' : '');
-
-                    list.innerHTML += `
-                        <tr class="border-b border-slate-50 last:border-0 ${bg} text-xs">
-                            <td class="p-1 font-mono text-slate-400">${tx.subDate}</td>
-                            <td class="p-1 font-bold capitalize truncate max-w-[100px]" title="${tx.desc}">${tx.desc}</td>
-                            <td class="p-1 ${isWrongCase ? 'text-amber-600 font-bold' : ''}">${typeLabel}${isWrongCase ? ' ⚠️' : ''}</td>
-                            <td class="p-1 font-mono text-right text-slate-400">${pfb.toFixed(2)}</td>
-                            <td class="p-1 font-mono text-right text-slate-400">${amt.toFixed(2)}</td>
-                            <td class="p-1 font-mono text-right ${color} font-bold">${flow.toFixed(2)}</td>
-                            <td class="p-1 font-mono text-right font-bold ${runBal < 0 ? 'text-rose-600' : 'text-slate-700'}">${runBal.toFixed(2)}</td>
-                        </tr>
-                    `;
-                });
-                // Show warning count for type issues
-                const badTypes = txs.filter(tx => tx.type && tx.type !== tx.type.toLowerCase());
-                if (badTypes.length > 0) {
-                    const warn = document.createElement('div');
-                    warn.className = 'mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-800 flex items-center gap-2';
-                    warn.innerHTML = `⚠️ Found ${badTypes.length} transaction(s) with incorrect type casing. Click "Fix & Normalize All Types" to repair them.`;
-                    list.parentElement.appendChild(warn);
-                }
-            };
-
-            window.fixAndNormalizeTypes = async () => {
-                if (!currentUser) { window.showStatus('Not logged in', true); return; }
-
-                const badTxs = txs.filter(tx => tx.type && tx.type !== tx.type.toLowerCase());
-
-                if (badTxs.length === 0) {
-                    window.showStatus('✅ All types are already correct — no fix needed!', false);
-                    return;
-                }
-
-                const confirmed = confirm(`Found ${badTxs.length} transaction(s) with incorrect type casing (e.g. "RETURN_ADVANCE" instead of "return_advance").\n\nClick OK to fix and normalize all of them in Firestore now.`);
-                if (!confirmed) return;
-
-                try {
-                    window.showStatus('Fixing type casing...', false);
-
-                    const chunkSize = 100;
-                    let fixed = 0;
-
-                    for (let i = 0; i < badTxs.length; i += chunkSize) {
-                        const chunk = badTxs.slice(i, i + chunkSize);
-                        const batch = writeBatch(db);
-                        chunk.forEach(tx => {
-                            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', tx.id);
-                            batch.update(docRef, { type: tx.type.toLowerCase() });
-                        });
-                        await batch.commit();
-                        fixed += chunk.length;
-                    }
-
-                    window.showStatus(`✅ Fixed ${fixed} transaction(s). Refreshing...`, false);
-
-                    // Refresh data and reopen diagnostics
-                    setTimeout(() => {
-                        window.fetchTransactions();
-                        setTimeout(() => window.openDiagnostics(), 1500);
-                    }, 800);
-
-                } catch (err) {
-                    console.error('fixAndNormalizeTypes error:', err);
-                    window.showStatus('Fix Failed: ' + err.message, true);
-                }
-            };
-
-            window.resetData = async () => {
-                if (!currentUser) return;
-                const confirm1 = confirm("⚠️ DANGER ZONE ⚠️\n\nThis will PERMANENTLY DELETE ALL TRANSACTIONS and reset all settings.\n\nAre you sure you want to wipe everything?");
-                if (!confirm1) return;
-
-                const confirm2 = confirm("Final Confirmation: There is NO UNDO.\n\nClick OK to erase all data from the database.");
-                if (!confirm2) return;
-
-                try {
-                    window.showStatus("Wiping Data...", true);
-
-                    // 1. Delete all transactions
-                    const txSnap = await getDocs(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'));
-                    const batch = writeBatch(db);
-                    txSnap.docs.forEach(d => batch.delete(d.ref));
-                    await batch.commit();
-
-                    // 2. Reset Settings
-                    staff = []; sources = []; categories = ["Warehouses", "Open Yard", "Admin Building", "Site General"];
-                    try {
-                        await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { staff, sources, categories });
-                    } catch (confError) { throw confError; }
-
-                    window.showStatus("Factory Reset Complete", false);
-                    setTimeout(() => window.location.reload(), 1500);
-                } catch (e) {
-                    console.error(e);
-                    window.showStatus("Reset Failed: " + e.message, true);
-                }
-            };
-
-            window.generateReportExcel = function () {
-                // 1. Determine Filtering
-                const start = document.getElementById('filter-start').value;
-                const end = document.getElementById('filter-end').value;
-                const filterCat = document.getElementById('filter-cat').value;
-                const filterProp = document.getElementById('filter-prop').value.toLowerCase().trim();
-                const filterPerson = document.getElementById('filter-person') ? document.getElementById('filter-person').value : 'all';
-
-                // 2. Sort all transactions chronologically (Oldest First)
-                const sortedAll = [...txs].sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
-
-                // 3. Calculate Opening Balance based on start date
-                let openingBalance = 0;
-                if (start) {
-                    // Sum (-paidFromBox) for all transactions BEFORE start date
-                    // paidFromBox > 0 means money out (reduce balance), < 0 means money in (increase balance)
-                    // So adding (-paidFromBox) correctly adjusts balance
-                    sortedAll.forEach(t => {
-                        if (t.subDate < start) {
-                            const pfb = parseFloat(t.paidFromBox) || 0;
-                            const amt = parseFloat(t.amount) || 0;
-                            let flow = 0;
-
-                            // Robust Fix V5
-                            const ttype = (t.type || '').toLowerCase();
-                            if (ttype === 'receive' || ttype === 'return_advance') {
-                                flow = amt;
-                            } else if (ttype === 'settle_debt') {
-                                flow = -amt;
-                            } else {
-                                flow = -pfb; // advance & expense: paidFromBox only
-                            }
-                            openingBalance += flow;
-                        }
-                    });
-                }
-
-                // 4. Filter list for report rows
-                const filtered = sortedAll.filter(t => {
-                    const dateMatch = (!start || t.subDate >= start) && (!end || t.subDate <= end);
-                    const hasAllocations = t.allocations && Array.isArray(t.allocations);
-                    const catMatch = (filterCat === 'all' || (hasAllocations && t.allocations.some(a => a.category === filterCat)));
-                    const propMatch = (!filterProp || (hasAllocations && t.allocations.some(a => (a.propertyNo || '').toLowerCase().includes(filterProp))));
-                    const personMatch = (filterPerson === 'all' || t.person === filterPerson);
-                    return dateMatch && catMatch && propMatch && personMatch;
-                });
-
-                // 5. Build Report Data
-                let currentBalance = openingBalance;
-                const data = [];
-
-                // Add Opening Balance Row if filtered by date
-                if (start) {
-                    data.push({
-                        "Submission Date": start,
-                        "Invoice Date": "-",
-                        "Invoice No": "-",
-                        "Description": "OPENING BALANCE",
-                        "Person": "-",
-                        "Total Amount": "-",
-                        "Deposit (In)": "-",
-                        "Withdrawal (Out)": "-",
-                        "Balance": openingBalance.toFixed(2)
-                    });
-                }
-
-                filtered.forEach(t => {
-                    const paidFromBox = parseFloat(t.paidFromBox) || 0;
-                    const amount = parseFloat(t.amount) || 0;
-
-                    // Robust Fix V5: Strictly Type Driven
-                    let cashIn = 0;
-                    let cashOut = 0;
-
-                    const ettype = (t.type || '').toLowerCase();
-                    if (ettype === 'receive' || ettype === 'return_advance') {
-                        cashIn = amount;
-                    } else if (ettype === 'settle_debt') {
-                        cashOut = amount;
-                    } else {
-                        cashOut = paidFromBox; // advance & expense: paidFromBox only
-                    }
-
-                    // Update running balance
-                    // Balance += (In - Out)
-                    // Since cashIn is abs(-paid) and cashOut is paid
-                    // This is mathematically: Balance += (-paidFromBox)
-                    currentBalance += (cashIn - cashOut);
-
-                    data.push({
-                        "Submission Date": t.subDate,
-                        "Invoice Date": t.invoiceDate || '-',
-                        "Invoice No": t.invoiceNo || '-',
-                        "Description": t.desc,
-                        "Person": t.person || '-',
-                        "Total Amount": (t.amount || 0).toFixed(2),
-                        "Deposit (In)": cashIn > 0 ? cashIn.toFixed(2) : '-',
-                        "Withdrawal (Out)": cashOut > 0 ? cashOut.toFixed(2) : '-',
-                        "Balance": currentBalance.toFixed(2)
-                    });
-                });
-
-                // 6. Generate Excel File
-                const ws = XLSX.utils.json_to_sheet(data);
-
-                // Adjust column widths for better readability
-                const wscols = [
-                    { wch: 15 }, // Sub Date
-                    { wch: 15 }, // Inv Date
-                    { wch: 15 }, // Inv No
-                    { wch: 40 }, // Description
-                    { wch: 20 }, // Person
-                    { wch: 15 }, // Total
-                    { wch: 15 }, // In
-                    { wch: 15 }, // Out
-                    { wch: 15 }  // Balance
-                ];
-                ws['!cols'] = wscols;
-
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Petty Cash Report");
-                XLSX.writeFile(wb, `PettyCash_Report_${window.getLocalDate()}.xlsx`);
-            };
 
             // --- AUTH & INITIALIZATION ---
 
@@ -2533,32 +3027,204 @@
                 window.location.reload();
             };
 
-            window.generateReportPDF = function () {
-                // 1. Sort all transactions chronologically (Oldest First)
-                const sortedAll = [...txs].sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
+            window.exportFullDatabase = async () => {
+                const data = { txs, staff, sources, categories };
+                const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' })); a.download = 'pettycash_backup.json'; a.click();
+            };
 
+            window.importFullDatabase = async (event) => {
+                if (!currentUser) return;
+                const file = event.target.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const d = JSON.parse(e.target.result);
+                        window.showStatus("Restoring Data...", false);
+
+                        if (d.staff || d.sources || d.categories) {
+                            staff = d.staff || staff;
+                            sources = d.sources || sources;
+                            categories = d.categories || categories;
+                            await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { staff, sources, categories });
+                        }
+
+                        if (d.txs && Array.isArray(d.txs)) {
+                            const txData = d.txs.map(data => ({
+                                user_id: currentUser.uid || null,
+                                type: data.type || 'expense',
+                                amount: Math.abs(parseFloat(data.amount || 0)),
+                                person: data.person || null,
+                                desc_text: data.desc || data.desc_text || '',
+                                sub_date: data.subDate || data.sub_date || null,
+                                timestamp: data.timestamp || new Date().toISOString(),
+                                paid_from_box: Math.abs(parseFloat(data.paidFromBox || data.paid_from_box || 0)),
+                                staff_owed: data.staffOwed || data.staff_owed || 0,
+                                manager_owed: data.managerOwed || data.manager_owed || 0,
+                                allocations: data.allocations || [],
+                                is_deducted_from_advance: !!(data.isDeductedFromAdvance || data.is_deducted_from_advance),
+                                advance_amount_used: data.advanceAmountUsed || data.advance_amount_used || 0,
+                                settled: !!data.settled,
+                                tax_amount: data.taxAmount || data.tax_amount || 0,
+                                net_amount: data.netAmount || data.net_amount || 0,
+                                payment_method: data.paymentMethod || data.payment_method || 'Cash',
+                                status: data.status || 'Active',
+                                repaid_amount: data.repaidAmount || data.repaid_amount || 0,
+                                invoice_no: data.invoiceNo || data.invoice_no || null,
+                                invoice_date: data.invoiceDate || data.invoice_date || null,
+                                batch_id: data.batchId || data.batch_id || null
+                            }));
+
+                            const chunkSize = 100;
+                            for (let i = 0; i < txData.length; i += chunkSize) {
+                                const chunk = txData.slice(i, i + chunkSize);
+                                const batch = writeBatch(db);
+                                chunk.forEach(tx => {
+                                    const docRef = doc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'));
+                                    batch.set(docRef, tx);
+                                });
+                                await batch.commit();
+                            }
+                        }
+
+                        window.showStatus("Restore Complete", false);
+                        window.fetchTransactions();
+                    } catch (err) {
+                        console.error(err);
+                        alert("Restore Failed: " + err.message);
+                    } finally {
+                        event.target.value = '';
+                    }
+                };
+                reader.readAsText(file);
+            };
+
+            window.openDiagnostics = () => {
+                const modal = document.getElementById('diag-modal');
+                modal.classList.remove('hidden');
+                const t = getTotals();
+                document.getElementById('diag-tx-count').innerText = txs.length;
+                document.getElementById('diag-balance').innerText = t.balance.toFixed(2);
+                const list = document.getElementById('diag-tx-list');
+                list.innerHTML = "";
+                const sorted = [...txs].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+                let runBal = 0;
+                sorted.forEach(tx => {
+                    const pfb = parseFloat(tx.paidFromBox || 0);
+                    const amt = parseFloat(tx.amount || 0);
+                    const ttype = (tx.type || '').toLowerCase();
+                    let flow = 0;
+                    if (tx.status === 'Voided') flow = 0;
+                    else if (ttype === 'receive' || ttype === 'return_advance') flow = amt;
+                    else if (ttype === 'settle_debt') flow = -amt;
+                    else flow = -pfb;
+                    runBal = Math.round((runBal + flow) * 100) / 100;
+                    let color = flow > 0 ? "text-emerald-600" : (flow < 0 ? "text-rose-600" : "text-slate-500");
+                    list.innerHTML += `<tr class="border-b border-slate-50 text-xs">
+                        <td class="p-1 font-mono text-slate-400">${tx.subDate}</td>
+                        <td class="p-1 font-bold truncate max-w-[100px]">${tx.desc}</td>
+                        <td class="p-1 capitalize">${tx.type}</td>
+                        <td class="p-1 font-mono text-right text-slate-400">${pfb.toFixed(2)}</td>
+                        <td class="p-1 font-mono text-right text-slate-400">${amt.toFixed(2)}</td>
+                        <td class="p-1 font-mono text-right ${color} font-bold">${flow.toFixed(2)}</td>
+                        <td class="p-1 font-mono text-right font-bold text-slate-700">${runBal.toFixed(2)}</td>
+                    </tr>`;
+                });
+            };
+
+            window.resetData = async () => {
+                if (!confirm("PERMANENTLY DELETE ALL DATA? This cannot be undone.")) return;
+                try {
+                    window.showStatus("Wiping Data...", true);
+                    const txSnap = await getDocs(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'));
+                    const batch = writeBatch(db);
+                    txSnap.docs.forEach(d => batch.delete(d.ref));
+                    await batch.commit();
+                    window.location.reload();
+                } catch (e) { window.showStatus("Reset Failed: " + e.message, true); }
+            };
+
+            window.generateReportExcel = function () {
+                const start = document.getElementById('filter-start').value;
+                const end = document.getElementById('filter-end').value;
+                const filterCat = document.getElementById('filter-cat').value;
+                const filterProp = document.getElementById('filter-prop').value.toLowerCase().trim();
+                const filterPerson = document.getElementById('filter-person') ? document.getElementById('filter-person').value : 'all';
+
+                const sortedAll = [...txs].sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
+                let openingBalance = 0;
+                if (start) {
+                    sortedAll.forEach(t => {
+                        if (t.subDate < start) {
+                            const pfb = parseFloat(t.paidFromBox) || 0;
+                            const amt = parseFloat(t.amount) || 0;
+                            const ttype = (t.type || '').toLowerCase();
+                            if (ttype === 'receive' || ttype === 'return_advance') openingBalance += amt;
+                            else if (ttype === 'settle_debt') openingBalance -= amt;
+                            else openingBalance -= pfb;
+                        }
+                    });
+                }
+
+                const filtered = sortedAll.filter(t => {
+                    const dateMatch = (!start || t.subDate >= start) && (!end || t.subDate <= end);
+                    const catMatch = (filterCat === 'all' || (t.allocations && t.allocations.some(a => a.category === filterCat)));
+                    const propMatch = (!filterProp || (t.allocations && t.allocations.some(a => (a.propertyNo || '').toLowerCase().includes(filterProp))));
+                    const personMatch = (filterPerson === 'all' || t.person === filterPerson);
+                    return dateMatch && catMatch && propMatch && personMatch;
+                });
+
+                let currentBalance = openingBalance;
+                const data = [];
+                if (start) {
+                    data.push({ "Date": start, "Description": "OPENING BALANCE", "Balance": openingBalance.toFixed(2) });
+                }
+
+                filtered.forEach(t => {
+                    const isVoided = t.status === 'Voided';
+                    let cashIn = 0, cashOut = 0;
+                    if (!isVoided) {
+                        const ettype = (t.type || '').toLowerCase();
+                        if (ettype === 'receive' || ettype === 'return_advance') cashIn = t.amount;
+                        else if (ettype === 'settle_debt' || ettype === 'advance') cashOut = t.amount;
+                        else cashOut = t.paidFromBox;
+                        currentBalance += (cashIn - cashOut);
+                    }
+                    data.push({
+                        "Date": t.subDate,
+                        "Invoice #": t.invoiceNo || '-',
+                        "Description": isVoided ? `[VOIDED] ${t.desc}` : t.desc,
+                        "Person": t.person || '-',
+                        "Adv Used": (parseFloat(t.advanceAmountUsed) || 0).toFixed(2),
+                        "Owed": ((t.staffOwed || 0) - (t.repaidAmount || 0)).toFixed(2),
+                        "In": cashIn > 0 ? cashIn.toFixed(2) : '-',
+                        "Out": cashOut > 0 ? cashOut.toFixed(2) : '-',
+                        "Balance": isVoided ? '-' : currentBalance.toFixed(2)
+                    });
+                });
+
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Report");
+                XLSX.writeFile(wb, `PettyCash_Report_${window.getLocalDate()}.xlsx`);
+            };
+
+            window.generateReportPDF = function () {
+                const sortedAll = [...txs].sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
                 const start = document.getElementById('filter-start').value;
                 const end = document.getElementById('filter-end').value;
                 const filterPerson = document.getElementById('filter-person-history') ? document.getElementById('filter-person-history').value : '';
                 const totals = getTotals();
 
-                // Logic for Running Balance
                 let currentBalance = 0;
                 if (start) {
                     sortedAll.forEach(t => {
                         if (t.subDate < start) {
                             const pfb = parseFloat(t.paidFromBox) || 0;
                             const amt = parseFloat(t.amount) || 0;
-                            let flow = 0;
-
-                            if (t.type === 'receive' || t.type === 'return_advance') {
-                                flow = amt;
-                            } else if (t.type === 'settle_debt' || t.type === 'advance') {
-                                flow = -amt;
-                            } else if (t.type === 'expense') {
-                                flow = -pfb;
-                            }
-                            currentBalance += flow;
+                            const ttype = (t.type || '').toLowerCase();
+                            if (ttype === 'receive' || ttype === 'return_advance') currentBalance += amt;
+                            else if (ttype === 'settle_debt' || ttype === 'advance') currentBalance -= amt;
+                            else currentBalance -= pfb;
                         }
                     });
                 }
@@ -2568,78 +3234,45 @@
                     const personMatch = (filterPerson === '' || t.person === filterPerson);
                     return dateMatch && personMatch;
                 }).map(t => {
-                    const paidFromBox = parseFloat(t.paidFromBox) || 0;
-                    const amount = parseFloat(t.amount) || 0;
-                    let cashIn = 0;
-                    let cashOut = 0;
-
-                    if (t.type === 'receive' || t.type === 'return_advance') {
-                        cashIn = amount;
-                    } else if (t.type === 'settle_debt' || t.type === 'advance') {
-                        cashOut = amount;
-                    } else if (t.type === 'expense') {
-                        cashOut = paidFromBox;
+                    const isVoided = t.status === 'Voided';
+                    let cashIn = 0, cashOut = 0;
+                    if (!isVoided) {
+                        const ettype = (t.type || '').toLowerCase();
+                        if (ettype === 'receive' || ettype === 'return_advance') cashIn = t.amount;
+                        else if (ettype === 'settle_debt' || ettype === 'advance') cashOut = t.amount;
+                        else cashOut = t.paidFromBox;
+                        currentBalance += (cashIn - cashOut);
                     }
-                    currentBalance += (cashIn - cashOut);
-
-                    let invDateDisplay = '-';
-                    if (t.invoiceDate) {
-                        invDateDisplay = t.invoiceDate;
-                    }
-
-                    return `<tr>
-                    <td>${t.subDate}</td>
-                    <td>${invDateDisplay}</td>
-                    <td>${t.invoiceNo || '-'}</td>
-                    <td>${t.desc}</td>
-                    <td>${t.person || '-'}</td>
-                    <td style="color:green">${cashIn > 0 ? cashIn.toFixed(2) : '-'}</td>
-                    <td style="color:red">${cashOut > 0 ? cashOut.toFixed(2) : '-'}</td>
-                    <td>${currentBalance.toFixed(2)}</td> 
-                </tr>`;
+                    const voidStyle = isVoided ? 'style="color: #94a3b8; text-decoration: line-through;"' : '';
+                    return `<tr ${voidStyle}>
+                        <td style="border: 1px solid #eee; padding: 5px;">${t.subDate}</td>
+                        <td style="border: 1px solid #eee; padding: 5px;">${t.desc}${isVoided ? ' (VOID)' : ''}</td>
+                        <td style="border: 1px solid #eee; padding: 5px;">${t.person}</td>
+                        <td style="border: 1px solid #eee; padding: 5px; text-align: right;">${cashIn > 0 ? cashIn.toFixed(2) : '-'}</td>
+                        <td style="border: 1px solid #eee; padding: 5px; text-align: right;">${cashOut > 0 ? cashOut.toFixed(2) : '-'}</td>
+                        <td style="border: 1px solid #eee; padding: 5px; text-align: right; font-weight: bold;">${currentBalance.toFixed(2)}</td>
+                    </tr>`;
                 }).join('');
 
-                const printableContent = `
-                    <div style="font-family: Arial, sans-serif; padding: 20px;">
-                        <div style="border-bottom: 3px solid #4f46e5; padding-bottom: 15px; margin-bottom: 20px; text-align: center;">
-                            <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase;">Petty Cash Report</h1>
-                            <p style="font-size: 12px; color: #555;">${start || 'All History'} to ${end || 'Present'}</p>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 10px; border-bottom: 2px solid #ddd; padding-bottom: 10px;">
-                            <div>
-                                <p><strong>Generated By:</strong> ${currentUser?.email || 'Guest User'}</p>
-                                <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
-                            </div>
-                            <div style="text-align: right;">
-                                <p style="font-size: 14px;"><strong>Closing Balance:</strong> <span style="color: #4f46e5;">${totals.balance.toFixed(2)}</span> AED</p>
-                            </div>
-                        </div>
-                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px;">
-                            <thead>
-                                <tr>
-                                    <th style="border: 1px solid #e2e8f0; padding: 6px; text-align: left; background-color: #f8fafc; color: #475569;">Date</th>
-                                    <th style="border: 1px solid #e2e8f0; padding: 6px; text-align: left; background-color: #f8fafc; color: #475569;">Inv. Date</th>
-                                    <th style="border: 1px solid #e2e8f0; padding: 6px; text-align: left; background-color: #f8fafc; color: #475569;">Inv #</th>
-                                    <th style="border: 1px solid #e2e8f0; padding: 6px; text-align: left; background-color: #f8fafc; color: #475569;">Description</th>
-                                    <th style="border: 1px solid #e2e8f0; padding: 6px; text-align: left; background-color: #f8fafc; color: #475569;">Person</th>
-                                    <th style="border: 1px solid #e2e8f0; padding: 6px; text-align: left; background-color: #f8fafc; color: #475569;">Deposit (In)</th>
-                                    <th style="border: 1px solid #e2e8f0; padding: 6px; text-align: left; background-color: #f8fafc; color: #475569;">Withdrawal (Out)</th>
-                                    <th style="border: 1px solid #e2e8f0; padding: 6px; text-align: left; background-color: #f8fafc; color: #475569;">Balance</th>
-                                </tr>
-                            </thead>
-                            <tbody>${rows}</tbody>
-                        </table>
-                    </div>
-                `;
+                const printableContent = `<div style="font-family: sans-serif; padding: 20px;">
+                    <h2 style="text-align: center;">Petty Cash Report</h2>
+                    <p style="text-align: center; font-size: 10px;">${start || 'All'} to ${end || 'Present'}</p>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 20px;">
+                        <thead><tr style="background: #f8fafc;">
+                            <th style="border: 1px solid #eee; padding: 8px;">Date</th>
+                            <th style="border: 1px solid #eee; padding: 8px;">Description</th>
+                            <th style="border: 1px solid #eee; padding: 8px;">Person</th>
+                            <th style="border: 1px solid #eee; padding: 8px; text-align: right;">In</th>
+                            <th style="border: 1px solid #eee; padding: 8px; text-align: right;">Out</th>
+                            <th style="border: 1px solid #eee; padding: 8px; text-align: right;">Balance</th>
+                        </tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>`;
 
-                // Store current body to restore later
-                const originalContent = document.body.innerHTML;
+                const original = document.body.innerHTML;
                 document.body.innerHTML = printableContent;
-
-                // Print automatically handles PDF generation dialog in modern browsers
                 window.print();
-
-                // Restore page state (Reload ensures event listeners aren't broken by innerHTML wipe)
                 window.location.reload();
             };
 
@@ -2686,6 +3319,7 @@
                 });
                 sources = d.sources || [];
                 categories = d.categories || ["Warehouses", "Open Yard", "Admin Building", "Site General"];
+                lastCashCountDate = d.last_cash_count_date || null;
                 renderRegistry();
                 renderPersonSelect();
                 if (typeof window.renderAllocationRows === 'function') window.renderAllocationRows();
@@ -2707,6 +3341,28 @@
                     txs = snapshot.docs.map(doc => mapTxFromDB(doc.id, doc.data()));
                     txs.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''));
                     window.renderAll();
+                    
+                    if (!cashCountChecked && txs.length > 0) {
+                        cashCountChecked = true;
+                        if (!lastCashCountDate) {
+                            window.updateCashCountDate(window.getLocalDate());
+                        } else {
+                            const last = new Date(lastCashCountDate).getTime();
+                            const now = new Date().getTime();
+                            const diffDays = (now - last) / (1000 * 60 * 60 * 24);
+
+                            if (diffDays >= 7) {
+                                const expected = getTotals().balance;
+                                document.getElementById('cc-expected').innerHTML = `${expected.toFixed(2)} <span class="text-base text-slate-400">AED</span>`;
+                                document.getElementById('cc-actual').value = '';
+                                document.getElementById('cc-reason').value = '';
+                                document.getElementById('cc-discrepancy-section').classList.add('hidden');
+                                document.getElementById('btn-cc-verify').innerText = "Verify & Record";
+                                document.getElementById('btn-cc-verify').disabled = false;
+                                document.getElementById('cash-count-modal').classList.remove('hidden');
+                            }
+                        }
+                    }
                 });
             }
 
@@ -2746,7 +3402,9 @@
                     settledTxId: dbTx.settled_tx_id,
                     invoiceNo: dbTx.invoice_no,
                     invoiceDate: dbTx.invoice_date,
-                    batchId: dbTx.batch_id
+                    batchId: dbTx.batch_id,
+                    voidReason: dbTx.void_reason,
+                    editReason: dbTx.edit_reason
                 };
             }
             // --- SYSTEM HEALTH CHECK (User Request) ---
@@ -2831,6 +3489,35 @@
                     alert("❌ System Health Check FAILED\n\n" + e.message);
                     console.error(e);
                 }
+            };
+
+            window.sendAlertWhatsApp = (txId) => {
+                const t = txs.find(tx => tx.id === txId);
+                if (!t) return;
+                
+                const staffObj = staff.find(s => getStaffName(s) === t.person);
+                const phone = staffObj?.phone || '';
+                if (!phone) return alert("No phone number for " + t.person);
+
+                const amt = parseFloat(t.amount) || 0;
+                const debt = getDebtToStaff(t.person);
+                const wallet = getAdvanceWalletFor(t.person);
+                const method = t.payment_method || t.paymentMethod || 'Cash';
+
+                let msg = `${String.fromCodePoint(0x1F6A8)} *PETTY CASH ALERT*\n\n`;
+                msg += `${String.fromCodePoint(0x1F4C5)} *Date:* ${new Date(t.subDate).toLocaleDateString('en-GB')}\n`;
+                msg += `${String.fromCodePoint(0x1F4DD)} *Desc:* ${t.desc || t.desc_text || '-'}\n`;
+                msg += `${String.fromCodePoint(0x1F4B8)} *Spent:* ${amt.toFixed(2)} AED\n`;
+                msg += `${String.fromCodePoint(0x1F4B3)} *Paid Using:* ${method}\n\n`;
+                
+                msg += `----------------------------\n`;
+                msg += `${String.fromCodePoint(0x1F3E6)} *ACTIVE ADVANCE:* ${wallet.toFixed(2)} AED\n`;
+                msg += `${String.fromCodePoint(0x1F91D)} *PENDING OWED:* ${debt.toFixed(2)} AED\n`;
+                msg += `----------------------------\n`;
+
+                const cleanNumber = phone.replace(/\D/g, '');
+                const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
+                window.open(url, '_blank');
             };
 
             window.onload = () => lucide.createIcons();
