@@ -331,6 +331,20 @@
 
             <!-- View: Dashboard -->
             <div id="view-dashboard" class="space-y-8 animate-in fade-in duration-500">
+                
+                <!-- Backup Reminder Alert -->
+                <div id="backup-reminder-box" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
+                            <i data-lucide="shield-alert" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-black text-slate-800 text-sm uppercase tracking-tight">Photo Backup Recommended</h4>
+                            <p class="text-slate-500 text-xs font-medium">It's been over 30 days since your last local photo backup. Keep your invoices safe!</p>
+                        </div>
+                    </div>
+                    <button onclick="window.switchView('settings')" class="bg-amber-600 text-white px-6 py-2.5 rounded-xl font-bold text-xs hover:bg-amber-700 transition-all shadow-md shadow-amber-100">Go to Backup</button>
+                </div>
 
                 <!-- Financial Summary Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -481,6 +495,22 @@
                                         Date</label>
                                     <input type="date" id="form-inv-date"
                                         class="modern-input w-full px-4 py-3 rounded-xl font-bold text-sm text-slate-800">
+                                </div>
+                                <div class="md:col-span-2 space-y-2">
+                                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Scan / Attach Invoice (Optional)</label>
+                                    <div class="flex gap-3 items-center">
+                                        <label class="flex-1 cursor-pointer group">
+                                            <div class="w-full px-4 py-3 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center gap-2 group-hover:border-indigo-400 group-hover:bg-indigo-50 transition-all">
+                                                <i data-lucide="camera" class="w-5 h-5 text-slate-400 group-hover:text-indigo-500"></i>
+                                                <span id="scan-label" class="text-xs font-bold text-slate-500 group-hover:text-indigo-600">Tap to Scan or Upload</span>
+                                            </div>
+                                            <input type="file" id="form-scan" accept="image/*" capture="environment" class="hidden" onchange="window.handleScanPreview(event)">
+                                        </label>
+                                        <div id="scan-preview-container" class="hidden relative w-12 h-12 rounded-lg overflow-hidden border border-slate-200 shadow-sm">
+                                            <img id="scan-preview" class="w-full h-full object-cover">
+                                            <button type="button" onclick="window.clearScan()" class="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5"><i data-lucide="x" class="w-2.5 h-2.5"></i></button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -701,21 +731,45 @@
 
             <!-- View: Setup -->
             <div id="view-settings" class="hidden space-y-8 animate-in fade-in duration-500">
-                <div
-                    class="modern-card p-8 flex flex-col md:flex-row items-center justify-between gap-6 border-l-4 border-l-indigo-500">
-                    <div>
-                        <h3 class="text-indigo-900 font-extrabold uppercase tracking-tight text-lg">Data & Backup</h3>
-                        <p class="text-slate-500 text-xs mt-1 font-medium">Securely export your financial data or
-                            restore from a previous backup file.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="modern-card p-8 flex items-center justify-between gap-6 border-l-4 border-l-amber-500">
+                        <div>
+                            <h3 class="text-amber-900 font-extrabold uppercase tracking-tight text-lg">Legacy Archive</h3>
+                            <p class="text-slate-500 text-xs mt-1 font-medium">View and restore invoices that were previously marked as legacy/archived.</p>
+                        </div>
+                        <button onclick="window.openLegacyArchive()"
+                            class="bg-amber-600 text-white px-6 py-3 rounded-xl font-bold text-xs hover:bg-amber-700 shadow-lg shadow-amber-200 transition-all flex items-center gap-2">
+                            <i data-lucide="archive"></i> Manage Legacy
+                        </button>
                     </div>
-                    <div class="flex gap-4">
-                        <button onclick="window.exportFullDatabase()"
-                            class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-xs hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all flex items-center gap-2"><i
-                                data-lucide="download-cloud"></i> Backup Data</button>
-                        <label
-                            class="cursor-pointer bg-white text-indigo-600 border border-indigo-200 px-6 py-3 rounded-xl font-bold text-xs hover:bg-indigo-50 transition-all text-center flex items-center gap-2"><i
-                                data-lucide="upload-cloud"></i> Restore Data<input type="file" id="import-db-input"
-                                class="hidden" accept=".json" onchange="window.importFullDatabase(event)"></label>
+
+                    <div
+                        class="modern-card p-8 flex items-center justify-between gap-6 border-l-4 border-l-indigo-500">
+                        <div>
+                            <h3 class="text-indigo-900 font-extrabold uppercase tracking-tight text-lg">Data & Backup</h3>
+                            <p class="text-slate-500 text-xs mt-1 font-medium">Securely export your financial data and 
+                                invoice photos to your computer.</p>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            <div class="flex gap-4">
+                                <button onclick="window.exportFullDatabase()"
+                                    class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-xs hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all flex items-center gap-2 flex-1"><i
+                                        data-lucide="download-cloud"></i> Text Backup</button>
+                                <label
+                                    class="cursor-pointer bg-white text-indigo-600 border border-indigo-200 px-6 py-3 rounded-xl font-bold text-xs hover:bg-indigo-50 transition-all text-center flex items-center gap-2 flex-1 justify-center"><i
+                                        data-lucide="upload-cloud"></i> Text Restore<input type="file" id="import-db-input"
+                                        class="hidden" accept=".json" onchange="window.importFullDatabase(event)"></label>
+                            </div>
+                            <div class="flex gap-4">
+                                <button onclick="window.backupPhotos()"
+                                    class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-xs hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg flex-1"><i
+                                        data-lucide="camera"></i> Photo Backup</button>
+                                <label
+                                    class="cursor-pointer bg-white text-slate-900 border border-slate-900 px-6 py-3 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all text-center flex items-center gap-2 flex-1 justify-center"><i
+                                        data-lucide="refresh-ccw"></i> Photo Restore<input type="file" id="import-photos-input"
+                                        class="hidden" accept=".json" onchange="window.restorePhotos(event)"></label>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1073,23 +1127,23 @@
                                 class="modern-input w-full px-4 py-3 rounded-xl font-bold text-sm">
                         </div>
                     </div>
-                    <div id="reimburse-fields" class="grid grid-cols-1 md:grid-cols-3 gap-6 hidden">
+                    <div id="edit-reimburse-fields" class="grid grid-cols-1 md:grid-cols-3 gap-6 hidden">
                         <div class="space-y-2">
                             <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Invoice
                                 Number</label>
-                            <input type="text" id="form-inv-no" placeholder="INV-000"
+                            <input type="text" id="edit-inv-no" placeholder="INV-000"
                                 class="modern-input w-full px-4 py-3 rounded-xl font-bold text-sm text-slate-800">
                         </div>
                         <div class="space-y-2">
                             <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Invoice
                                 Date</label>
-                            <input type="date" id="form-inv-date"
+                            <input type="date" id="edit-inv-date"
                                 class="modern-input w-full px-4 py-3 rounded-xl font-bold text-sm text-slate-800">
                         </div>
                         <div class="space-y-2">
                             <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Tax/VAT
                                 (Optional)</label>
-                            <input type="number" id="form-tax-amount" step="0.01" placeholder="0.00"
+                            <input type="number" id="edit-tax-amount" step="0.01" placeholder="0.00"
                                 class="modern-input w-full px-4 py-3 rounded-xl font-bold text-sm text-slate-800">
                         </div>
                     </div>
@@ -1099,6 +1153,31 @@
                         <input type="text" id="edit-desc"
                             class="modern-input w-full px-4 py-3 rounded-xl font-medium text-sm">
                     </div>
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Category Allocations</label>
+                        <div id="edit-allocations-list" class="space-y-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <!-- Dynamic rows here -->
+                        </div>
+                        <button onclick="window.addEditAllocationRow()" class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest flex items-center gap-1 hover:text-indigo-700">
+                            <i data-lucide="plus-circle" class="w-3 h-3"></i> Add Allocation
+                        </button>
+                    </div>
+                    <div class="space-y-3 hidden" id="edit-scan-section">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Invoice Scan / Image</label>
+                        <div class="flex gap-3 items-center">
+                            <label class="flex-1 cursor-pointer group">
+                                <div class="w-full px-4 py-3 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center gap-2 group-hover:border-indigo-400 group-hover:bg-indigo-50 transition-all">
+                                    <i data-lucide="camera" class="w-5 h-5 text-slate-400 group-hover:text-indigo-500"></i>
+                                    <span id="edit-scan-label" class="text-xs font-bold text-slate-500 group-hover:text-indigo-600">Change Scan or Paste (Ctrl+V)</span>
+                                </div>
+                                <input type="file" id="edit-scan-input" accept="image/*" capture="environment" class="hidden" onchange="window.handleEditScanPreview(event)">
+                            </label>
+                            <div id="edit-scan-preview-container" class="hidden relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 shadow-sm">
+                                <img id="edit-scan-preview" class="w-full h-full object-cover">
+                                <button type="button" onclick="window.clearEditScan()" class="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5"><i data-lucide="x" class="w-2.5 h-2.5"></i></button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="space-y-1.5">
                         <label class="text-[10px] font-bold text-rose-500 uppercase tracking-widest">Reason for Edit <span class="text-rose-400">*</span></label>
                         <input type="text" id="edit-reason" required placeholder="Why are you changing this record? (Required)"
@@ -1107,8 +1186,8 @@
                 </div>
                 <div class="p-8 pt-0 flex gap-3 transition-smooth"><button onclick="window.closeModal()"
                         class="flex-1 py-4 font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-all">Cancel</button><button
-                        onclick="window.saveEdit()"
-                        class="flex-2 bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition-all">Save
+                        id="save-edit-btn" onclick="window.saveEdit()"
+                        class="flex-2 bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition-all flex items-center justify-center gap-2">Save
                         Changes</button></div>
             </div>
         </div>
@@ -1147,6 +1226,49 @@
                         Transaction</button></div>
             </div>
         </div>
+        <div id="legacy-archive-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 modal-overlay no-print transition-smooth">
+            <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
+                <div class="p-8 bg-amber-600 text-white flex justify-between items-center shrink-0">
+                    <div>
+                        <h3 class="text-xl font-black uppercase tracking-tight">Legacy Archive</h3>
+                        <p class="text-[10px] text-amber-100 mt-1 uppercase font-bold tracking-wider">Invoices Hidden from Dashboard</p>
+                    </div>
+                    <button onclick="window.closeModal()" class="text-amber-100 hover:text-white transition-smooth"><i data-lucide="x"></i></button>
+                </div>
+                <div class="p-4 bg-slate-50 border-b border-slate-100">
+                    <div class="relative">
+                        <input type="text" id="legacy-search" oninput="window.renderLegacyList()" placeholder="Search archived invoices..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all">
+                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                            <i data-lucide="search" class="w-3.5 h-3.5"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto p-0 no-scrollbar">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-slate-50 z-10">
+                            <tr class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                                <th class="px-8 py-4 w-12"><input type="checkbox" id="legacy-select-all" onchange="window.toggleAllLegacy(this.checked)" class="w-4 h-4 rounded cursor-pointer"></th>
+                                <th class="px-4 py-4">Date</th>
+                                <th class="px-4 py-4">Details</th>
+                                <th class="px-4 py-4">Person</th>
+                                <th class="px-4 py-4 text-right">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="legacy-archive-body" class="divide-y divide-slate-100 text-xs text-slate-600"></tbody>
+                    </table>
+                </div>
+                <div class="p-8 bg-slate-50 border-t border-slate-100 flex justify-between items-center shrink-0">
+                    <p id="legacy-selected-count" class="text-xs font-bold text-slate-500">0 items selected</p>
+                    <div class="flex gap-3">
+                        <button onclick="window.closeModal()" class="px-6 py-3 font-bold text-slate-500 hover:text-slate-700 transition-all text-xs uppercase tracking-widest">Close</button>
+                        <button id="btn-restore-legacy" onclick="window.restoreFromLegacy()" disabled class="bg-emerald-600 text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-200 hover:bg-emerald-700 disabled:opacity-50 disabled:shadow-none transition-all flex items-center gap-2">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Restore to Pending
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="staff-modal" class="fixed inset-0 modal-overlay hidden flex items-center justify-center z-50 p-4">
             <div class="bg-white rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -1301,18 +1423,20 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, getDocs, addDoc, updateDoc, deleteDoc, writeBatch, deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBuQEoHzwpZxxSGsa6Qa3SeuxNshK4jMac",
             authDomain: "petty-cash-448b6.firebaseapp.com",
             projectId: "petty-cash-448b6",
-            storageBucket: "petty-cash-448b6.firebasestorage.app",
+            storageBucket: "petty-cash-448b6.appspot.com",
             messagingSenderId: "751484833436",
             appId: "1:751484833436:web:8c3345a43d98fac2de2759"
         };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
         {
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'petty-cash-pro';
@@ -1336,6 +1460,158 @@
 
 
             // --- GLOBAL UI HELPERS ---
+
+            // --- LOCAL STORAGE (IndexedDB) FOR PHOTOS ---
+            const dbName = "PettyCashPhotos";
+            const storeName = "invoices";
+            
+            // Request persistent storage
+            if (navigator.storage && navigator.storage.persist) {
+                navigator.storage.persist().then(granted => {
+                    if (granted) console.log("Storage persistence granted.");
+                });
+            }
+            
+            window.initPhotoDB = () => {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(dbName, 1);
+                    request.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains(storeName)) {
+                            db.createObjectStore(storeName);
+                        }
+                    };
+                    request.onsuccess = (e) => resolve(e.target.result);
+                    request.onerror = (e) => reject(e.target.error);
+                });
+            };
+
+            window.compressImage = (base64Str) => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.src = base64Str;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 1600;
+                        const MAX_HEIGHT = 1600;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.8));
+                    };
+                });
+            };
+
+            window.uploadInvoiceScan = async (customData = null) => {
+                const data = customData || currentScanData;
+                if (!data) return null;
+                const photoId = 'local-' + Date.now();
+                const compressed = await window.compressImage(data);
+                await window.savePhotoLocal(photoId, compressed);
+                return photoId;
+            };
+
+            window.savePhotoLocal = async (id, base64Data) => {
+                const db = await window.initPhotoDB();
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction([storeName], "readwrite");
+                    const store = transaction.objectStore(storeName);
+                    const request = store.put(base64Data, id);
+                    request.onsuccess = () => resolve(id);
+                    request.onerror = (e) => reject(e.target.error);
+                });
+            };
+
+            window.getPhotoLocal = async (id) => {
+                const db = await window.initPhotoDB();
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction([storeName], "readonly");
+                    const store = transaction.objectStore(storeName);
+                    const request = store.get(id);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = (e) => reject(e.target.error);
+                });
+            };
+
+            window.backupPhotos = async () => {
+                try {
+                    window.showStatus("Preparing Photo Backup...", false);
+                    const db = await window.initPhotoDB();
+                    const transaction = db.transaction([storeName], "readonly");
+                    const store = transaction.objectStore(storeName);
+                    const request = store.getAll();
+                    const keysRequest = store.getAllKeys();
+                    
+                    const [photos, keys] = await Promise.all([
+                        new Promise((resolve) => request.onsuccess = () => resolve(request.result)),
+                        new Promise((resolve) => keysRequest.onsuccess = () => resolve(keysRequest.result))
+                    ]);
+                    
+                    if (keys.length === 0) {
+                        window.showStatus("No photos found to backup.", true);
+                        return;
+                    }
+
+                    const backupData = {};
+                    keys.forEach((key, i) => { backupData[key] = photos[i]; });
+                    
+                    const blob = new Blob([JSON.stringify(backupData)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `PettyCash_Photos_Backup_${new Date().toISOString().split('T')[0]}.json`;
+                    a.click();
+                    localStorage.setItem('last_photo_backup_date', new Date().toISOString());
+                    window.showStatus("Photo Backup Downloaded!");
+                } catch (err) {
+                    console.error("Backup Error", err);
+                    window.showStatus("Backup Failed", true);
+                }
+            };
+
+            window.restorePhotos = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                try {
+                    window.showStatus("Reading Backup File...", false);
+                    const text = await file.text();
+                    const backupData = JSON.parse(text);
+                    const db = await window.initPhotoDB();
+                    
+                    const transaction = db.transaction([storeName], "readwrite");
+                    const store = transaction.objectStore(storeName);
+                    
+                    let count = 0;
+                    for (const key in backupData) {
+                        store.put(backupData[key], key);
+                        count++;
+                    }
+                    
+                    transaction.oncomplete = () => {
+                        window.showStatus(`Successfully Restored ${count} Photos!`);
+                        e.target.value = ''; 
+                    };
+                } catch (err) {
+                    console.error("Restore Error", err);
+                    window.showStatus("Restore Failed: " + err.message, true);
+                }
+            };
 
             window.updateCashCountDate = async (dateStr) => {
                 lastCashCountDate = dateStr;
@@ -1497,7 +1773,7 @@
             }
 
             window.closeModal = function () {
-                ['funds-modal', 'settle-modal', 'edit-modal', 'receipt-modal', 'statement-modal', 'reimburse-select-modal', 'wa-format-modal', 'receipt-preview-modal'].forEach(id => {
+                ['funds-modal', 'settle-modal', 'edit-modal', 'receipt-modal', 'statement-modal', 'reimburse-select-modal', 'wa-format-modal', 'receipt-preview-modal', 'legacy-archive-modal'].forEach(id => {
                     const el = document.getElementById(id); if (el) el.classList.add('hidden');
                 });
             };
@@ -2357,6 +2633,11 @@
                             
                             const voidTag = isVoided ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest"><i data-lucide="ban" class="w-2.5 h-2.5"></i> VOIDED: ${t.voidReason || 'No reason'}</div>` : '';
                             const editTag = (!isVoided && t.editReason) ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-0.5 border border-indigo-100 rounded text-[9px] font-black uppercase tracking-widest" title="Edit Reason: ${t.editReason}"><i data-lucide="pencil" class="w-2.5 h-2.5"></i> EDITED</div>` : '';
+                            const scanTag = t.invoiceUrl 
+                                ? `<button onclick="window.viewInvoice('${t.id}')" class="mt-1.5 inline-flex items-center gap-1 bg-indigo-100 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded text-[9px] font-black uppercase hover:bg-indigo-200 transition-colors" title="View Attached Photo">
+                                     <i data-lucide="image" class="w-2.5 h-2.5"></i> SCAN
+                                   </button>` 
+                                : '';
 
                             return `<tr class="hover:bg-slate-50 transition-colors group ${voidStyle}">
                             <td class="px-6 py-4 font-bold text-slate-500 font-mono text-xs ${isVoided ? 'line-through' : ''}">${window.formatSafeDate(t.invoiceDate || t.subDate)}</td>
@@ -2366,7 +2647,7 @@
                                     <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md ${window.getTypeStyles((t.type||'').toLowerCase())}">${typeLabel}</span>
                                     <span class="font-bold text-slate-700 ${isVoided ? 'line-through' : ''}">${t.desc || 'No Desc'}</span>
                                 </div>
-                                <div class="mt-1.5 flex flex-wrap gap-1">${allocs}${advTag}${editTag}</div>
+                                <div class="mt-1.5 flex flex-wrap gap-1">${allocs}${advTag}${scanTag}${editTag}</div>
                                 ${voidTag}
                             </td>
                             <td class="px-6 py-4">
@@ -2387,6 +2668,23 @@
 
                     const lc = document.getElementById('log-count');
                     if (lc) lc.innerText = filtered.length;
+
+                    // Photo Backup Reminder Logic
+                    const lastBackup = localStorage.getItem('last_photo_backup_date');
+                    const reminderBox = document.getElementById('backup-reminder-box');
+                    if (reminderBox) {
+                        if (!lastBackup) {
+                            reminderBox.classList.remove('hidden');
+                        } else {
+                            const lastDate = new Date(lastBackup).getTime();
+                            const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+                            if (Date.now() - lastDate > thirtyDays) {
+                                reminderBox.classList.remove('hidden');
+                            } else {
+                                reminderBox.classList.add('hidden');
+                            }
+                        }
+                    }
 
                     const batchMap = {};
                     txs.forEach(t => {
@@ -2421,10 +2719,13 @@
                                     
                                     <div class="mt-auto flex flex-col gap-2">
                                         <button onclick="window.exportBatchExcel('${b.id}')" class="w-full bg-emerald-50 border-2 border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
-                                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export Batch Excel
+                                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel Report
+                                        </button>
+                                        <button onclick="window.printBatchInvoices('${b.id}')" class="w-full bg-slate-50 border-2 border-slate-200 text-slate-700 hover:bg-slate-600 hover:text-white hover:border-slate-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+                                            <i data-lucide="printer" class="w-4 h-4"></i> Print Invoices
                                         </button>
                                         <button onclick="window.receiveBatchCash('${b.id}', ${b.total})" class="w-full bg-white border-2 border-blue-200 text-blue-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
-                                            <i data-lucide="download" class="w-4 h-4"></i> Mark Cash Received
+                                            <i data-lucide="download" class="w-4 h-4"></i> Cash Received
                                         </button>
                                     </div>
                                 </div>
@@ -2544,6 +2845,69 @@
                 return new Date(now.getTime() - offset).toISOString().split('T')[0];
             };
 
+            let currentScanData = null;
+            window.handleScanPreview = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    currentScanData = event.target.result;
+                    const preview = document.getElementById('scan-preview');
+                    if (preview) preview.src = currentScanData;
+                    const container = document.getElementById('scan-preview-container');
+                    if (container) container.classList.remove('hidden');
+                    const label = document.getElementById('scan-label');
+                    if (label) label.innerText = "Invoice Attached!";
+                    lucide.createIcons();
+                };
+                reader.readAsDataURL(file);
+            };
+
+            window.clearScan = () => {
+                currentScanData = null;
+                const input = document.getElementById('form-scan');
+                if (input) input.value = '';
+                const container = document.getElementById('scan-preview-container');
+                if (container) container.classList.add('hidden');
+                const label = document.getElementById('scan-label');
+                if (label) label.innerText = "Tap to Scan or Upload";
+            };
+
+            // Clipboard Paste Support
+            window.addEventListener('paste', (e) => {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let index in items) {
+                    const item = items[index];
+                    if (item.kind === 'file' && item.type.includes('image')) {
+                        const blob = item.getAsFile();
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const isEditModalOpen = !document.getElementById('edit-modal').classList.contains('hidden');
+                            if (isEditModalOpen) {
+                                currentEditScanData = event.target.result;
+                                const preview = document.getElementById('edit-scan-preview');
+                                if (preview) preview.src = currentEditScanData;
+                                const container = document.getElementById('edit-scan-preview-container');
+                                if (container) container.classList.remove('hidden');
+                                const label = document.getElementById('edit-scan-label');
+                                if (label) label.innerText = "Scan Pasted!";
+                            } else {
+                                currentScanData = event.target.result;
+                                const preview = document.getElementById('scan-preview');
+                                if (preview) preview.src = currentScanData;
+                                const container = document.getElementById('scan-preview-container');
+                                if (container) container.classList.remove('hidden');
+                                const label = document.getElementById('scan-label');
+                                if (label) label.innerText = "Invoice Pasted!";
+                            }
+                            lucide.createIcons();
+                        };
+                        reader.readAsDataURL(blob);
+                    }
+                }
+            });
+
             window.handleInitialSubmit = async (e) => {
                 e.preventDefault();
                 const btn = document.getElementById('process-btn');
@@ -2635,8 +2999,23 @@
                         document.getElementById('funds-modal').classList.remove('hidden');
                         btn.disabled = false;
                         btn.innerHTML = originalContent;
-                        lucide.createIcons();
                         return;
+                    }
+
+                    if (currentScanData && activeTab === 'expense') {
+                        try {
+                            btn.innerHTML = `<i data-lucide="upload-cloud" class="w-5 h-5 animate-pulse"></i> Uploading Scan...`;
+                            lucide.createIcons();
+                            tx.invoice_url = await window.uploadInvoiceScan();
+                        } catch (err) {
+                            console.error("Storage Error:", err);
+                            if (!confirm("Invoice photo upload failed or timed out. Save transaction WITHOUT the photo?")) {
+                                btn.disabled = false;
+                                btn.innerHTML = originalContent;
+                                lucide.createIcons();
+                                return;
+                            }
+                        }
                     }
 
                     const docRef = await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), tx);
@@ -2647,6 +3026,7 @@
                     }
                     
                     document.getElementById('entry-form').reset();
+                    window.clearScan();
                     document.getElementById('form-sub-date').value = window.getLocalDate();
                     if (person) window.checkAdvanceWallet(person);
 
@@ -2786,6 +3166,146 @@
                     window.currentUnbatchedExpenses = window.currentUnbatchedExpenses.filter(t => !ids.includes(t.id));
                     window.selectedReimbursementIds.clear();
                     window.filterReimburseModal();
+                } catch (err) {
+                    window.showStatus("Error: " + err.message, true);
+                }
+            };
+
+            window.selectedLegacyIds = new Set();
+            window.openLegacyArchive = () => {
+                window.selectedLegacyIds.clear();
+                document.getElementById('legacy-archive-modal').classList.remove('hidden');
+                window.renderLegacyList();
+            };
+
+            window.renderLegacyList = () => {
+                const body = document.getElementById('legacy-archive-body');
+                const search = (document.getElementById('legacy-search')?.value || '').toLowerCase();
+                
+                let legacyTxs = txs.filter(t => t.batchId === 'legacy');
+                
+                if (search) {
+                    legacyTxs = legacyTxs.filter(t => 
+                        (t.desc || '').toLowerCase().includes(search) ||
+                        (t.person || '').toLowerCase().includes(search) ||
+                        (t.subDate || '').toLowerCase().includes(search)
+                    );
+                }
+                
+                legacyTxs.sort((a,b) => (b.subDate || '').localeCompare(a.subDate || ''));
+                
+                body.innerHTML = legacyTxs.map(t => `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-8 py-4"><input type="checkbox" class="legacy-cb w-4 h-4 rounded cursor-pointer" value="${t.id}" ${window.selectedLegacyIds.has(t.id) ? 'checked' : ''} onchange="window.toggleLegacyItem('${t.id}', this.checked)"></td>
+                        <td class="px-4 py-4 font-mono font-bold text-slate-400">${t.subDate || '-'}</td>
+                        <td class="px-4 py-4 font-bold text-slate-800">${t.desc || '-'}</td>
+                        <td class="px-4 py-4 font-semibold text-slate-500">${t.person || '-'}</td>
+                        <td class="px-4 py-4 text-right font-black text-slate-700">${(t.amount || 0).toFixed(2)}</td>
+                    </tr>
+                `).join('');
+                
+                if (legacyTxs.length === 0) {
+                    body.innerHTML = `<tr><td colspan="5" class="py-20 text-center text-slate-400 uppercase font-black tracking-widest text-[10px]">No legacy invoices found</td></tr>`;
+                }
+                
+                window.updateLegacyUI();
+                lucide.createIcons();
+            };
+
+            window.toggleLegacyItem = (id, checked) => {
+                if (checked) window.selectedLegacyIds.add(id);
+                else window.selectedLegacyIds.delete(id);
+                window.updateLegacyUI();
+            };
+
+            window.toggleAllLegacy = (checked) => {
+                const cbs = document.querySelectorAll('.legacy-cb');
+                cbs.forEach(cb => {
+                    cb.checked = checked;
+                    if (checked) window.selectedLegacyIds.add(cb.value);
+                    else window.selectedLegacyIds.delete(cb.value);
+                });
+                window.updateLegacyUI();
+            };
+
+            window.updateLegacyUI = () => {
+                const count = window.selectedLegacyIds.size;
+                const selCountEl = document.getElementById('legacy-selected-count');
+                const restoreBtn = document.getElementById('btn-restore-legacy');
+                if (selCountEl) selCountEl.innerText = `${count} items selected`;
+                if (restoreBtn) restoreBtn.disabled = count === 0;
+            };
+
+            let currentEditScanData = null;
+            window.handleEditScanPreview = (e) => {
+                const file = e.target.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    currentEditScanData = event.target.result;
+                    document.getElementById('edit-scan-preview').src = currentEditScanData;
+                    document.getElementById('edit-scan-preview-container').classList.remove('hidden');
+                    document.getElementById('edit-scan-label').innerText = "New Scan Attached!";
+                    lucide.createIcons();
+                };
+                reader.readAsDataURL(file);
+            };
+            window.clearEditScan = () => {
+                currentEditScanData = null;
+                const preview = document.getElementById('edit-scan-preview');
+                if (preview) preview.src = '';
+                const container = document.getElementById('edit-scan-preview-container');
+                if (container) container.classList.add('hidden');
+                const label = document.getElementById('edit-scan-label');
+                if (label) label.innerText = "Change Scan or Paste (Ctrl+V)";
+            };
+
+            window.compressImage = (base64Str, maxWidth = 1200, maxHeight = 1200, quality = 0.7) => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.src = base64Str;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > height) { if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; } }
+                        else { if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; } }
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                });
+            };
+
+            window.uploadInvoiceScan = async (data = currentScanData) => {
+                if (!data) return null;
+                try {
+                    const localId = "local-" + Date.now() + "-" + Math.floor(Math.random()*1000);
+                    const compressedData = await window.compressImage(data);
+                    await window.savePhotoLocal(localId, compressedData);
+                    return localId;
+                } catch (err) {
+                    console.error("Local Save Error:", err);
+                    throw err;
+                }
+            };
+
+            window.restoreFromLegacy = async () => {
+                const ids = Array.from(window.selectedLegacyIds);
+                if (ids.length === 0) return;
+                
+                if (!confirm(`Restore ${ids.length} selected invoices to Pending Reimbursement?`)) return;
+                
+                try {
+                    window.showStatus("Restoring...", true);
+                    const batch = writeBatch(db);
+                    ids.forEach(id => {
+                        const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', id);
+                        batch.update(docRef, { batch_id: deleteField() });
+                    });
+                    await batch.commit();
+                    window.closeModal();
+                    window.showStatus("Restored successfully!");
                 } catch (err) {
                     window.showStatus("Error: " + err.message, true);
                 }
@@ -3066,6 +3586,70 @@
                 XLSX.writeFile(wb, `Report_${batchId}.xlsx`);
             };
 
+            window.printBatchInvoices = async (batchId) => {
+                const batch = window.globalBatchMap[batchId];
+                if (!batch || !batch.txs) return;
+                
+                const invoices = batch.txs.filter(t => t.invoiceUrl);
+                if (invoices.length === 0) {
+                    alert("No scanned invoices found in this batch.");
+                    return;
+                }
+                
+                window.showStatus("Preparing Invoices...", false);
+                
+                const invoiceRows = await Promise.all(invoices.map(async t => {
+                    let src = t.invoiceUrl;
+                    
+                    if (src && src.startsWith('local-')) {
+                        try {
+                            const localData = await window.getPhotoLocal(src);
+                            if (localData) src = localData;
+                        } catch (e) { console.error("Local Fetch Error", e); }
+                    }
+                    
+                    return `
+                        <div class="invoice-container">
+                            <div class="header">
+                                <h1>Invoice: ${t.invoiceNo || 'N/A'}</h1>
+                                <div class="meta">
+                                    <span>Date: ${window.formatSafeDate(t.invoiceDate || t.subDate)}</span>
+                                    <span style="margin-left: 20px;">Amount: ${(t.amount || 0).toFixed(2)} AED</span>
+                                    <span style="margin-left: 20px;">Person: ${t.person || 'N/A'}</span>
+                                </div>
+                                <p style="margin: 10px 0 0; color: #475569; font-weight: 500;">${t.desc || t.desc_text || ''}</p>
+                            </div>
+                            <img src="${src}" />
+                        </div>
+                    `;
+                }));
+
+                let html = `
+                <html>
+                <head>
+                    <title>Invoices - ${batchId}</title>
+                    <style>
+                        @media print { .no-print { display: none; } }
+                        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; text-align: center; background: #f8fafc; }
+                        .invoice-container { page-break-after: always; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 40px; border: 1px solid #e2e8f0; }
+                        img { max-width: 100%; max-height: 850px; border-radius: 12px; margin-top: 30px; border: 1px solid #cbd5e1; }
+                        .header { text-align: left; border-bottom: 2px solid #3b82f6; padding-bottom: 20px; margin-bottom: 20px; }
+                        h1 { font-size: 24px; color: #1e293b; margin: 0; font-weight: 800; }
+                        .meta { display: flex; justify-between; color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-top: 8px; }
+                    </style>
+                </head>
+                <body>
+                    ${invoiceRows.join('')}
+                </body>
+                </html>
+                `;
+                
+                const win = window.open('', '_blank');
+                win.document.write(html);
+                win.document.close();
+                win.onload = () => { setTimeout(() => { win.print(); }, 500); };
+            };
+
             window.receiveBatchCash = async (batchId, amount) => {
                 if (!currentUser) return;
                 if (!confirm(`Mark ${amount.toFixed(2)} AED as received from Accounts for this batch?`)) return;
@@ -3240,11 +3824,55 @@
                 document.getElementById('edit-type-label').innerText = t.type;
                 document.getElementById('edit-amount').value = t.amount;
                 document.getElementById('edit-date').value = t.subDate;
-                document.getElementById('edit-desc').value = t.desc;
+                document.getElementById('edit-desc').value = t.desc || t.desc_text || '';
                 document.getElementById('edit-reason').value = ''; 
+
+                const rFields = document.getElementById('edit-reimburse-fields');
+                const scanSection = document.getElementById('edit-scan-section');
+                if (t.type === 'expense') {
+                    rFields.classList.remove('hidden');
+                    document.getElementById('edit-inv-no').value = t.invoiceNo || '';
+                    document.getElementById('edit-inv-date').value = t.invoiceDate || '';
+                    document.getElementById('edit-tax-amount').value = t.taxAmount || '';
+
+                    scanSection.classList.remove('hidden');
+                    currentEditScanData = null;
+                    if (t.invoiceUrl) {
+                        const preview = document.getElementById('edit-scan-preview');
+                        const container = document.getElementById('edit-scan-preview-container');
+                        const label = document.getElementById('edit-scan-label');
+                        
+                        if (t.invoiceUrl.startsWith('local-')) {
+                            window.getPhotoLocal(t.invoiceUrl).then(data => {
+                                if (data) {
+                                    preview.src = data;
+                                    container.classList.remove('hidden');
+                                    label.innerText = "Local Scan Attached";
+                                }
+                            });
+                        } else {
+                            preview.src = t.invoiceUrl;
+                            container.classList.remove('hidden');
+                            label.innerText = "Current Scan Attached";
+                        }
+                    } else {
+                        window.clearEditScan();
+                    }
+                } else {
+                    rFields.classList.add('hidden');
+                    scanSection.classList.add('hidden');
+                }
+
+                currentEditAllocations = t.allocations && t.allocations.length > 0 
+                    ? JSON.parse(JSON.stringify(t.allocations)) 
+                    : [{ category: t.category || categories[0], propertyNo: t.propertyNo || '' }];
+                window.renderEditAllocationRows();
             };
 
             window.saveEdit = async () => {
+                const btn = document.getElementById('save-edit-btn');
+                if (!btn || btn.disabled) return;
+
                 const t = txs.find(x => x.id === editingTxId);
                 if (!t) return;
 
@@ -3261,20 +3889,55 @@
                     return;
                 }
 
+                btn.disabled = true;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Saving...`;
+                lucide.createIcons();
+
                 const newAmount = parseFloat(amountInput.value);
                 const updateData = {
                     amount: newAmount,
                     sub_date: dateInput.value,
                     desc_text: descInput.value,
-                    edit_reason: reasonInput.value.trim()
+                    edit_reason: reasonInput.value.trim(),
+                    allocations: currentEditAllocations
                 };
+
+                if (t.type === 'expense') {
+                    updateData.invoice_no = document.getElementById('edit-inv-no').value;
+                    updateData.invoice_date = document.getElementById('edit-inv-date').value;
+                    updateData.tax_amount = parseFloat(document.getElementById('edit-tax-amount').value) || 0;
+                    updateData.net_amount = newAmount - updateData.tax_amount;
+
+                    if (currentEditScanData) {
+                        try {
+                            btn.innerHTML = `<i data-lucide="upload-cloud" class="w-4 h-4 animate-pulse"></i> Uploading...`;
+                            lucide.createIcons();
+                            const url = await window.uploadInvoiceScan(currentEditScanData);
+                            if (url) updateData.invoice_url = url;
+                        } catch (err) { 
+                            console.error("Edit Scan Error", err);
+                            if (!confirm("Invoice photo upload failed or timed out. Save changes WITHOUT the new photo?")) {
+                                btn.disabled = false;
+                                btn.innerHTML = originalText;
+                                lucide.createIcons();
+                                return;
+                            }
+                        }
+                    }
+                }
 
                 try {
                     await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', editingTxId), updateData);
+                    window.showStatus("Changes Saved Successfully!");
                     window.closeModal();
                 } catch (e) {
                     console.error(e);
                     window.showStatus("Error Saving: " + e.message, true);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    lucide.createIcons();
                 }
             };
 
@@ -3306,6 +3969,25 @@
             window.updateAllocRow = (idx, key, val) => { currentAllocations[idx][key] = val; if (key === 'category') window.renderAllocationRows(); };
             window.addAllocationRow = () => { currentAllocations.push({ id: Date.now(), category: categories[0], propertyNo: '' }); window.renderAllocationRows(); };
             window.removeAllocationRow = (idx) => { if (currentAllocations.length > 1) { currentAllocations.splice(idx, 1); window.renderAllocationRows(); } };
+
+            let currentEditAllocations = [];
+            window.renderEditAllocationRows = () => {
+                const list = document.getElementById('edit-allocations-list');
+                if (!list) return;
+                list.innerHTML = currentEditAllocations.map((a, i) => `
+                    <div class="flex gap-3 items-center">
+                        <select onchange="window.updateEditAllocRow(${i}, 'category', this.value)" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-indigo-500">
+                            ${categories.map(c => `<option value="${c}" ${a.category === c ? 'selected' : ''}>${c}</option>`).join('')}
+                        </select>
+                        <input type="text" placeholder="Plot #" value="${a.propertyNo || ''}" onchange="window.updateEditAllocRow(${i}, 'propertyNo', this.value)" class="w-24 bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-indigo-500">
+                        <button onclick="window.removeEditAllocationRow(${i})" class="text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition-smooth"><i data-lucide="minus-circle" class="w-4 h-4"></i></button>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            };
+            window.addEditAllocationRow = () => { currentEditAllocations.push({ category: categories[0], propertyNo: '' }); window.renderEditAllocationRows(); };
+            window.removeEditAllocationRow = (idx) => { if (currentEditAllocations.length > 1) { currentEditAllocations.splice(idx, 1); window.renderEditAllocationRows(); } };
+            window.updateEditAllocRow = (idx, key, val) => { currentEditAllocations[idx][key] = val; };
 
             window.openSettle = (id, intentionalType, personName = null) => {
                 let t = txs.find(x => x.id === id);
@@ -3722,7 +4404,8 @@
                     invoiceDate: dbTx.invoice_date || '',
                     batchId: dbTx.batch_id || null,
                     voidReason: dbTx.void_reason || '',
-                    editReason: dbTx.edit_reason || ''
+                    editReason: dbTx.edit_reason || '',
+                    invoiceUrl: dbTx.invoice_url || ''
                 };
             }
 
@@ -3841,6 +4524,23 @@
 
                 const cleanNumber = phone.replace(/\D/g, '');
                 window.open(`https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+            };
+
+            window.viewInvoice = async (txId) => {
+                const t = txs.find(x => x.id === txId);
+                if (!t || !t.invoiceUrl) return;
+                
+                let src = t.invoiceUrl;
+                if (src.startsWith('local-')) {
+                    window.showStatus("Loading Photo...", false);
+                    const localData = await window.getPhotoLocal(src);
+                    if (localData) src = localData;
+                    window.showStatus("Loaded");
+                }
+                
+                const win = window.open('', '_blank');
+                win.document.write(`<html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;"><img src="${src}" style="max-width:100%;max-height:100vh;"></body></html>`);
+                win.document.close();
             };
 
             window.onload = () => lucide.createIcons();
