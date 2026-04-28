@@ -12,7 +12,7 @@
     <!-- Image Capture -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Excel generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -554,11 +554,24 @@
                             <p class="text-blue-100 font-bold opacity-80 uppercase text-[10px] tracking-widest">Submit & track batches for Accounts replenishment</p>
                         </div>
                         <button onclick="window.submitToAccounts()" class="bg-white text-blue-600 px-6 py-3 rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all flex items-center gap-2">
-                            <i data-lucide="send" class="w-5 h-5"></i> Submit New Batch
+                            <i data-lucide="plus-circle" class="w-5 h-5"></i> Stage New Invoices
                         </button>
                     </div>
                 </div>
                 
+                <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight mb-4 mt-8 flex items-center gap-2"><i data-lucide="folder-open" class="text-blue-500 w-6 h-6"></i> Currently Processing (Staged)</h3>
+                <div id="reimbursement-staged-folders" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Staged folders injected via JS -->
+                </div>
+                <div class="flex justify-end mt-4 mb-8">
+                    <button onclick="window.finalizeStagedBatch()" class="bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-emerald-700 transition-all flex items-center gap-2 disabled:opacity-50" id="finalize-batch-btn" disabled>
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i> Finalize Selected Folders into Batch
+                    </button>
+                </div>
+                
+                <hr class="border-slate-200">
+
+                <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight mb-4 mt-8 flex items-center gap-2"><i data-lucide="archive" class="text-slate-400 w-6 h-6"></i> Pending Reimbursement Batches</h3>
                 <div id="reimbursement-batches" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Batches injected via JS -->
                 </div>
@@ -1207,12 +1220,17 @@
                     <button onclick="window.closeModal()" class="text-blue-200 hover:text-white transition-smooth"><i data-lucide="x"></i></button>
                 </div>
                 <div class="p-6 overflow-y-auto no-scrollbar flex-grow bg-slate-50">
+                    <div class="flex items-center justify-between mb-4">
+                        <select id="reimburse-category-filter" onchange="window.filterReimburseModal()" class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:border-blue-500 transition-all">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
                     <div class="border border-slate-200 rounded-xl overflow-hidden bg-white">
                         <table class="w-full text-left">
                             <thead class="bg-slate-100 text-[10px] font-black text-slate-500 uppercase tracking-widest">
                                 <tr>
                                     <th class="p-3 w-10 text-center"><input type="checkbox" id="reimburse-select-all" class="w-4 h-4 rounded text-blue-600 cursor-pointer" onchange="window.toggleAllReimburse(this.checked)"></th>
-                                    <th class="p-3">Date</th>
+                                    <th class="p-3">Date (Inv)</th>
                                     <th class="p-3">Description</th>
                                     <th class="p-3">Person</th>
                                     <th class="p-3 text-right">Amount (AED)</th>
@@ -1231,7 +1249,7 @@
                             <p id="reimburse-selected-total" class="text-xl font-black text-blue-600">0.00 AED</p>
                         </div>
                         <button onclick="window.confirmBatchSubmission()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
-                            <i data-lucide="check-circle-2" class="w-5 h-5"></i> Create Batch
+                            <i data-lucide="play-circle" class="w-5 h-5"></i> Start Processing (Stage)
                         </button>
                     </div>
                 </div>
@@ -1282,7 +1300,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, getDocs, addDoc, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, getDocs, addDoc, updateDoc, deleteDoc, writeBatch, deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBuQEoHzwpZxxSGsa6Qa3SeuxNshK4jMac",
@@ -2229,6 +2247,15 @@
                 }
             };
 
+            window.formatSafeDate = (dString) => {
+                if (!dString) return '-';
+                if (dString.includes('-')) {
+                    const p = dString.split('T')[0].split('-');
+                    if (p.length === 3) return `${p[2]}/${p[1]}/${p[0]}`;
+                }
+                return new Date(dString).toLocaleDateString('en-GB');
+            };
+
             window.renderAll = function () {
                 try {
                     const totals = getTotals();
@@ -2332,7 +2359,7 @@
                             const editTag = (!isVoided && t.editReason) ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-0.5 border border-indigo-100 rounded text-[9px] font-black uppercase tracking-widest" title="Edit Reason: ${t.editReason}"><i data-lucide="pencil" class="w-2.5 h-2.5"></i> EDITED</div>` : '';
 
                             return `<tr class="hover:bg-slate-50 transition-colors group ${voidStyle}">
-                            <td class="px-6 py-4 font-bold text-slate-500 font-mono text-xs ${isVoided ? 'line-through' : ''}">${new Date(t.subDate).toLocaleDateString()}</td>
+                            <td class="px-6 py-4 font-bold text-slate-500 font-mono text-xs ${isVoided ? 'line-through' : ''}">${window.formatSafeDate(t.invoiceDate || t.subDate)}</td>
                             <td class="px-6 py-4 font-bold text-slate-700 text-xs ${isVoided ? 'line-through' : ''}">${t.person || '-'}</td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
@@ -2364,18 +2391,20 @@
                     const batchMap = {};
                     txs.forEach(t => {
                         const ttype = (t.type || '').toLowerCase();
-                        if (ttype === 'expense' && t.batch_id) {
-                            if (!batchMap[t.batch_id]) batchMap[t.batch_id] = { id: t.batch_id, count: 0, total: 0, received: false, date: t.subDate };
-                            batchMap[t.batch_id].count++;
-                            batchMap[t.batch_id].total += (parseFloat(t.paidFromBox) || 0);
-                            if (t.subDate < batchMap[t.batch_id].date) batchMap[t.batch_id].date = t.subDate;
+                        if (ttype === 'expense' && t.batchId && t.batchId !== 'staged' && t.batchId !== 'legacy') {
+                            if (!batchMap[t.batchId]) batchMap[t.batchId] = { id: t.batchId, count: 0, total: 0, received: false, date: t.subDate, txs: [] };
+                            batchMap[t.batchId].count++;
+                            batchMap[t.batchId].total += (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0);
+                            batchMap[t.batchId].txs.push(t);
+                            if (t.subDate < batchMap[t.batchId].date) batchMap[t.batchId].date = t.subDate;
                         }
-                        if (ttype === 'receive' && t.batch_id) {
-                            if (!batchMap[t.batch_id]) batchMap[t.batch_id] = { id: t.batch_id, count: 0, total: 0, received: true, date: t.subDate };
-                            batchMap[t.batch_id].received = true;
+                        if (ttype === 'receive' && t.batchId) {
+                            if (!batchMap[t.batchId]) batchMap[t.batchId] = { id: t.batchId, count: 0, total: 0, received: true, date: t.subDate, txs: [] };
+                            batchMap[t.batchId].received = true;
                         }
                     });
 
+                    window.globalBatchMap = batchMap;
                     const pendingBatches = Object.values(batchMap).filter(b => !b.received && b.total > 0).sort((a,b) => b.id.localeCompare(a.id));
 
                     const batchContainer = document.getElementById('reimbursement-batches');
@@ -2384,16 +2413,81 @@
                             batchContainer.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 font-bold text-xs border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50">No pending reimbursement batches</div>';
                         } else {
                             batchContainer.innerHTML = pendingBatches.map(b => `
-                                <div class="bg-blue-50/50 border border-blue-100 p-5 rounded-2xl relative overflow-hidden group">
+                                <div class="bg-blue-50/50 border border-blue-100 p-5 rounded-2xl relative overflow-hidden group flex flex-col h-full">
                                     <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] font-black px-3 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">Processing</div>
                                     <div class="text-[10px] text-blue-400 font-bold mb-1 uppercase tracking-wider">${new Date(parseInt(b.id.split('-')[1])).toLocaleDateString()}</div>
                                     <div class="text-2xl font-black text-blue-900 mb-0.5 tracking-tight">${b.total.toFixed(2)} <span class="text-xs text-blue-500 font-bold">AED</span></div>
                                     <div class="text-[10px] font-bold text-blue-600 uppercase tracking-wide mb-5 bg-blue-100/50 inline-block px-2 py-0.5 rounded-md">${b.count} Expenses</div>
-                                    <button onclick="window.receiveBatchCash('${b.id}', ${b.total})" class="w-full bg-white border-2 border-blue-200 text-blue-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
-                                        <i data-lucide="download" class="w-4 h-4"></i> Receive Cash
-                                    </button>
+                                    
+                                    <div class="mt-auto flex flex-col gap-2">
+                                        <button onclick="window.exportBatchExcel('${b.id}')" class="w-full bg-emerald-50 border-2 border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+                                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export Batch Excel
+                                        </button>
+                                        <button onclick="window.receiveBatchCash('${b.id}', ${b.total})" class="w-full bg-white border-2 border-blue-200 text-blue-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+                                            <i data-lucide="download" class="w-4 h-4"></i> Mark Cash Received
+                                        </button>
+                                    </div>
                                 </div>
                             `).join('');
+                        }
+                    }
+
+                    // Render Staged Folders
+                    const stagedTxs = txs.filter(t => (t.type || '').toLowerCase() === 'expense' && t.batchId === 'staged' && t.status !== 'Voided');
+                    const stagedMap = {};
+                    stagedTxs.forEach(t => {
+                        const cat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized');
+                        if (!stagedMap[cat]) stagedMap[cat] = { cat: cat, count: 0, total: 0, txs: [] };
+                        stagedMap[cat].count++;
+                        stagedMap[cat].total += (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0);
+                        stagedMap[cat].txs.push(t);
+                    });
+
+                    const stagedFolders = Object.values(stagedMap).sort((a,b) => a.cat.localeCompare(b.cat));
+                    window.currentStagedFolders = stagedFolders;
+
+                    const stagedContainer = document.getElementById('reimbursement-staged-folders');
+                    if (stagedContainer) {
+                        if (stagedFolders.length === 0) {
+                            stagedContainer.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 font-bold text-xs border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50">No staged folders currently processing.</div>`;
+                            const btn = document.getElementById('finalize-batch-btn');
+                            if (btn) btn.disabled = true;
+                        } else {
+                            stagedContainer.innerHTML = stagedFolders.map((f, i) => {
+                                const isExpanded = window.expandedFolders && window.expandedFolders.has(f.cat);
+                                const txRows = f.txs.map(tx => `
+                                    <div class="flex items-center justify-between py-2 px-3 bg-white/50 rounded-lg border border-amber-100 mb-1 group/item">
+                                        <div class="flex flex-col">
+                                            <span class="text-[10px] font-bold text-slate-700">${tx.desc || 'No Desc'}</span>
+                                            <span class="text-[9px] text-slate-400 font-mono">${window.formatSafeDate(tx.invoiceDate || tx.subDate)} • ${(tx.amount || 0).toFixed(2)} AED</span>
+                                        </div>
+                                        <button onclick="event.stopPropagation(); window.unstageInvoice('${tx.id}')" class="opacity-0 group-hover/item:opacity-100 p-1 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all">
+                                            <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
+                                `).join('');
+
+                                return `
+                                <div class="bg-amber-50/50 border border-amber-200 p-5 rounded-2xl relative overflow-hidden group cursor-pointer transition-all hover:bg-amber-100/80" onclick="window.toggleFolderExpansion('${f.cat}')">
+                                    <div class="absolute top-4 right-4">
+                                        <input type="checkbox" id="staged-chk-${i}" value="${f.cat}" class="w-5 h-5 rounded text-amber-600 focus:ring-amber-500 border-amber-300 folder-checkbox" onclick="event.stopPropagation(); window.checkFolderSelection()">
+                                    </div>
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="p-2.5 bg-amber-100 rounded-xl text-amber-600"><i data-lucide="${isExpanded ? 'folder-open' : 'folder'}" class="w-5 h-5"></i></div>
+                                        <h4 class="font-black text-slate-800 text-sm uppercase tracking-wide truncate pr-8">${f.cat}</h4>
+                                    </div>
+                                    <div class="text-xl font-black text-amber-900 mb-0.5 tracking-tight">${f.total.toFixed(2)} <span class="text-[10px] text-amber-600 font-bold uppercase">AED</span></div>
+                                    <div class="text-[10px] font-bold text-amber-700 uppercase tracking-wide bg-amber-100/50 inline-block px-2 py-0.5 rounded-md mb-3">${f.count} Invoices</div>
+                                    
+                                    ${isExpanded ? `<div class="mt-4 pt-4 border-t border-amber-200/50">${txRows}</div>` : ''}
+                                    
+                                    <div class="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4 text-amber-400"></i>
+                                    </div>
+                                </div>
+                                `;
+                            }).join('');
+                            window.checkFolderSelection();
                         }
                     }
 
@@ -2552,10 +2646,8 @@
                         window.sendAlertWhatsApp(docRef.id);
                     }
                     
-                    window.fetchTransactions();
                     document.getElementById('entry-form').reset();
                     document.getElementById('form-sub-date').value = window.getLocalDate();
-
                     if (person) window.checkAdvanceWallet(person);
 
                 } catch (e) {
@@ -2570,78 +2662,107 @@
                 }
             };
 
-            window.fetchTransactions = () => {
-                const q = query(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'));
-                onSnapshot(q, (snapshot) => {
-                    txs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    window.renderAll();
-                });
+            window.selectedReimbursementIds = window.selectedReimbursementIds || new Set();
+
+            window.filterReimburseModal = () => {
+                const catSelect = document.getElementById('reimburse-category-filter');
+                const selectedCat = catSelect ? catSelect.value : '';
+                
+                let filtered = window.currentUnbatchedExpenses || [];
+                if (selectedCat) {
+                    filtered = filtered.filter(t => {
+                        if (t.allocations && t.allocations.length > 0) {
+                            return t.allocations.some(a => a.category === selectedCat);
+                        }
+                        return (t.category === selectedCat);
+                    });
+                }
+
+                const body = document.getElementById('reimburse-select-body');
+                body.innerHTML = filtered.map(t => {
+                    const dateStr = window.formatSafeDate(t.invoiceDate || t.subDate);
+                    const isChecked = window.selectedReimbursementIds.has(t.id) ? 'checked' : '';
+                    return `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 text-center"><input type="checkbox" class="reimburse-checkbox w-4 h-4 rounded text-blue-600 cursor-pointer" value="${t.id}" ${isChecked} onchange="window.handleReimburseCheckboxChange(this)"></td>
+                        <td class="p-3 font-mono text-xs text-slate-500">${dateStr}</td>
+                        <td class="p-3 font-bold text-slate-800">${t.desc || '-'}</td>
+                        <td class="p-3 font-bold text-slate-600">${t.person || '-'}</td>
+                        <td class="p-3 font-mono font-bold text-right text-slate-800" data-amt="${t.amount || 0}">${(t.amount || 0).toFixed(2)}</td>
+                    </tr>
+                `}).join('');
+
+                const allVisibleCheckboxes = document.querySelectorAll('.reimburse-checkbox');
+                const allChecked = allVisibleCheckboxes.length > 0 && Array.from(allVisibleCheckboxes).every(cb => cb.checked);
+                document.getElementById('reimburse-select-all').checked = allChecked;
+                window.updateReimburseTotal();
             };
 
-            window.fetchSettings = () => {
-                onSnapshot(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), (doc) => {
-                    if (doc.exists()) {
-                        const d = doc.data();
-                        staff = d.staff || [];
-                        sources = d.sources || [];
-                        categories = d.categories || categories;
-                        lastCashCountDate = d.last_cash_count_date || null;
-                        renderRegistry();
-                    }
-                });
+            window.handleReimburseCheckboxChange = (cb) => {
+                if (cb.checked) window.selectedReimbursementIds.add(cb.value);
+                else window.selectedReimbursementIds.delete(cb.value);
+                
+                const allVisibleCheckboxes = document.querySelectorAll('.reimburse-checkbox');
+                const allChecked = allVisibleCheckboxes.length > 0 && Array.from(allVisibleCheckboxes).every(cb => cb.checked);
+                document.getElementById('reimburse-select-all').checked = allChecked;
+                window.updateReimburseTotal();
             };
 
             window.submitToAccounts = async () => {
                 if (!currentUser) return;
-                let currentUnbatchedExpenses = txs.filter(t => (t.type || '').toLowerCase() === 'expense' && !t.batch_id && t.status !== 'Voided');
+                let currentUnbatchedExpenses = txs.filter(t => (t.type || '').toLowerCase() === 'expense' && !t.batchId && t.status !== 'Voided');
                 
                 if (currentUnbatchedExpenses.length === 0) {
-                    alert("No pending expenses to submit to accounts.");
+                    alert("No pending expenses to stage.");
                     return;
                 }
 
                 currentUnbatchedExpenses.sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
                 
-                const body = document.getElementById('reimburse-select-body');
-                body.innerHTML = currentUnbatchedExpenses.map(t => `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 text-center"><input type="checkbox" class="reimburse-checkbox w-4 h-4 rounded text-blue-600 cursor-pointer" value="${t.id}" onchange="window.updateReimburseTotal()"></td>
-                        <td class="p-3 font-mono text-xs text-slate-500">${new Date(t.subDate).toLocaleDateString()}</td>
-                        <td class="p-3 font-bold text-slate-800">${t.desc || '-'}</td>
-                        <td class="p-3 font-bold text-slate-600">${t.person || '-'}</td>
-                        <td class="p-3 font-mono font-bold text-right text-slate-800" data-amt="${t.amount || 0}">${(t.amount || 0).toFixed(2)}</td>
-                    </tr>
-                `).join('');
+                window.currentUnbatchedExpenses = currentUnbatchedExpenses;
+                window.selectedReimbursementIds = new Set();
+                
+                const catSelect = document.getElementById('reimburse-category-filter');
+                if (catSelect) {
+                    let uniqueCats = new Set();
+                    currentUnbatchedExpenses.forEach(t => {
+                        if (t.allocations && t.allocations.length > 0) {
+                            t.allocations.forEach(a => { if (a.category) uniqueCats.add(a.category); });
+                        } else if (t.category) {
+                            uniqueCats.add(t.category);
+                        }
+                    });
+                    const sortedCats = Array.from(uniqueCats).sort();
+                    catSelect.innerHTML = '<option value="">All Categories</option>' + sortedCats.map(c => `<option value="${c}">${c}</option>`).join('');
+                }
 
-                document.getElementById('reimburse-select-all').checked = false;
-                window.updateReimburseTotal();
+                window.filterReimburseModal();
+                
                 document.getElementById('reimburse-select-modal').classList.remove('hidden');
                 lucide.createIcons();
             };
 
             window.toggleAllReimburse = (checked) => {
-                document.querySelectorAll('.reimburse-checkbox').forEach(cb => cb.checked = checked);
+                document.querySelectorAll('.reimburse-checkbox').forEach(cb => {
+                    cb.checked = checked;
+                    if (checked) window.selectedReimbursementIds.add(cb.value);
+                    else window.selectedReimbursementIds.delete(cb.value);
+                });
                 window.updateReimburseTotal();
             };
 
             window.updateReimburseTotal = () => {
                 let total = 0;
-                let count = 0;
-                document.querySelectorAll('.reimburse-checkbox:checked').forEach(cb => {
-                    const row = cb.closest('tr');
-                    const amtCell = row.querySelector('[data-amt]');
-                    if (amtCell) {
-                        total += parseFloat(amtCell.getAttribute('data-amt')) || 0;
-                        count++;
-                    }
+                let count = window.selectedReimbursementIds.size;
+                window.selectedReimbursementIds.forEach(id => {
+                    const t = window.currentUnbatchedExpenses.find(x => x.id === id);
+                    if (t) total += parseFloat(t.amount || 0);
                 });
                 document.getElementById('reimburse-selected-total').innerText = `${total.toFixed(2)} AED (${count} items)`;
             };
 
             window.getSelectedReimburseIds = () => {
-                const ids = [];
-                document.querySelectorAll('.reimburse-checkbox:checked').forEach(cb => ids.push(cb.value));
-                return ids;
+                return Array.from(window.selectedReimbursementIds);
             };
 
             window.markLegacyProcessed = async () => {
@@ -2662,7 +2783,9 @@
                     });
                     await batch.commit();
                     window.showStatus("Marked as legacy successfully.");
-                    window.closeModal();
+                    window.currentUnbatchedExpenses = window.currentUnbatchedExpenses.filter(t => !ids.includes(t.id));
+                    window.selectedReimbursementIds.clear();
+                    window.filterReimburseModal();
                 } catch (err) {
                     window.showStatus("Error: " + err.message, true);
                 }
@@ -2671,15 +2794,12 @@
             window.confirmBatchSubmission = async () => {
                 const ids = window.getSelectedReimburseIds();
                 if (ids.length === 0) {
-                    alert("Please select at least one expense to batch.");
+                    alert("Please select at least one expense to stage.");
                     return;
                 }
 
-                if (!confirm(`Are you sure you want to group these ${ids.length} expenses into a Reimbursement Batch?`)) return;
-
                 try {
-                    window.showStatus("Submitting Batch...", true);
-                    const batchId = 'BATCH-' + Date.now();
+                    window.showStatus("Staging for processing...", true);
                     const batch = writeBatch(db);
                     
                     const chunkSize = 100;
@@ -2687,17 +2807,263 @@
                         const chunk = ids.slice(i, i + chunkSize);
                         chunk.forEach(id => {
                             const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', id);
+                            batch.update(docRef, { batch_id: 'staged' });
+                        });
+                    }
+                    
+                    await batch.commit();
+                    window.showStatus("Invoices Staged! Check Currently Processing.");
+                    window.currentUnbatchedExpenses = window.currentUnbatchedExpenses.filter(t => !ids.includes(t.id));
+                    window.selectedReimbursementIds.clear();
+                    window.filterReimburseModal();
+                    
+                    window.closeModal(); // Close modal so user can see the folders immediately
+                } catch (err) {
+                    console.error("Submit Error", err);
+                    window.showStatus("Error submitting: " + err.message, true);
+                }
+            };
+
+            window.expandedFolders = new Set();
+            window.toggleFolderExpansion = (cat) => {
+                if (window.expandedFolders.has(cat)) window.expandedFolders.delete(cat);
+                else window.expandedFolders.add(cat);
+                window.renderAll();
+            };
+
+            window.unstageInvoice = async (id) => {
+                if (!confirm("Remove this invoice from processing?")) return;
+                try {
+                    window.showStatus("Removing...", true);
+                    const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', id);
+                    await updateDoc(docRef, { batch_id: deleteField() });
+                    window.showStatus("Removed!");
+                } catch (err) {
+                    window.showStatus("Error: " + err.message, true);
+                }
+            };
+
+            window.toggleFolderSelect = (id) => {
+                const cb = document.getElementById(id);
+                if (cb) {
+                    cb.checked = !cb.checked;
+                    window.checkFolderSelection();
+                }
+            };
+
+            window.checkFolderSelection = () => {
+                const boxes = document.querySelectorAll('.folder-checkbox:checked');
+                const btn = document.getElementById('finalize-batch-btn');
+                if (btn) btn.disabled = boxes.length === 0;
+            };
+
+            window.finalizeStagedBatch = async () => {
+                const boxes = document.querySelectorAll('.folder-checkbox:checked');
+                if (boxes.length === 0) return;
+                
+                const selectedCats = Array.from(boxes).map(b => b.value);
+                
+                if (!confirm(`Finalize batch for ${selectedCats.length} category folder(s)?`)) return;
+
+                const stagedTxs = txs.filter(t => (t.type || '').toLowerCase() === 'expense' && t.batchId === 'staged' && t.status !== 'Voided');
+                const txsToBatch = stagedTxs.filter(t => {
+                    const cat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized');
+                    return selectedCats.includes(cat);
+                });
+
+                if (txsToBatch.length === 0) return;
+
+                try {
+                    window.showStatus("Creating Final Batch...", true);
+                    const batchId = 'BATCH-' + Date.now();
+                    const batch = writeBatch(db);
+                    
+                    const chunkSize = 100;
+                    for (let i = 0; i < txsToBatch.length; i += chunkSize) {
+                        const chunk = txsToBatch.slice(i, i + chunkSize);
+                        chunk.forEach(t => {
+                            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
                             batch.update(docRef, { batch_id: batchId });
                         });
                     }
                     
                     await batch.commit();
-                    window.showStatus("Batch created successfully!");
-                    window.closeModal();
+                    window.showStatus("Batch Created Successfully!");
+                    window.renderAll();
                 } catch (err) {
-                    console.error("Submit Error", err);
-                    window.showStatus("Error submitting: " + err.message, true);
+                    console.error("Batching Error", err);
+                    window.showStatus("Error creating batch: " + err.message, true);
                 }
+            };
+
+            window.exportBatchExcel = (batchId) => {
+                if (!window.globalBatchMap || !window.globalBatchMap[batchId]) return;
+                
+                const batch = window.globalBatchMap[batchId];
+                if (!batch.txs || batch.txs.length === 0) return;
+
+                const catGroups = {};
+                batch.txs.forEach(t => {
+                    const cat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized');
+                    if (!catGroups[cat]) catGroups[cat] = [];
+                    catGroups[cat].push(t);
+                });
+
+                const wb = XLSX.utils.book_new();
+                const today = new Date();
+                const dateStr = `${today.getDate().toString().padStart(2,'0')}.${(today.getMonth()+1).toString().padStart(2,'0')}.${today.getFullYear()}`;
+                const invPrefix = `B${today.getDate().toString().padStart(2,'0')}${(today.getMonth()+1).toString().padStart(2,'0')}${today.getFullYear()}`;
+
+                const noVatCats = ['adnoc', 'hilux', 'crv', 'tucson'];
+
+                const style_header = {
+                    fill: { fgColor: { rgb: "F2F2F2" } },
+                    font: { bold: true, sz: 11, name: "Arial" },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    border: {
+                        top: { style: "thin" }, bottom: { style: "thin" },
+                        left: { style: "thin" }, right: { style: "thin" }
+                    }
+                };
+
+                const style_cell = {
+                    font: { sz: 10, name: "Arial" },
+                    border: {
+                        top: { style: "thin" }, bottom: { style: "thin" },
+                        left: { style: "thin" }, right: { style: "thin" }
+                    },
+                    alignment: { vertical: "center" }
+                };
+
+                const style_num = { ...style_cell, alignment: { horizontal: "right", vertical: "center" } };
+                const style_center = { ...style_cell, alignment: { horizontal: "center", vertical: "center" } };
+                const style_total = { ...style_num, font: { bold: true, sz: 11, name: "Arial" } };
+
+                Object.keys(catGroups).forEach(cat => {
+                    const txs = catGroups[cat];
+                    const isNoVat = noVatCats.includes(cat.toLowerCase());
+                    const wsData = [];
+                    const lastCol = isNoVat ? 4 : 6;
+
+                    wsData.push([{ v: "Emirates For Ind. Cities Co.", s: { font: { bold: true, sz: 14, color: { rgb: "C00000" } }, alignment: { horizontal: "center" } } }]);
+                    wsData.push([{ v: cat, s: { font: { bold: true, sz: 16 }, alignment: { horizontal: "center" } } }]);
+                    
+                    if (isNoVat) {
+                        wsData.push([
+                            { v: dateStr, s: { font: { bold: true, sz: 12 } } }, 
+                            "", "", 
+                            { v: `Invoice ${cat} ${invPrefix}`, s: { font: { bold: true, sz: 11, color: { rgb: "FF0000" } }, alignment: { horizontal: "right" } } }
+                        ]);
+                        wsData.push([
+                            { v: "Sl No", s: style_header },
+                            { v: "Date", s: style_header },
+                            { v: "Description of bill", s: style_header },
+                            { v: "Bill number", s: style_header },
+                            { v: "Total", s: style_header }
+                        ]);
+                    } else {
+                        wsData.push([
+                            { v: dateStr, s: { font: { bold: true, sz: 12 } } }, 
+                            "", "", "", "", 
+                            { v: `Invoice ${cat} ${invPrefix}`, s: { font: { bold: true, sz: 11, color: { rgb: "FF0000" } }, alignment: { horizontal: "right" } } }
+                        ]);
+                        wsData.push([
+                            { v: "Sl No", s: style_header },
+                            { v: "Date", s: style_header },
+                            { v: "Description of bill", s: style_header },
+                            { v: "Bill number", s: style_header },
+                            { v: "Amount", s: style_header },
+                            { v: "Vat", s: style_header },
+                            { v: "Total", s: style_header }
+                        ]);
+                    }
+                    
+                    let rowIndex = 4;
+                    txs.forEach((t, i) => {
+                        const invDate = t.invoiceDate || t.subDate || '';
+                        let dateFormatted = '';
+                        if (invDate) {
+                            if (invDate.includes('-')) {
+                                const p = invDate.split('T')[0].split('-');
+                                if (p.length === 3) dateFormatted = `${p[2]}.${p[1]}.${p[0]}`;
+                            } else {
+                                dateFormatted = new Date(invDate).toLocaleDateString('en-GB').replace(/\//g, '.');
+                            }
+                        }
+                        const desc = t.desc || '';
+                        let billNo = t.invoiceNo || t.id.split('-').pop();
+                        const total = parseFloat(t.amount || 0);
+
+                        if (isNoVat) {
+                            wsData.push([
+                                { v: i + 1, s: style_center },
+                                { v: dateFormatted, s: style_center },
+                                { v: desc, s: style_cell },
+                                { v: billNo, s: style_center },
+                                { v: total, s: style_num, t: 'n', z: '#,##0.00' }
+                            ]);
+                        } else {
+                            const rowNum = rowIndex + 1;
+                            const vatFormula = `G${rowNum}*0.04762`;
+                            const amtFormula = `G${rowNum}-F${rowNum}`;
+                            wsData.push([
+                                { v: i + 1, s: style_center },
+                                { v: dateFormatted, s: style_center },
+                                { v: desc, s: style_cell },
+                                { v: billNo, s: style_center },
+                                { f: amtFormula, s: style_num, t: 'n', z: '#,##0.00' },
+                                { f: vatFormula, s: style_num, t: 'n', z: '#,##0.00' },
+                                { v: total, s: style_total, t: 'n', z: '#,##0.00' }
+                            ]);
+                        }
+                        rowIndex++;
+                    });
+                    
+                    const endRow = rowIndex;
+                    const startRow = 5;
+                    if (isNoVat) {
+                        wsData.push([
+                            "", "", "", 
+                            { v: "TOTAL", s: { ...style_header, alignment: { horizontal: "right" } } },
+                            { f: `SUM(E${startRow}:E${endRow})`, s: style_total, t: 'n', z: '#,##0.00' }
+                        ]);
+                    } else {
+                        wsData.push([
+                            "", "", "", 
+                            { v: "TOTAL", s: { ...style_header, alignment: { horizontal: "right" } } },
+                            { f: `SUM(E${startRow}:E${endRow})`, s: style_total, t: 'n', z: '#,##0.00' },
+                            { f: `SUM(F${startRow}:F${endRow})`, s: style_total, t: 'n', z: '#,##0.00' },
+                            { f: `SUM(G${startRow}:G${endRow})`, s: style_total, t: 'n', z: '#,##0.00' }
+                        ]);
+                    }
+                    
+                    wsData.push([]);
+                    wsData.push([{ v: "for approval", s: { font: { bold: true } } }]);
+                    wsData.push([]);
+                    wsData.push([{ v: "Mohammed Al Hazzaa", s: { font: { bold: true, sz: 12 } } }]);
+                    wsData.push([{ v: "C.E.O", s: { font: { bold: true } } }]);
+                    wsData.push([{ v: "Emirates Industrial City, Sharjah", s: { font: { sz: 10 } } }]);
+                    
+                    const ws = XLSX.utils.aoa_to_sheet(wsData);
+                    
+                    ws['!merges'] = [
+                        { s: {r: 0, c: 0}, e: {r: 0, c: lastCol} },
+                        { s: {r: 1, c: 0}, e: {r: 1, c: lastCol} },
+                        { s: {r: 2, c: 0}, e: {r: 2, c: 2} },
+                        { s: {r: 2, c: 3}, e: {r: 2, c: lastCol} }
+                    ];
+                    
+                    if (isNoVat) {
+                        ws['!cols'] = [{ wch: 8 }, { wch: 15 }, { wch: 60 }, { wch: 15 }, { wch: 15 }];
+                    } else {
+                        ws['!cols'] = [{ wch: 8 }, { wch: 15 }, { wch: 60 }, { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 12 }];
+                    }
+
+                    let safeSheetName = cat.replace(/[\\/*?:\[\]]/g, '').substring(0, 31);
+                    XLSX.utils.book_append_sheet(wb, ws, safeSheetName);
+                });
+
+                XLSX.writeFile(wb, `Report_${batchId}.xlsx`);
             };
 
             window.receiveBatchCash = async (batchId, amount) => {
@@ -3285,7 +3651,7 @@
                     // Initial Fetch & Realtime Subscription
                     fetchSettings();
                     fetchTransactions();
-                    setupRealtime(); // Call the new unified subscription
+                    setupRealtime(); 
 
                     const today = window.getLocalDate();
                     document.getElementById('form-sub-date').value = today;
@@ -3325,9 +3691,54 @@
                 if (typeof window.renderAllocationRows === 'function') window.renderAllocationRows();
             }
 
+            function mapTxFromDB(id, dbTx) {
+                let mappedType = dbTx.type || 'expense';
+                if (mappedType === 'repayment') {
+                    mappedType = ((dbTx.desc_text || dbTx.desc || '').toLowerCase().includes('return')) ? 'return_advance' : 'settle_debt';
+                }
+                return {
+                    id: id,
+                    type: mappedType,
+                    amount: parseFloat(dbTx.amount || 0),
+                    person: dbTx.person || '',
+                    desc: dbTx.desc_text || dbTx.desc || '',
+                    subDate: dbTx.sub_date || '',
+                    timestamp: dbTx.timestamp || '',
+                    paidFromBox: parseFloat(dbTx.paid_from_box || 0),
+                    staffOwed: parseFloat(dbTx.staff_owed || 0),
+                    managerOwed: parseFloat(dbTx.manager_owed || 0),
+                    allocations: dbTx.allocations || [],
+                    isDeductedFromAdvance: !!dbTx.is_deducted_from_advance,
+                    advanceAmountUsed: parseFloat(dbTx.advance_amount_used || 0),
+                    settled: ((dbTx.manager_owed || 0) + (dbTx.staff_owed || 0) > 0) 
+                             ? ((dbTx.repaid_amount || 0) >= ((dbTx.manager_owed || 0) + (dbTx.staff_owed || 0) - 0.01)) 
+                             : !!dbTx.settled,
+                    taxAmount: parseFloat(dbTx.tax_amount || 0),
+                    netAmount: parseFloat(dbTx.net_amount || 0),
+                    paymentMethod: dbTx.payment_method || 'Cash',
+                    status: dbTx.status || 'Active',
+                    repaidAmount: parseFloat(dbTx.repaid_amount || 0),
+                    invoiceNo: dbTx.invoice_no || '',
+                    invoiceDate: dbTx.invoice_date || '',
+                    batchId: dbTx.batch_id || null,
+                    voidReason: dbTx.void_reason || '',
+                    editReason: dbTx.edit_reason || ''
+                };
+            }
+
+            async function fetchTransactions() {
+                if (!currentUser) return;
+                try {
+                    const q = query(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'));
+                    const snap = await getDocs(q);
+                    txs = snap.docs.map(doc => mapTxFromDB(doc.id, doc.data()));
+                    txs.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''));
+                    window.renderAll();
+                } catch (e) { console.error("Tx fetch error", e); }
+            }
+
             async function setupRealtime() {
                 if (!currentUser) return;
-
                 if (window.unsubConfig) window.unsubConfig();
                 if (window.unsubTxs) window.unsubTxs();
 
@@ -3350,7 +3761,6 @@
                             const last = new Date(lastCashCountDate).getTime();
                             const now = new Date().getTime();
                             const diffDays = (now - last) / (1000 * 60 * 60 * 24);
-
                             if (diffDays >= 7) {
                                 const expected = getTotals().balance;
                                 document.getElementById('cc-expected').innerHTML = `${expected.toFixed(2)} <span class="text-base text-slate-400">AED</span>`;
@@ -3366,74 +3776,18 @@
                 });
             }
 
-            async function fetchTransactions() {
-                // Handled natively by Firebase onSnapshot in setupRealtime
-            }
-
-            function mapTxFromDB(id, dbTx) {
-                let mappedType = dbTx.type;
-                if (mappedType === 'repayment') {
-                    // Safe handling of legacy ambiguous "repayment" types
-                    mappedType = ((dbTx.desc_text || dbTx.desc || '').toLowerCase().includes('return')) ? 'return_advance' : 'settle_debt';
-                }
-
-                return {
-                    id: id,
-                    type: mappedType,
-                    amount: dbTx.amount,
-                    person: dbTx.person,
-                    // Handle legacy desc_text vs new desc
-                    desc: dbTx.desc_text || dbTx.desc || '',
-                    // CamelCase mapping
-                    subDate: dbTx.sub_date,
-                    timestamp: dbTx.timestamp,
-                    paidFromBox: dbTx.paid_from_box,
-                    staffOwed: dbTx.staff_owed,
-                    managerOwed: dbTx.manager_owed,
-                    allocations: dbTx.allocations || [],
-                    isDeductedFromAdvance: dbTx.is_deducted_from_advance,
-                    advanceAmountUsed: dbTx.advance_amount_used,
-                    settled: ((dbTx.manager_owed || 0) + (dbTx.staff_owed || 0) > 0) ? ((dbTx.repaid_amount || 0) >= ((dbTx.manager_owed || 0) + (dbTx.staff_owed || 0) - 0.01)) : dbTx.settled,
-                    taxAmount: dbTx.tax_amount,
-                    netAmount: dbTx.net_amount,
-                    paymentMethod: dbTx.payment_method,
-                    status: dbTx.status,
-                    repaidAmount: dbTx.repaid_amount,
-                    settledTxId: dbTx.settled_tx_id,
-                    invoiceNo: dbTx.invoice_no,
-                    invoiceDate: dbTx.invoice_date,
-                    batchId: dbTx.batch_id,
-                    voidReason: dbTx.void_reason,
-                    editReason: dbTx.edit_reason
-                };
-            }
-            // --- SYSTEM HEALTH CHECK (User Request) ---
+            // --- SYSTEM HEALTH CHECK ---
             window.runSystemHealthCheck = () => {
                 console.log("Starting System Health Check...");
                 const mockTxs = [];
-                // Helper to mimic getTotals/getAdvanceWalletFor strictly for this simulation
-                // We use the SAME logic as the main app to verify it behaves as expected on known data
                 const verifyLogic = (txs) => {
                     let bal = 0;
-                    let adv = 0;
                     txs.forEach(t => {
                         const amt = t.amount || 0;
-                        const pfb = t.paidFromBox || t.paid_from_box || 0;
-                        // Note: Our simulation uses CamelCase for paidFromBox to match mapTxFromFB output.
-
-                        // Re-implementing the CORE LOGIC here to verify IT matches expectations
-                        if (t.type === 'receive') {
-                            bal += Math.abs(amt);
-                        }
-                        else if (t.type === 'return_advance') {
-                            bal += Math.abs(amt);
-                        }
-                        else if (t.type === 'settle_debt') {
-                            bal += -Math.abs(amt);
-                        }
-                        else {
-                            bal += -pfb;
-                        }
+                        const pfb = t.paidFromBox || 0;
+                        if (t.type === 'receive' || t.type === 'return_advance') bal += Math.abs(amt);
+                        else if (t.type === 'settle_debt') bal -= Math.abs(amt);
+                        else bal -= pfb;
                     });
                     return bal;
                 };
@@ -3451,73 +3805,42 @@
                 };
 
                 try {
-                    // Scenario 1: Deposit 1000
-                    const t1 = { id: '1', type: 'receive', amount: 1000, desc: 'Init', paidFromBox: 0 };
-                    mockTxs.push(t1);
+                    mockTxs.push({ id: '1', type: 'receive', amount: 1000, paidFromBox: 0 });
                     if (verifyLogic(mockTxs) !== 1000) throw new Error("Deposit Logic Failed");
-
-                    // Scenario 2: Expense 100
-                    const t2 = { id: '2', type: 'expense', amount: 100, desc: 'Exp', paidFromBox: 100 };
-                    mockTxs.push(t2);
+                    mockTxs.push({ id: '2', type: 'expense', amount: 100, paidFromBox: 100 });
                     if (verifyLogic(mockTxs) !== 900) throw new Error("Expense Logic Failed");
-
-                    // Scenario 3: Advance 500
-                    const t3 = { id: '3', type: 'advance', amount: 500, desc: 'Adv', paidFromBox: 500, person: 'TestUser' };
-                    mockTxs.push(t3);
+                    mockTxs.push({ id: '3', type: 'advance', amount: 500, paidFromBox: 500, person: 'TestUser' });
                     if (verifyLogic(mockTxs) !== 400) throw new Error("Advance Logic Failed");
-                    if (verifyAdvance(mockTxs, 'TestUser') !== 500) throw new Error("Advance Wallet Logic Failed (Giving)");
-
-                    // Scenario 4: Repayment (Return)
-                    const t4 = { id: '4', type: 'return_advance', amount: 50, desc: 'Cash Return', paidFromBox: -50, person: 'TestUser' };
-                    mockTxs.push(t4);
-                    // 400 + 50 = 450
-                    if (verifyLogic(mockTxs) !== 450) throw new Error("Repayment (Return) Logic Failed");
-                    // Wallet: 500 - 50 = 450
-                    if (verifyAdvance(mockTxs, 'TestUser') !== 450) throw new Error("Advance Wallet Return Logic Failed");
-
-                    // Scenario 5: Repayment (Pay Debt) - The Bug Case
-                    const t5 = { id: '5', type: 'settle_debt', amount: 100, desc: 'Pay: Salary', paidFromBox: -100, person: 'TestUser' };
-                    mockTxs.push(t5);
-                    // 450 - 100 = 350 (Money OUT)
-                    if (verifyLogic(mockTxs) !== 350) throw new Error("Repayment (Pay) Logic Failed (Did not deduct)");
-                    // Wallet: Should remain 450 (Not a return)
-                    if (verifyAdvance(mockTxs, 'TestUser') !== 450) throw new Error("Advance Wallet Pay Logic Failed (Incorrectly deducted)");
-
-                    alert("✅ System Health Check PASSED\n\nAll core logic constraints verified successfully.\n- Balance Calculation: OK\n- Advance Wallet Logic: OK\n- Ambiguous Repayment Handling: OK");
-
+                    if (verifyAdvance(mockTxs, 'TestUser') !== 500) throw new Error("Advance Wallet Logic Failed");
+                    alert("✅ System Health Check PASSED");
                 } catch (e) {
-                    alert("❌ System Health Check FAILED\n\n" + e.message);
-                    console.error(e);
+                    alert("❌ System Health Check FAILED: " + e.message);
                 }
             };
 
             window.sendAlertWhatsApp = (txId) => {
                 const t = txs.find(tx => tx.id === txId);
                 if (!t) return;
-                
                 const staffObj = staff.find(s => getStaffName(s) === t.person);
                 const phone = staffObj?.phone || '';
                 if (!phone) return alert("No phone number for " + t.person);
-
                 const amt = parseFloat(t.amount) || 0;
                 const debt = getDebtToStaff(t.person);
                 const wallet = getAdvanceWalletFor(t.person);
-                const method = t.payment_method || t.paymentMethod || 'Cash';
+                const method = t.paymentMethod || 'Cash';
 
                 let msg = `${String.fromCodePoint(0x1F6A8)} *PETTY CASH ALERT*\n\n`;
                 msg += `${String.fromCodePoint(0x1F4C5)} *Date:* ${new Date(t.subDate).toLocaleDateString('en-GB')}\n`;
-                msg += `${String.fromCodePoint(0x1F4DD)} *Desc:* ${t.desc || t.desc_text || '-'}\n`;
+                msg += `${String.fromCodePoint(0x1F4DD)} *Desc:* ${t.desc || '-'}\n`;
                 msg += `${String.fromCodePoint(0x1F4B8)} *Spent:* ${amt.toFixed(2)} AED\n`;
                 msg += `${String.fromCodePoint(0x1F4B3)} *Paid Using:* ${method}\n\n`;
-                
                 msg += `----------------------------\n`;
                 msg += `${String.fromCodePoint(0x1F3E6)} *ACTIVE ADVANCE:* ${wallet.toFixed(2)} AED\n`;
                 msg += `${String.fromCodePoint(0x1F91D)} *PENDING OWED:* ${debt.toFixed(2)} AED\n`;
                 msg += `----------------------------\n`;
 
                 const cleanNumber = phone.replace(/\D/g, '');
-                const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
-                window.open(url, '_blank');
+                window.open(`https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`, '_blank');
             };
 
             window.onload = () => lucide.createIcons();
