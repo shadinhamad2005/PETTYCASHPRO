@@ -1034,39 +1034,43 @@
             </div>
         </div>
 
-        <!-- WhatsApp Format Selection Modal -->
-        <div id="wa-format-modal"
-            class="hidden fixed inset-0 z-[6000] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/40 backdrop-blur-sm">
-            <div
-                class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
-                <div class="p-6 bg-emerald-600 text-white">
-                    <h3 class="font-black uppercase tracking-tight text-white">Choose Format</h3>
-                    <p class="text-[10px] text-emerald-100 font-bold uppercase tracking-widest mt-1">Select your message style</p>
+        <!-- Custom Phone Input Modal -->
+        <div id="phone-modal"
+            class="hidden fixed inset-0 z-[7000] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/40 backdrop-blur-sm">
+            <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100 p-8 text-center space-y-4">
+                <div class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-indigo-600 mb-2">
+                    <i data-lucide="phone" class="w-8 h-8"></i>
                 </div>
-                <div class="p-6 space-y-3">
-                    <button onclick="window.executeWhatsAppSend('table')"
-                        class="w-full p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left group">
-                        <div class="flex justify-between items-center mb-1">
-                            <p class="text-[10px] font-black text-slate-400 uppercase group-hover:text-emerald-600">Option 1</p>
-                            <span class="bg-slate-200 text-slate-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase">Monospace</span>
-                        </div>
-                        <p class="text-sm font-bold text-slate-800">Professional Table</p>
-                        <p class="text-[10px] text-slate-500 mt-1 leading-tight">Structured text table using monospace fonts for alignment.</p>
-                    </button>
-                    
-                    <button onclick="window.executeWhatsAppSend('emoji')"
-                        class="w-full p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left group">
-                        <div class="flex justify-between items-center mb-1">
-                            <p class="text-[10px] font-black text-slate-400 uppercase group-hover:text-emerald-600">Option 2</p>
-                            <span class="bg-emerald-100 text-emerald-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase">Visual</span>
-                        </div>
-                        <p class="text-sm font-bold text-slate-800">Emoji Summary</p>
-                        <p class="text-[10px] text-slate-500 mt-1 leading-tight">Rich formatting with emojis, perfect for quick scanning on mobile.</p>
-                    </button>
+                <h3 class="text-xl font-black uppercase tracking-tight text-slate-800">WhatsApp Number</h3>
+                <p id="phone-modal-subtitle" class="text-xs text-slate-500 font-bold uppercase tracking-widest">Enter number for Staff Member</p>
+                <div class="relative">
+                    <input type="tel" id="modal-phone-input" 
+                        class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-center text-xl font-black text-slate-800 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                        placeholder="971501234567">
                 </div>
-                <div class="px-6 pb-6">
-                    <button onclick="document.getElementById('wa-format-modal').classList.add('hidden')"
-                        class="w-full py-2 text-slate-400 font-bold text-[10px] hover:text-slate-600 transition-all uppercase tracking-widest">Cancel</button>
+                <div class="grid grid-cols-2 gap-3 pt-4">
+                    <button onclick="document.getElementById('phone-modal').classList.add('hidden')"
+                        class="py-4 rounded-2xl font-bold text-xs text-slate-400 hover:bg-slate-50 transition-all uppercase tracking-widest">Cancel</button>
+                    <button id="btn-submit-phone"
+                        class="bg-indigo-600 text-white py-4 rounded-2xl font-bold text-xs hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all uppercase tracking-widest">Save & Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Confirmation Modal -->
+        <div id="confirm-modal"
+            class="hidden fixed inset-0 z-[8000] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/60 backdrop-blur-sm">
+            <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100 p-8 text-center space-y-4">
+                <div id="confirm-modal-icon-bg" class="bg-amber-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-amber-600 mb-2">
+                    <i id="confirm-modal-icon" data-lucide="help-circle" class="w-8 h-8"></i>
+                </div>
+                <h3 id="confirm-modal-title" class="text-xl font-black uppercase tracking-tight text-slate-800">Confirm Action</h3>
+                <p id="confirm-modal-body" class="text-sm text-slate-500 font-medium">Are you sure you want to proceed?</p>
+                <div class="grid grid-cols-2 gap-3 pt-4">
+                    <button id="btn-confirm-cancel"
+                        class="py-4 rounded-2xl font-bold text-xs text-slate-400 hover:bg-slate-50 transition-all uppercase tracking-widest">Cancel</button>
+                    <button id="btn-confirm-ok"
+                        class="bg-slate-800 text-white py-4 rounded-2xl font-bold text-xs hover:bg-slate-900 shadow-lg transition-all uppercase tracking-widest">Confirm</button>
                 </div>
             </div>
         </div>
@@ -1456,6 +1460,7 @@
             let lastCashCountDate = null;
             let cashCountChecked = false;
             let pendingWhatsAppPayload = null; // Store data for the selection modal
+            let settlementTargetName = null;
 
 
 
@@ -1773,9 +1778,53 @@
             }
 
             window.closeModal = function () {
-                ['funds-modal', 'settle-modal', 'edit-modal', 'receipt-modal', 'statement-modal', 'reimburse-select-modal', 'wa-format-modal', 'receipt-preview-modal', 'legacy-archive-modal'].forEach(id => {
+                ['funds-modal', 'settle-modal', 'edit-modal', 'receipt-modal', 'statement-modal', 'reimburse-select-modal', 'wa-format-modal', 'receipt-preview-modal', 'legacy-archive-modal', 'phone-modal', 'confirm-modal'].forEach(id => {
                     const el = document.getElementById(id); if (el) el.classList.add('hidden');
                 });
+            };
+
+            window.askPhone = (person, callback) => {
+                const modal = document.getElementById('phone-modal');
+                document.getElementById('phone-modal-subtitle').innerText = `Enter number for ${person}`;
+                const input = document.getElementById('modal-phone-input');
+                input.value = '';
+                modal.classList.remove('hidden');
+                input.focus();
+
+                document.getElementById('btn-submit-phone').onclick = async () => {
+                    const val = input.value.trim();
+                    if (!val) return;
+                    await savePhoneNumber(person, val);
+                    modal.classList.add('hidden');
+                    if (callback) callback(val);
+                };
+            };
+
+            window.customConfirm = ({ title, body, icon, iconBg, okText, cancelText, onOk, onCancel }) => {
+                const modal = document.getElementById('confirm-modal');
+                if (title) document.getElementById('confirm-modal-title').innerText = title;
+                if (body) document.getElementById('confirm-modal-body').innerText = body;
+                if (okText) document.getElementById('btn-confirm-ok').innerText = okText;
+                if (cancelText) document.getElementById('btn-confirm-cancel').innerText = cancelText;
+                
+                const iconEl = document.getElementById('confirm-modal-icon');
+                const iconBgEl = document.getElementById('confirm-modal-icon-bg');
+                if (icon) iconEl.setAttribute('data-lucide', icon);
+                if (iconBg) {
+                    iconBgEl.className = `${iconBg} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-2`;
+                }
+                lucide.createIcons();
+
+                modal.classList.remove('hidden');
+
+                document.getElementById('btn-confirm-ok').onclick = () => {
+                    modal.classList.add('hidden');
+                    if (onOk) onOk();
+                };
+                document.getElementById('btn-confirm-cancel').onclick = () => {
+                    modal.classList.add('hidden');
+                    if (onCancel) onCancel();
+                };
             };
 
             window.getTypeStyles = function (type) {
@@ -1874,85 +1923,73 @@
             }
 
             window.sendWhatsApp = (personName) => {
-                const balance = getAdvanceWalletFor(personName);
-                pendingWhatsAppPayload = {
-                    person: personName,
-                    type: 'advance_alert',
-                    data: { balance }
-                };
-                document.getElementById('wa-format-modal').classList.remove('hidden');
+                const bal = getAdvanceWalletFor(personName);
+                if (bal <= 0) return alert("No active advance for " + personName);
+                pendingWhatsAppPayload = { person: personName, type: 'advance_alert', data: { balance: bal } };
+                window.executeWhatsAppSend();
             };
 
             window.sendDebtSummaryWhatsApp = (personName) => {
-                const debts = txs.filter(t => t.person === personName && (t.staffOwed > 0.01) && !t.settled && t.status !== 'Voided');
-                if (debts.length === 0) return window.showStatus("No pending debts", true);
-                
-                pendingWhatsAppPayload = {
-                    person: personName,
-                    type: 'debt_summary',
-                    data: { debts }
-                };
-                document.getElementById('wa-format-modal').classList.remove('hidden');
+                const debts = txs.filter(t => t.person === personName && (t.staffOwed > 0) && !t.settled);
+                if (debts.length === 0) return alert("No pending debts for " + personName);
+                pendingWhatsAppPayload = { person: personName, type: 'debt_summary', data: { debts } };
+                window.executeWhatsAppSend();
             };
 
-            window.executeWhatsAppSend = (format) => {
+            window.executeWhatsAppSend = (format = 'text') => {
                 if (!pendingWhatsAppPayload) return;
                 const { person, type, data } = pendingWhatsAppPayload;
                 const staffObj = staff.find(s => getStaffName(s) === person);
                 let phone = getStaffPhone(staffObj);
 
+                const proceedSend = (phoneNumber) => {
+                    const cleanNumber = cleanPhone(phoneNumber);
+                    let header = `*PETTYCASH PRO* `;
+                    let cta = `\n\n*Please confirm by replying 'OK'. Thank you!*`;
+                    let msg = "";
+
+                    if (type === 'advance_alert') {
+                        msg = `${header}📋\n\nHi *${person}*,\n\nOur records indicate an active advance of:\n💰 *${data.balance.toFixed(2)} AED*\n\nPlease provide the necessary receipts or settle the balance soon.\n\n_Thank you._`;
+                    } 
+                    else if (type === 'debt_summary') {
+                        msg = `${header}📋\n\nHi *${person}*,\n\nBelow is the summary of your pending reimbursements:\n\n`;
+                        let total = 0;
+                        data.debts.forEach(d => {
+                            const rem = (d.staffOwed || 0) - (d.repaidAmount || 0);
+                            total += rem;
+                            msg += `• *${new Date(d.subDate).toLocaleDateString()}*: ${d.desc} → *${rem.toFixed(2)} AED*\n`;
+                        });
+                        msg += `\n*TOTAL PAYABLE: ${total.toFixed(2)} AED*`;
+                    }
+                    else if (type === 'receipt') {
+                        let title = "TRANSACTION RECORDED";
+                        if (data.type === 'settle_debt') title = "PAYMENT COMPLETED";
+                        if (data.type === 'return_advance') title = "CASH RETURN RECORDED";
+
+                        const currentDebt = getDebtToStaff(person);
+                        const currentAdv = getAdvanceWalletFor(person);
+
+                        msg = `${header}✅\n\n*${title}*\n\n👤 *Staff:* ${person}\n📝 *Type:* ${data.type.toUpperCase().replace('_', ' ')}\n💰 *Amount:* *${data.amount.toFixed(2)} AED*\n📅 *Date:* ${new Date().toLocaleDateString()}\n\n*Note:* ${data.desc}`;
+                        
+                        if (data.paidFromAdv) msg += `\n\n💡 _Deducted from Advance: ${data.paidFromAdv.toFixed(2)} AED_`;
+                        if (data.addedToDebt) msg += `\n\n⚠️ _Added to Balance Owed: ${data.addedToDebt.toFixed(2)} AED_`;
+                        
+                        msg += `\n\n🏦 *ACTIVE ADVANCE:* ${currentAdv.toFixed(2)} AED`;
+                        msg += `\n🤝 *BALANCE OWED TO YOU:* *${currentDebt.toFixed(2)} AED*`;
+                        
+                        msg += cta;
+                    }
+
+                    const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
+                    window.open(url, '_blank');
+                    pendingWhatsAppPayload = null;
+                };
+
                 if (!phone) {
-                    phone = prompt(`Enter WhatsApp number for ${person}:`);
-                    if (!phone) return;
-                    savePhoneNumber(person, phone);
+                    window.askPhone(person, (p) => proceedSend(p));
+                } else {
+                    proceedSend(phone);
                 }
-
-                const cleanNumber = cleanPhone(phone);
-                let msg = "";
-
-                if (type === 'advance_alert') {
-                    if (format === 'table') {
-                        msg = `PETTY CASH ALERT\n--------------------\nStaff: ${person}\nStatus: PENDING ADVANCE\n--------------------\nBALANCE: ${data.balance.toFixed(2)} AED\n--------------------\nPlease settle soon.`;
-                    } else {
-                        msg = `💰 *PETTY CASH UPDATE*\n\nHi *${person}*,\nRecords show a pending advance of *${data.balance.toFixed(2)} AED*.\n\n⏳ Please submit your receipts or settle the balance soon. Thank you!`;
-                    }
-                } 
-                else if (type === 'debt_summary') {
-                    let total = 0;
-                    if (format === 'table') {
-                        msg = `DEBT SUMMARY: ${person}\n----------------------------\nDATE       | DESC       | PENDING\n`;
-                        data.debts.forEach(d => {
-                            const rem = (d.staffOwed || 0) - (d.repaidAmount || 0);
-                            total += rem;
-                            msg += `${new Date(d.subDate).toLocaleDateString().padEnd(10)} | ${d.desc.substring(0,10).padEnd(10)} | ${rem.toFixed(2)}\n`;
-                        });
-                        msg += `----------------------------\nTOTAL OWE: ${total.toFixed(2)} AED`;
-                    } else {
-                        msg = `💵 *PAYMENT SUMMARY*\n\nHi *${person}*, here are the amounts currently owed to you:\n\n`;
-                        data.debts.forEach(d => {
-                            const rem = (d.staffOwed || 0) - (d.repaidAmount || 0);
-                            total += rem;
-                            msg += `• *${new Date(d.subDate).toLocaleDateString()}*: ${d.desc} (*${rem.toFixed(2)} AED*)\n`;
-                        });
-                        msg += `\n${String.fromCodePoint(0x1F4B0)} *Total Pending: ${total.toFixed(2)} AED*`;
-                    }
-                }
-                else if (type === 'receipt') {
-                    if (format === 'table') {
-                        msg = `RECEIPT: ${data.type.toUpperCase()}\n--------------------\nPerson: ${person}\nDate: ${new Date().toLocaleDateString()}\nNote: ${data.desc}\n--------------------\nTOTAL: ${data.amount.toFixed(2)} AED`;
-                        if (data.paidFromAdv) msg += `\nFrom Adv: ${data.paidFromAdv.toFixed(2)}`;
-                        if (data.addedToDebt) msg += `\nOwed: ${data.addedToDebt.toFixed(2)}`;
-                    } else {
-                        msg = `${String.fromCodePoint(0x2705)} *TRANSACTION RECORDED*\n\n${String.fromCodePoint(0x1F464)} *Person:* ${person}\n${String.fromCodePoint(0x1F4DD)} *Type:* ${data.type.toUpperCase()}\n${String.fromCodePoint(0x1F4B0)} *Amount:* ${data.amount.toFixed(2)} AED\n${String.fromCodePoint(0x1F4C5)} *Date:* ${new Date().toLocaleDateString()}\n\n*Note:* ${data.desc}`;
-                        if (data.paidFromAdv) msg += `\n\n${String.fromCodePoint(0x1F4A1)} _Deducted from Advance: ${data.paidFromAdv.toFixed(2)} AED_`;
-                        if (data.addedToDebt) msg += `\n\n${String.fromCodePoint(0x26A0)} _Added to Pending Owed: ${data.addedToDebt.toFixed(2)} AED_`;
-                    }
-                }
-
-                const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
-                window.open(url, '_blank');
-                document.getElementById('wa-format-modal').classList.add('hidden');
-                pendingWhatsAppPayload = null;
             };
 
             window.copyReceiptAsImage = async () => {
@@ -2008,77 +2045,73 @@
                 const staffObj = staff.find(s => getStaffName(s) === personName);
                 let phone = getStaffPhone(staffObj);
 
-                if (!phone) {
-                    phone = prompt(`Enter WhatsApp number for ${personName} (e.g., 971501234567):`);
-                    if (!phone) return;
-                    savePhoneNumber(personName, phone);
-                }
-                const cleanNumber = cleanPhone(phone);
-
-                // Deduplicate by ID
-                const uniqueTxs = [];
-                const seenIds = new Set();
-                txs.forEach(t => {
-                    if (t.person === personName && t.status !== 'Voided' && !seenIds.has(t.id)) {
-                        uniqueTxs.push(t);
-                        seenIds.add(t.id);
-                    }
-                });
-
-                const periodTxs = uniqueTxs.filter(t => {
-                    const dateMatch = (!start || t.subDate >= start) && (!end || t.subDate <= end);
-                    return dateMatch;
-                }).sort((a, b) => (a.subDate || '').localeCompare(b.subDate || ''));
-
-                if (periodTxs.length === 0) return alert("No transactions found for this period");
-
-                let openingBal = 0;
-                if (start) {
-                    uniqueTxs.forEach(t => {
-                        if (t.subDate < start) {
-                            const amt = parseFloat(t.amount) || 0;
-                            const ttype = (t.type || '').toLowerCase();
-                            if (ttype === 'advance') openingBal += amt;
-                            else if (ttype === 'return_advance') openingBal -= amt;
-                            else if (ttype === 'expense' && t.isDeductedFromAdvance) openingBal -= (parseFloat(t.advanceAmountUsed) || 0);
+                const proceed = (phoneNumber) => {
+                    const cleanNumber = cleanPhone(phoneNumber);
+                    // Deduplicate by ID
+                    const uniqueTxs = [];
+                    const seenIds = new Set();
+                    txs.forEach(t => {
+                        if (t.person === personName && t.status !== 'Voided' && !seenIds.has(t.id)) {
+                            uniqueTxs.push(t);
+                            seenIds.add(t.id);
                         }
                     });
+
+                    const periodTxs = uniqueTxs.filter(t => {
+                        const dateMatch = (!start || t.subDate >= start) && (!end || t.subDate <= end);
+                        return dateMatch;
+                    }).sort((a, b) => (a.subDate || '').localeCompare(b.subDate || ''));
+
+                    if (periodTxs.length === 0) return alert("No transactions found for this period");
+
+                    let openingBal = 0;
+                    if (start) {
+                        uniqueTxs.forEach(t => {
+                            if (t.subDate < start) {
+                                const amt = parseFloat(t.amount) || 0;
+                                const ttype = (t.type || '').toLowerCase();
+                                if (ttype === 'advance') openingBal += amt;
+                                else if (ttype === 'return_advance') openingBal -= amt;
+                                else if (ttype === 'expense' && t.isDeductedFromAdvance) openingBal -= (parseFloat(t.advanceAmountUsed) || 0);
+                            }
+                        });
+                    }
+
+                    let currentBal = openingBal;
+                    let msg = `*PETTYCASH PRO* 📜\n\n*ACCOUNT STATEMENT*\n👤 *Name:* ${personName}\n📅 *Period:* ${start ? new Date(start).toLocaleDateString('en-GB') : 'All'} to ${end ? new Date(end).toLocaleDateString('en-GB') : 'Today'}\n\n`;
+                    
+                    periodTxs.forEach(t => {
+                        const amt = parseFloat(t.amount) || 0;
+                        const ttype = (t.type || '').toLowerCase();
+                        const dateStr = new Date(t.subDate).toLocaleDateString('en-GB');
+                        let flow = 0;
+                        let symbol = "";
+
+                        if (ttype === 'advance') { flow = amt; symbol = "+"; }
+                        else if (ttype === 'return_advance') { flow = -amt; symbol = "-"; }
+                        else if (ttype === 'expense' && t.isDeductedFromAdvance) {
+                            flow = -(parseFloat(t.advanceAmountUsed) || 0);
+                            symbol = "-";
+                        }
+
+                        currentBal += flow;
+                        if (flow !== 0) {
+                            msg += `🔹 *${dateStr}*: ${t.desc || t.desc_text || '-'}\n   *${symbol}${Math.abs(flow).toFixed(2)} AED*\n\n`;
+                        }
+                    });
+                    msg += `🏦 *Opening Balance:* ${openingBal.toFixed(2)} AED\n`;
+                    msg += `💰 *Closing Balance:* *${currentBal.toFixed(2)} AED*`;
+
+                    const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
+                    window.open(url, '_blank');
+                    window.closeModal();
+                };
+
+                if (!phone) {
+                    window.askPhone(personName, (p) => proceed(p));
+                } else {
+                    proceed(phone);
                 }
-
-                let currentBal = openingBal;
-                let msg = `${String.fromCodePoint(0x1F4DC)} *PETTY CASH STATEMENT*\n`;
-                msg += `${String.fromCodePoint(0x1F464)} *Beneficiary:* ${personName}\n`;
-                msg += `${String.fromCodePoint(0x1F4C5)} *Period:* ${start ? new Date(start).toLocaleDateString('en-GB') : 'All'} to ${end ? new Date(end).toLocaleDateString('en-GB') : 'Today'}\n\n`;
-                msg += `----------------------------\n`;
-                
-                periodTxs.forEach(t => {
-                    const amt = parseFloat(t.amount) || 0;
-                    const ttype = (t.type || '').toLowerCase();
-                    const dateStr = new Date(t.subDate).toLocaleDateString('en-GB');
-                    let flow = 0;
-                    let symbol = "";
-
-                    if (ttype === 'advance') { flow = amt; symbol = "+"; }
-                    else if (ttype === 'return_advance') { flow = -amt; symbol = "-"; }
-                    else if (ttype === 'expense' && t.isDeductedFromAdvance) {
-                        flow = -(parseFloat(t.advanceAmountUsed) || 0);
-                        symbol = "-";
-                    }
-
-                    currentBal += flow;
-                    if (flow !== 0) {
-                        msg += `${String.fromCodePoint(0x1F539)} *${dateStr}*\n`;
-                        msg += `   *Item:* ${t.desc || t.desc_text || '-'}\n`;
-                        msg += `   *Amount:* ${symbol}${Math.abs(flow).toFixed(2)} AED\n\n`;
-                    }
-                });
-                msg += `----------------------------\n\n`;
-                msg += `${String.fromCodePoint(0x1F3E6)} *Opening Balance:* ${openingBal.toFixed(2)} AED\n`;
-                msg += `${String.fromCodePoint(0x1F4B0)} *Closing Balance:* *${currentBal.toFixed(2)} AED*`;
-
-                const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
-                window.open(url, '_blank');
-                window.closeModal();
             };
 
             window.downloadStaffStatementPDF = () => {
@@ -2216,7 +2249,8 @@
             };
 
             window.openReceiptModal = (type, amount, person, desc, paidFromAdv, addedToDebt) => {
-                if (type !== 'advance' && type !== 'repayment' && type !== 'expense') return;
+                const validTypes = ['advance', 'repayment', 'expense', 'return_advance', 'settle_debt'];
+                if (!validTypes.includes(type)) return;
 
                 const modal = document.getElementById('receipt-modal');
                 const btn = document.getElementById('btn-send-whatsapp-receipt');
@@ -2244,8 +2278,12 @@
                         type: 'receipt',
                         data: { type, amount, desc, paidFromAdv, addedToDebt }
                     };
-                    document.getElementById('wa-format-modal').classList.remove('hidden');
+                    window.executeWhatsAppSend();
                 };
+            };
+
+            window.openReceiptPreview = (dummy, tx) => {
+                window.openReceiptModal(tx.type, tx.amount, tx.person, tx.desc || tx.desc_text, tx.paidFromAdv || 0, tx.addedToDebt || 0);
             };
 
             window.renderStaffCards = () => {
@@ -3021,9 +3059,8 @@
                     const docRef = await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), tx);
                     window.showStatus("Transaction Saved!");
                     
-                    if (confirm("Send WhatsApp Alert?")) {
-                        window.sendAlertWhatsApp(docRef.id);
-                    }
+                    // Automatically show receipt modal
+                    window.openReceiptModal(tx.type, tx.amount, tx.person, tx.desc_text, tx.advance_amount_used || 0, tx.staff_owed || 0);
                     
                     document.getElementById('entry-form').reset();
                     window.clearScan();
@@ -3363,6 +3400,35 @@
                 }
             };
 
+            window.markReceived = async (batchId, amount) => {
+                window.customConfirm({
+                    title: "Receive Funds?",
+                    body: `Mark ${amount.toFixed(2)} AED as received from Accounts for this batch?`,
+                    icon: "banknote",
+                    iconBg: "bg-emerald-100",
+                    okText: "Receive",
+                    onOk: async () => {
+                        try {
+                            window.showStatus("Updating...", true);
+                            const batch = writeBatch(db);
+                            const batchTxs = txs.filter(t => t.batch_id === batchId);
+                            batchTxs.forEach(t => {
+                                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
+                                batch.update(docRef, { 
+                                    status: 'Settled',
+                                    received_date: new Date().toISOString(),
+                                    settled: true 
+                                });
+                            });
+                            await batch.commit();
+                            window.showStatus("Batch Received & Settled!");
+                        } catch (err) {
+                            window.showStatus("Error: " + err.message, true);
+                        }
+                    }
+                });
+            };
+
             window.toggleFolderSelect = (id) => {
                 const cb = document.getElementById(id);
                 if (cb) {
@@ -3383,37 +3449,39 @@
                 
                 const selectedCats = Array.from(boxes).map(b => b.value);
                 
-                if (!confirm(`Finalize batch for ${selectedCats.length} category folder(s)?`)) return;
+                window.customConfirm({
+                    title: "Finalize Batch?",
+                    body: `Finalize batch for ${selectedCats.length} category folder(s)?`,
+                    icon: "check-circle",
+                    iconBg: "bg-emerald-100",
+                    okText: "Finalize",
+                    onOk: async () => {
+                        try {
+                            window.showStatus("Finalizing batch...", true);
+                            const batch = writeBatch(db);
+                            const batchId = 'batch_' + new Date().getTime();
+                            const today = new Date().toISOString();
 
-                const stagedTxs = txs.filter(t => (t.type || '').toLowerCase() === 'expense' && t.batchId === 'staged' && t.status !== 'Voided');
-                const txsToBatch = stagedTxs.filter(t => {
-                    const cat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized');
-                    return selectedCats.includes(cat);
-                });
+                            selectedCats.forEach(cat => {
+                                const folderExpenses = window.processingTxs.filter(t => (t.allocations?.some(a => a.category === cat) || t.category === cat));
+                                folderExpenses.forEach(t => {
+                                    const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
+                                    batch.update(docRef, { 
+                                        batch_id: batchId,
+                                        staged_date: today,
+                                        status: 'Batching'
+                                    });
+                                });
+                            });
 
-                if (txsToBatch.length === 0) return;
-
-                try {
-                    window.showStatus("Creating Final Batch...", true);
-                    const batchId = 'BATCH-' + Date.now();
-                    const batch = writeBatch(db);
-                    
-                    const chunkSize = 100;
-                    for (let i = 0; i < txsToBatch.length; i += chunkSize) {
-                        const chunk = txsToBatch.slice(i, i + chunkSize);
-                        chunk.forEach(t => {
-                            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
-                            batch.update(docRef, { batch_id: batchId });
-                        });
+                            await batch.commit();
+                            window.showStatus("Batch Finalized!");
+                            window.renderAll();
+                        } catch (err) {
+                            window.showStatus("Error: " + err.message, true);
+                        }
                     }
-                    
-                    await batch.commit();
-                    window.showStatus("Batch Created Successfully!");
-                    window.renderAll();
-                } catch (err) {
-                    console.error("Batching Error", err);
-                    window.showStatus("Error creating batch: " + err.message, true);
-                }
+                });
             };
 
             window.exportBatchExcel = (batchId) => {
@@ -4000,7 +4068,7 @@
                 
                 let rem = 0;
                 if (intentionalType === 'return_advance') {
-                    rem = getAdvanceWalletFor(t.person);
+                    rem = getAdvanceWalletFor(name);
                     settlementType = 'advance';
                     document.getElementById('settle-title').innerText = "Return Advance";
                 } else {
@@ -4512,15 +4580,21 @@
                 const wallet = getAdvanceWalletFor(t.person);
                 const method = t.paymentMethod || 'Cash';
 
-                let msg = `${String.fromCodePoint(0x1F6A8)} *PETTY CASH ALERT*\n\n`;
-                msg += `${String.fromCodePoint(0x1F4C5)} *Date:* ${new Date(t.subDate).toLocaleDateString('en-GB')}\n`;
-                msg += `${String.fromCodePoint(0x1F4DD)} *Desc:* ${t.desc || '-'}\n`;
-                msg += `${String.fromCodePoint(0x1F4B8)} *Spent:* ${amt.toFixed(2)} AED\n`;
-                msg += `${String.fromCodePoint(0x1F4B3)} *Paid Using:* ${method}\n\n`;
-                msg += `----------------------------\n`;
-                msg += `${String.fromCodePoint(0x1F3E6)} *ACTIVE ADVANCE:* ${wallet.toFixed(2)} AED\n`;
-                msg += `${String.fromCodePoint(0x1F91D)} *PENDING OWED:* ${debt.toFixed(2)} AED\n`;
-                msg += `----------------------------\n`;
+                let msg = `*PETTYCASH PRO* 🚨\n\n*TRANSACTION ALERT*\n\n`;
+                msg += `📅 *Date:* ${new Date(t.subDate).toLocaleDateString('en-GB')}\n`;
+                msg += `📝 *Desc:* ${t.desc || '-'}\n`;
+                msg += `💸 *Amount:* *${amt.toFixed(2)} AED*\n`;
+                msg += `💳 *Method:* ${method}\n\n`;
+                
+                const advUsed = parseFloat(t.advance_amount_used || t.advanceAmountUsed) || 0;
+                const addedDebt = parseFloat(t.staff_owed || t.addedToDebt) || 0;
+                
+                if (advUsed > 0) msg += `💡 _Deducted from Advance: ${advUsed.toFixed(2)} AED_\n`;
+                if (addedDebt > 0) msg += `⚠️ _Added to Balance Owed: ${addedDebt.toFixed(2)} AED_\n`;
+                if (advUsed > 0 || addedDebt > 0) msg += `\n`;
+                msg += `🏦 *ACTIVE ADVANCE:* ${wallet.toFixed(2)} AED\n`;
+                msg += `🤝 *BALANCE OWED TO YOU:* *${debt.toFixed(2)} AED*\n\n`;
+                msg += `*Please confirm by replying 'OK'. Thank you!*`;
 
                 const cleanNumber = phone.replace(/\D/g, '');
                 window.open(`https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`, '_blank');
