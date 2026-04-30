@@ -308,9 +308,11 @@
                                 data-lucide="settings-2" class="w-4 h-4"></i> <span
                                 class="hidden sm:inline">Config</span></button>
                     </div>
-                    <button onclick="window.handleLogout()"
-                        class="p-2.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors border border-transparent hover:border-rose-100 ml-2"
-                        title="Sign Out"><i data-lucide="log-out" class="w-5 h-5"></i></button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="window.handleLogout()"
+                            class="p-2.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors border border-transparent hover:border-rose-100 ml-2"
+                            title="Sign Out"><i data-lucide="log-out" class="w-5 h-5"></i></button>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -506,9 +508,16 @@
                                             </div>
                                             <input type="file" id="form-scan" accept="image/*" capture="environment" class="hidden" onchange="window.handleScanPreview(event)">
                                         </label>
-                                        <div id="scan-preview-container" class="hidden relative w-12 h-12 rounded-lg overflow-hidden border border-slate-200 shadow-sm">
-                                            <img id="scan-preview" class="w-full h-full object-cover">
-                                            <button type="button" onclick="window.clearScan()" class="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5"><i data-lucide="x" class="w-2.5 h-2.5"></i></button>
+                                        <div id="scan-previews-list" class="flex flex-wrap gap-2">
+                                            <!-- Previews will be injected here -->
+                                        </div>
+                                        <div id="add-page-btn" class="hidden">
+                                            <label class="cursor-pointer">
+                                                <div class="w-12 h-12 bg-slate-100 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center text-slate-400 hover:border-indigo-400 hover:text-indigo-500 transition-all">
+                                                    <i data-lucide="plus" class="w-5 h-5"></i>
+                                                </div>
+                                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="window.handleScanPreview(event, true)">
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
@@ -715,20 +724,6 @@
                 </div>
             </div>
 
-
-
-            <!-- View: Staff Ledger -->
-            <div id="view-ledger" class="hidden space-y-6 animate-in fade-in duration-500">
-                <div class="mb-4">
-                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">Staff Ledger &amp; Analytics</h2>
-                    <p class="text-xs font-bold text-slate-500 mt-1">Select a staff member to view their detailed spending and balances.</p>
-                </div>
-                
-                <div id="staff-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    <!-- Cards injected via JS -->
-                </div>
-            </div>
-
             <!-- View: Setup -->
             <div id="view-settings" class="hidden space-y-8 animate-in fade-in duration-500">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -752,22 +747,13 @@
                         </div>
                         <div class="flex flex-col gap-3">
                             <div class="flex gap-4">
-                                <button onclick="window.exportFullDatabase()"
-                                    class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-xs hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all flex items-center gap-2 flex-1"><i
-                                        data-lucide="download-cloud"></i> Text Backup</button>
+                                <button onclick="window.exportMasterBackup()"
+                                    class="bg-amber-500 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-amber-200 hover:bg-amber-600 transition-all flex items-center gap-2 flex-1 justify-center"><i
+                                        data-lucide="package"></i> Master Backup (All Data)</button>
                                 <label
-                                    class="cursor-pointer bg-white text-indigo-600 border border-indigo-200 px-6 py-3 rounded-xl font-bold text-xs hover:bg-indigo-50 transition-all text-center flex items-center gap-2 flex-1 justify-center"><i
-                                        data-lucide="upload-cloud"></i> Text Restore<input type="file" id="import-db-input"
-                                        class="hidden" accept=".json" onchange="window.importFullDatabase(event)"></label>
-                            </div>
-                            <div class="flex gap-4">
-                                <button onclick="window.backupPhotos()"
-                                    class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-xs hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg flex-1"><i
-                                        data-lucide="camera"></i> Photo Backup</button>
-                                <label
-                                    class="cursor-pointer bg-white text-slate-900 border border-slate-900 px-6 py-3 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all text-center flex items-center gap-2 flex-1 justify-center"><i
-                                        data-lucide="refresh-ccw"></i> Photo Restore<input type="file" id="import-photos-input"
-                                        class="hidden" accept=".json" onchange="window.restorePhotos(event)"></label>
+                                    class="cursor-pointer bg-white text-amber-600 border border-amber-500 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-amber-50 transition-all text-center flex items-center gap-2 flex-1 justify-center"><i
+                                        data-lucide="package-open"></i> Master Restore<input type="file" id="import-master-input"
+                                        class="hidden" accept=".json" onchange="window.importMasterBackup(event)"></label>
                             </div>
                         </div>
                     </div>
@@ -828,10 +814,6 @@
                     <button onclick="window.resetData()"
                         class="w-full bg-rose-50 text-rose-600 py-4 rounded-xl font-black border border-rose-200 uppercase text-xs tracking-widest hover:bg-rose-100 hover:border-rose-300 transition-all flex justify-center items-center gap-2"><i
                             data-lucide="alert-triangle" class="w-4 h-4"></i> Danger: Factory Reset Database</button>
-
-                    <button onclick="window.openDiagnostics()"
-                        class="w-full bg-slate-100 text-slate-600 py-4 rounded-xl font-bold border border-slate-200 uppercase text-xs tracking-widest hover:bg-slate-200 transition-all flex justify-center items-center gap-2"><i
-                            data-lucide="activity" class="w-4 h-4"></i> System Diagnostics</button>
                 </div>
             </div>
         </main>
@@ -846,14 +828,18 @@
                             class="w-5 h-5 text-slate-500"></i></button>
                 </div>
                 <div class="p-6 overflow-y-auto space-y-4">
-                    <div class="stats-grid grid grid-cols-2 gap-4">
-                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                            <p class="text-xs font-bold text-slate-400 uppercase">Loaded Transactions</p>
-                            <p id="diag-tx-count" class="text-2xl font-black text-slate-800">0</p>
+                    <div class="stats-grid grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase">Transactions</p>
+                            <p id="diag-tx-count" class="text-xl font-black text-slate-800">0</p>
                         </div>
-                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                            <p class="text-xs font-bold text-slate-400 uppercase">Calculated Balance</p>
-                            <p id="diag-balance" class="text-2xl font-black text-indigo-600">0.00</p>
+                        <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 text-center">
+                            <p class="text-[10px] font-bold text-indigo-400 uppercase">Balance</p>
+                            <p id="diag-balance" class="text-xl font-black text-indigo-600">0.00</p>
+                        </div>
+                        <div class="bg-amber-50 p-4 rounded-2xl border border-amber-100 text-center">
+                            <p class="text-[10px] font-bold text-amber-500 uppercase">With Photos</p>
+                            <p id="diag-photo-count" class="text-xl font-black text-amber-600">0</p>
                         </div>
                     </div>
 
@@ -877,9 +863,17 @@
                         class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all mb-3 shadow-lg shadow-emerald-200">
                         Run System Health Check
                     </button>
-                    <button onclick="window.fixAndNormalizeTypes()"
-                        class="w-full py-3 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-all mb-3 shadow-lg shadow-amber-200 flex items-center justify-center gap-2">
-                        <i data-lucide="wrench" class="w-4 h-4"></i> Fix &amp; Normalize All Types
+                    <button onclick="window.analyzePhotos()"
+                        class="w-full py-3 bg-indigo-50 text-indigo-600 border border-indigo-100 font-bold rounded-xl hover:bg-indigo-100 transition-all mb-3 flex items-center justify-center gap-2">
+                        <i data-lucide="search" class="w-4 h-4"></i> Deep Scan Photo Store
+                    </button>
+                    <button onclick="window.autoLinkOrphanedPhotos()"
+                        class="w-full py-3 bg-emerald-50 text-emerald-600 border border-emerald-100 font-bold rounded-xl hover:bg-emerald-100 transition-all mb-3 flex items-center justify-center gap-2">
+                        <i data-lucide="link" class="w-4 h-4"></i> Auto-Link Orphaned Photos
+                    </button>
+                    <button onclick="window.deduplicatePhotos()"
+                        class="w-full py-3 bg-rose-50 text-rose-600 border border-rose-100 font-bold rounded-xl hover:bg-rose-100 transition-all mb-3 flex items-center justify-center gap-2">
+                        <i data-lucide="copy" class="w-4 h-4"></i> Clean Duplicate Photos
                     </button>
                     <button
                         onclick="window.fetchTransactions(); document.getElementById('diag-modal').classList.add('hidden'); window.showStatus('Refreshing...')"
@@ -972,64 +966,112 @@
                         class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all flex items-center justify-center gap-2">
                         <i data-lucide="message-circle" class="w-4 h-4"></i> Send WhatsApp
                     </button>
-                    </button>
-                </div>
                 </div>
             </div>
         </div>
 
+        <!-- Unified Message Draft / Choice Modal -->
+        <div id="wa-draft-modal"
+            class="hidden fixed inset-0 z-[6000] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/60 backdrop-blur-md">
+            <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
+                <div class="p-6 bg-slate-900 text-white flex justify-between items-center shrink-0">
+                    <h3 class="text-sm font-black uppercase tracking-widest">Message Draft</h3>
+                    <button onclick="window.closeModal()" class="text-slate-400 hover:text-white transition-smooth"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="p-6 text-center space-y-4 shrink-0">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Preview &amp; Choose Option</p>
+                </div>
+                <!-- Universal Mini Receipt Preview - scrollable -->
+                <div id="draft-preview-container" class="mx-6 p-3 bg-slate-50 border border-slate-100 rounded-2xl overflow-y-auto shadow-inner flex-1 min-h-0">
+                    <div id="mini-receipt-draft" class="bg-white p-6 shadow-sm text-left font-mono text-[10px] leading-snug border border-slate-200">
+                        <div class="text-center border-b-2 border-dashed border-slate-400 pb-3 mb-3">
+                            <p class="font-black text-[14px] tracking-wider">PETTYCASH PRO</p>
+                            <p id="draft-rec-date" class="text-[11px] mt-0.5">DATE: --/--/----</p>
+                        </div>
+                        <div id="draft-rec-content" class="space-y-2 mb-3">
+                            <!-- Dynamic Content -->
+                        </div>
+                        <div id="draft-footer" class="mt-4 text-center text-[9px] text-slate-500 border-t-2 border-dashed border-slate-400 pt-2">
+                            <p>*** THANK YOU ***</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 grid grid-cols-1 gap-3 shrink-0">
+                    <button id="btn-wa-text" onclick="window.confirmWASend('text')"
+                        class="bg-emerald-600 text-white py-4 rounded-2xl font-black text-xs hover:bg-emerald-700 shadow-xl shadow-emerald-200 transition-all flex items-center justify-center gap-3">
+                        <i data-lucide="message-circle" class="w-5 h-5"></i> Send WhatsApp Text
+                    </button>
+                    <button id="btn-wa-image" onclick="window.confirmWASend('image')"
+                        class="relative overflow-hidden bg-slate-100 text-slate-800 py-4 rounded-2xl font-black text-xs hover:bg-slate-200 transition-all flex items-center justify-center gap-3">
+                        <i data-lucide="copy" class="w-5 h-5"></i> <span>Copy Receipt Image</span>
+                        <div id="copy-progress-bar" class="absolute bottom-0 left-0 h-1 bg-indigo-600 transition-all duration-300 w-0 hidden"></div>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Receipt Modal -->
+        <!-- Classic Receipt Modal (Triggered after confirmation) -->
         <div id="receipt-modal"
-            class="hidden fixed inset-0 z-[5000] flex items-center justify-center p-4 modal-overlay no-print transition-smooth">
-            <div
-                class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
-                <div class="p-8 text-center space-y-4">
-                    <div
-                        class="bg-emerald-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-emerald-600 mb-2">
-                        <i data-lucide="check" class="w-8 h-8"></i>
+            class="hidden fixed inset-0 z-[6000] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/60 backdrop-blur-md">
+            <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
+                <div class="p-6 bg-slate-900 text-white flex justify-between items-center">
+                    <h3 class="text-sm font-black uppercase tracking-widest">Transaction Success</h3>
+                    <button onclick="window.closeModal()" class="text-slate-400 hover:text-white transition-smooth"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="p-8 text-center">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="check-circle" class="w-8 h-8"></i>
                     </div>
-                    <h3 class="text-xl font-black uppercase tracking-tight text-slate-800">Transaction Recorded</h3>
+                    <h2 class="text-2xl font-black text-slate-800 mb-1 tracking-tight">Saved Successfully</h2>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Transaction recorded in ledger</p>
                     
-                    <!-- Mini Receipt Preview -->
-                    <div id="receipt-preview-container" class="mt-4 p-4 bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden">
-                        <div id="mini-receipt" class="bg-white p-6 shadow-sm text-left font-mono text-[10px] leading-tight border border-slate-200">
-                            <div class="text-center border-b border-dashed border-slate-300 pb-2 mb-2">
-                                <p class="font-black text-[12px]">PETTYCASH PRO</p>
-                                <p id="rec-date">DATE: --/--/----</p>
+                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-left mb-8 font-mono text-[10px] leading-relaxed shadow-inner">
+                        <div class="text-center border-b border-dashed border-slate-300 pb-3 mb-4">
+                            <p class="font-black text-xs">PETTYCASH PRO</p>
+                            <p id="rec-date" class="text-slate-400 mt-1">DATE: --/--/----</p>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between border-b border-slate-100 pb-1">
+                                <span class="text-slate-400 font-bold">TYPE:</span>
+                                <span id="rec-type" class="font-black text-slate-800 uppercase">--</span>
                             </div>
-                            <div class="space-y-1 mb-2">
-                                <p><strong>PERSON:</strong> <span id="rec-person">---</span></p>
-                                <p><strong>TYPE:</strong> <span id="rec-type">---</span></p>
-                                <p><strong>MEMO:</strong> <span id="rec-desc">---</span></p>
+                            <div class="flex justify-between border-b border-slate-100 pb-1">
+                                <span class="text-slate-400 font-bold">PERSON:</span>
+                                <span id="rec-person" class="font-black text-slate-800">--</span>
                             </div>
-                            <div class="border-t border-dashed border-slate-300 pt-2 flex justify-between font-black text-[12px]">
-                                <span>TOTAL:</span>
-                                <span id="rec-amount">0.00 AED</span>
+                            <div class="flex justify-between border-b border-slate-100 pb-1">
+                                <span class="text-slate-400 font-bold">AMOUNT:</span>
+                                <span id="rec-amount" class="font-black text-slate-900 text-xs">0.00 AED</span>
                             </div>
-                            <div id="rec-adv-section" class="mt-1 text-[9px] text-slate-500 hidden">
-                                <p>Advance Used: <span id="rec-adv-used">0.00</span></p>
-                                <p>Debt Added: <span id="rec-debt">0.00</span></p>
+                            <div id="rec-adv-section" class="hidden space-y-1 pt-1 bg-amber-50/50 -mx-2 px-2 rounded-lg">
+                                <div class="flex justify-between">
+                                    <span class="text-amber-600 font-bold">FROM ADVANCE:</span>
+                                    <span id="rec-adv-used" class="font-black text-amber-700">0.00</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-rose-600 font-bold">ADDED TO DEBT:</span>
+                                    <span id="rec-debt" class="font-black text-rose-700">0.00</span>
+                                </div>
                             </div>
-                            <div class="mt-4 text-center text-[8px] text-slate-400">
-                                <p>*** THANK YOU ***</p>
+                            <div class="pt-2">
+                                <p class="text-slate-400 font-bold mb-1 uppercase text-[8px]">Description:</p>
+                                <p id="rec-desc" class="text-slate-800 font-medium leading-normal break-words">--</p>
                             </div>
+                        </div>
+                        <div class="mt-6 text-center text-[8px] text-slate-300 border-t border-dashed border-slate-200 pt-3">
+                            <p>*** TRANSACTION COMPLETED ***</p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2 mt-4">
-                        <button id="btn-copy-receipt-img" onclick="window.copyReceiptAsImage()"
-                            class="bg-indigo-50 text-indigo-600 py-3 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all flex items-center justify-center gap-2">
-                            <i data-lucide="copy" class="w-4 h-4"></i> Copy Image
-                        </button>
-                        <button id="btn-send-whatsapp-receipt"
-                            class="bg-emerald-600 text-white py-3 rounded-xl font-bold text-xs hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all flex items-center justify-center gap-2">
-                            <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
-                        </button>
-                    </div>
-                    <button onclick="window.closeModal()"
-                        class="w-full py-2 text-slate-400 font-bold text-[10px] hover:text-slate-600 transition-all">Close</button>
+                    <button id="btn-send-whatsapp-receipt"
+                        class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black text-xs hover:bg-emerald-700 shadow-xl shadow-emerald-200 transition-all flex items-center justify-center gap-3">
+                        <i data-lucide="message-circle" class="w-5 h-5"></i> Send to WhatsApp
+                    </button>
+                    
+                    <button onclick="window.closeModal()" 
+                        class="w-full mt-3 py-3 rounded-xl font-bold text-xs text-slate-400 hover:bg-slate-50 transition-all uppercase tracking-widest">
+                        Maybe Later
+                    </button>
                 </div>
             </div>
         </div>
@@ -1167,19 +1209,22 @@
                         </button>
                     </div>
                     <div class="space-y-3 hidden" id="edit-scan-section">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Invoice Scan / Image</label>
-                        <div class="flex gap-3 items-center">
+                        <div class="flex justify-between items-center">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Invoice Scans / Images</label>
+                            <button type="button" id="edit-add-page-btn" onclick="document.getElementById('edit-scan-input-append').click()" class="hidden text-indigo-600 hover:text-indigo-700 font-bold text-xs flex items-center gap-1">
+                                <i data-lucide="plus" class="w-3 h-3"></i> Add Page
+                            </button>
+                            <input type="file" id="edit-scan-input-append" accept="image/*" capture="environment" class="hidden" onchange="window.handleEditScanPreview(event, true)">
+                        </div>
+                        <div class="flex flex-col gap-3">
                             <label class="flex-1 cursor-pointer group">
                                 <div class="w-full px-4 py-3 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center gap-2 group-hover:border-indigo-400 group-hover:bg-indigo-50 transition-all">
                                     <i data-lucide="camera" class="w-5 h-5 text-slate-400 group-hover:text-indigo-500"></i>
                                     <span id="edit-scan-label" class="text-xs font-bold text-slate-500 group-hover:text-indigo-600">Change Scan or Paste (Ctrl+V)</span>
                                 </div>
-                                <input type="file" id="edit-scan-input" accept="image/*" capture="environment" class="hidden" onchange="window.handleEditScanPreview(event)">
+                                <input type="file" id="edit-scan-input" accept="image/*" capture="environment" class="hidden" onchange="window.handleEditScanPreview(event, false)">
                             </label>
-                            <div id="edit-scan-preview-container" class="hidden relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 shadow-sm">
-                                <img id="edit-scan-preview" class="w-full h-full object-cover">
-                                <button type="button" onclick="window.clearEditScan()" class="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5"><i data-lucide="x" class="w-2.5 h-2.5"></i></button>
-                            </div>
+                            <div id="edit-scan-previews-list" class="flex flex-wrap gap-3 mt-1"></div>
                         </div>
                     </div>
                     <div class="space-y-1.5">
@@ -1522,13 +1567,23 @@
                 });
             };
 
-            window.uploadInvoiceScan = async (customData = null) => {
-                const data = customData || currentScanData;
-                if (!data) return null;
-                const photoId = 'local-' + Date.now();
-                const compressed = await window.compressImage(data);
-                await window.savePhotoLocal(photoId, compressed);
-                return photoId;
+            window.uploadInvoiceScan = async (customData = null, txId = null) => {
+                const dataArray = customData || currentScanData;
+                if (!dataArray || (Array.isArray(dataArray) && dataArray.length === 0)) return null;
+                
+                const items = Array.isArray(dataArray) ? dataArray : [dataArray];
+                const uploadedIds = [];
+                
+                for (let i = 0; i < items.length; i++) {
+                    const data = items[i];
+                    // If txId is provided, use deterministic naming. Otherwise fallback to random.
+                    const localId = txId ? `local-${txId}-page${i}` : "local-" + Date.now() + "-" + Math.floor(Math.random()*10000);
+                    const compressedData = await window.compressImage(data);
+                    await window.savePhotoLocal(localId, compressedData);
+                    uploadedIds.push(localId);
+                }
+                
+                return uploadedIds.length === 1 ? uploadedIds[0] : uploadedIds;
             };
 
             window.savePhotoLocal = async (id, base64Data) => {
@@ -1778,7 +1833,7 @@
             }
 
             window.closeModal = function () {
-                ['funds-modal', 'settle-modal', 'edit-modal', 'receipt-modal', 'statement-modal', 'reimburse-select-modal', 'wa-format-modal', 'receipt-preview-modal', 'legacy-archive-modal', 'phone-modal', 'confirm-modal'].forEach(id => {
+                ['funds-modal', 'settle-modal', 'edit-modal', 'receipt-modal', 'statement-modal', 'reimburse-select-modal', 'wa-format-modal', 'receipt-preview-modal', 'legacy-archive-modal', 'phone-modal', 'confirm-modal', 'wa-draft-modal'].forEach(id => {
                     const el = document.getElementById(id); if (el) el.classList.add('hidden');
                 });
             };
@@ -1944,22 +1999,63 @@
 
                 const proceedSend = (phoneNumber) => {
                     const cleanNumber = cleanPhone(phoneNumber);
-                    let header = `*PETTYCASH PRO* `;
-                    let cta = `\n\n*Please confirm by replying 'OK'. Thank you!*`;
+                    const header = `*PETTYCASH PRO* `;
+                    const cta = `\n\n*Please confirm by replying 'OK'. Thank you!*`;
+                    const divider = "---------------------------------";
                     let msg = "";
+                    let htmlPreview = "";
 
                     if (type === 'advance_alert') {
-                        msg = `${header}📋\n\nHi *${person}*,\n\nOur records indicate an active advance of:\n💰 *${data.balance.toFixed(2)} AED*\n\nPlease provide the necessary receipts or settle the balance soon.\n\n_Thank you._`;
+                        msg = `${header} ${String.fromCodePoint(0x1F4CB)}\n`;
+                        msg += `DATE: ${new Date().toLocaleDateString('en-GB')}\n`;
+                        msg += `${divider}\n\n`;
+                        msg += `*ADVANCE NOTIFICATION*\n\n`;
+                        msg += `PERSON: *${person}*\n`;
+                        msg += `ACTIVE ADVANCE: *${data.balance.toFixed(2)} AED*\n\n`;
+                        msg += `Please provide receipts soon.\n`;
+                        msg += `${divider}\n`;
+                        msg += `*** THANK YOU ***`;
+
+                        htmlPreview = `
+                            <p class="font-bold text-center mb-2 underline">ADVANCE NOTIFICATION</p>
+                            <p>PERSON: <strong>${person}</strong></p>
+                            <p class="mt-4">ACTIVE ADVANCE: <strong class="text-indigo-600">${data.balance.toFixed(2)} AED</strong></p>
+                            <p class="mt-4 text-[8px] text-slate-400">Please provide receipts soon.</p>
+                        `;
                     } 
                     else if (type === 'debt_summary') {
-                        msg = `${header}📋\n\nHi *${person}*,\n\nBelow is the summary of your pending reimbursements:\n\n`;
+                        msg = `${header} ${String.fromCodePoint(0x1F4CB)}\n`;
+                        msg += `DATE: ${new Date().toLocaleDateString('en-GB')}\n`;
+                        msg += `${divider}\n\n`;
+                        msg += `*REIMBURSEMENT SUMMARY*\n\n`;
+                        msg += `PERSON: *${person}*\n\n`;
                         let total = 0;
+                        let listHtml = "";
                         data.debts.forEach(d => {
                             const rem = (d.staffOwed || 0) - (d.repaidAmount || 0);
                             total += rem;
                             msg += `• *${new Date(d.subDate).toLocaleDateString()}*: ${d.desc} → *${rem.toFixed(2)} AED*\n`;
+                            listHtml += `<div class="flex justify-between py-1 border-b border-dashed border-slate-100">
+                                <span class="truncate pr-2">${d.desc}</span>
+                                <span class="font-bold">${rem.toFixed(2)}</span>
+                            </div>`;
                         });
-                        msg += `\n*TOTAL PAYABLE: ${total.toFixed(2)} AED*`;
+                        msg += `\n${divider}\n`;
+                        msg += `*TOTAL PAYABLE: ${total.toFixed(2)} AED*\n`;
+                        msg += `*** THANK YOU ***`;
+                        msg += cta;
+
+                        htmlPreview = `
+                            <p class="font-bold text-center mb-2 underline uppercase">Reimbursement Summary</p>
+                            <p class="mb-4">PERSON: <strong>${person}</strong></p>
+                            <div class="space-y-1 mb-4">
+                                ${listHtml}
+                            </div>
+                            <div class="flex justify-between font-black text-xs border-t-2 border-slate-200 pt-2">
+                                <span>TOTAL PAYABLE:</span>
+                                <span>${total.toFixed(2)} AED</span>
+                            </div>
+                        `;
                     }
                     else if (type === 'receipt') {
                         let title = "TRANSACTION RECORDED";
@@ -1969,20 +2065,163 @@
                         const currentDebt = getDebtToStaff(person);
                         const currentAdv = getAdvanceWalletFor(person);
 
-                        msg = `${header}✅\n\n*${title}*\n\n👤 *Staff:* ${person}\n📝 *Type:* ${data.type.toUpperCase().replace('_', ' ')}\n💰 *Amount:* *${data.amount.toFixed(2)} AED*\n📅 *Date:* ${new Date().toLocaleDateString()}\n\n*Note:* ${data.desc}`;
+                        msg = `${header} ${String.fromCodePoint(0x2705)}\n`;
+                        msg += `DATE: ${new Date().toLocaleDateString('en-GB')}\n`;
+                        msg += `${divider}\n\n`;
+                        msg += `*${title}*\n\n`;
+                        msg += `PERSON: *${person}*\n`;
+                        msg += `TYPE: *${data.type.toUpperCase().replace('_', ' ')}*\n`;
+                        msg += `MEMO: *${data.desc}*\n`;
+                        if (data.invNo) msg += `INV NO: *${data.invNo}*\n`;
+                        if (data.invDate) msg += `INV DATE: *${new Date(data.invDate).toLocaleDateString('en-GB')}*\n`;
+                        msg += `\n${divider}\n`;
+                        msg += `*TOTAL: ${data.amount.toFixed(2)} AED*\n\n`;
                         
-                        if (data.paidFromAdv) msg += `\n\n💡 _Deducted from Advance: ${data.paidFromAdv.toFixed(2)} AED_`;
-                        if (data.addedToDebt) msg += `\n\n⚠️ _Added to Balance Owed: ${data.addedToDebt.toFixed(2)} AED_`;
+                        if (data.paidFromAdv) msg += `${String.fromCodePoint(0x1F4A1)} _Deducted from Advance: ${data.paidFromAdv.toFixed(2)} AED_\n`;
+                        if (data.addedToDebt) msg += `${String.fromCodePoint(0x26A0)}${String.fromCodePoint(0xFE0F)} _Added to Balance Owed: ${data.addedToDebt.toFixed(2)} AED_\n`;
                         
-                        msg += `\n\n🏦 *ACTIVE ADVANCE:* ${currentAdv.toFixed(2)} AED`;
-                        msg += `\n🤝 *BALANCE OWED TO YOU:* *${currentDebt.toFixed(2)} AED*`;
-                        
+                        msg += `\n${String.fromCodePoint(0x1F3E6)} *ACTIVE ADVANCE:* ${currentAdv.toFixed(2)} AED\n`;
+                        msg += `${String.fromCodePoint(0x1F91D)} *BALANCE OWED TO YOU:* *${currentDebt.toFixed(2)} AED*\n\n`;
+                        msg += `*** THANK YOU ***`;
                         msg += cta;
+
+                        htmlPreview = `
+                            <p class="font-bold text-center mb-2 uppercase tracking-tighter underline">${title}</p>
+                            <div class="space-y-1 text-slate-700">
+                                <p>PERSON: <strong class="text-slate-900">${person}</strong></p>
+                                <p>TYPE: <strong class="text-slate-900">${data.type.toUpperCase().replace('_', ' ')}</strong></p>
+                                <p>MEMO: <strong class="text-slate-900">${data.desc}</strong></p>
+                                ${data.invNo ? `<p>INV NO: <strong>${data.invNo}</strong></p>` : ''}
+                                ${data.invDate ? `<p>INV DATE: <strong>${new Date(data.invDate).toLocaleDateString('en-GB')}</strong></p>` : ''}
+                            </div>
+                            <div class="my-4 border-t-2 border-slate-300 pt-2 font-black text-xs flex justify-between">
+                                <span>TOTAL AMOUNT:</span>
+                                <span>${data.amount.toFixed(2)} AED</span>
+                            </div>
+                            <div class="text-[8px] text-slate-500 space-y-1 italic border-t border-dashed border-slate-200 pt-2">
+                                ${data.paidFromAdv ? `<p>Deducted from Adv: ${data.paidFromAdv.toFixed(2)}</p>` : ''}
+                                ${data.addedToDebt ? `<p>Added to Debt: ${data.addedToDebt.toFixed(2)}</p>` : ''}
+                                <p class="pt-1 font-bold">WALLET: ${currentAdv.toFixed(2)} | OWED: ${currentDebt.toFixed(2)}</p>
+                            </div>
+                        `;
+                    }
+                    else if (type === 'statement') {
+                        msg = `${header} ${String.fromCodePoint(0x1F4DC)}\n`;
+                        msg += `DATE: ${new Date().toLocaleDateString('en-GB')}\n`;
+                        msg += `${divider}\n\n`;
+                        msg += `*ACCOUNT STATEMENT*\n\n`;
+                        msg += `PERSON: *${person}*\n`;
+                        msg += `PERIOD: *${data.period}*\n\n`;
+                        
+                        let rowsHtml = "";
+                        data.rows.forEach(r => {
+                            msg += `• *${r.date}*: ${r.desc}\n   *${r.flow} AED*\n\n`;
+                            rowsHtml += `
+                                <div class="flex justify-between py-1.5 border-b border-dashed border-slate-200">
+                                    <div class="flex flex-col pr-2 flex-1 min-w-0">
+                                        <span class="text-[9px] font-bold text-slate-500">${r.date}</span>
+                                        <span class="text-[10px] text-slate-800 font-semibold break-words">${r.desc}</span>
+                                    </div>
+                                    <span class="font-black text-[11px] self-center shrink-0 ml-2">${r.flow}</span>
+                                </div>
+                            `;
+                        });
+                        
+                        msg += `${divider}\n`;
+                        msg += `*OPENING: ${data.opening.toFixed(2)} AED*\n`;
+                        msg += `*CLOSING: ${data.closing.toFixed(2)} AED*\n`;
+                        msg += `*** THANK YOU ***`;
+                        msg += cta;
+
+                        htmlPreview = `
+                            <p class="font-bold text-center mb-2 underline uppercase tracking-tighter">Account Statement</p>
+                            <p class="text-[8px] text-center mb-4">PERIOD: ${data.period}</p>
+                            <div class="space-y-1 mb-4">
+                                ${rowsHtml}
+                            </div>
+                            <div class="border-t-2 border-slate-400 pt-2 text-[9px] space-y-1">
+                                <div class="flex justify-between font-bold text-slate-700"><span>OPENING BALANCE:</span><span>${data.opening.toFixed(2)}</span></div>
+                                <div class="flex justify-between font-black text-[11px] border-t border-slate-300 pt-1 text-slate-900">
+                                    <span>CLOSING BALANCE:</span>
+                                    <span>${data.closing.toFixed(2)} AED</span>
+                                </div>
+                            </div>
+                        `;
                     }
 
-                    const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
-                    window.open(url, '_blank');
-                    pendingWhatsAppPayload = null;
+                    // Store global values for confirmation
+                    window.currentWAMsg = msg;
+                    window.currentWACleanNumber = cleanNumber;
+
+                    // Show Modal
+                    document.getElementById('draft-rec-date').innerText = "DATE: " + new Date().toLocaleDateString('en-GB');
+                    document.getElementById('draft-rec-content').innerHTML = htmlPreview;
+                    document.getElementById('wa-draft-modal').classList.remove('hidden');
+                    lucide.createIcons();
+
+                    // Pre-render image in background
+                    setTimeout(() => { window.preRenderDraft(); }, 50);
+                };
+
+                window.confirmWASend = async (option) => {
+                    if (option === 'text') {
+                        const url = `https://wa.me/${window.currentWACleanNumber}?text=${encodeURIComponent(window.currentWAMsg)}`;
+                        window.open(url, '_blank');
+                        window.closeModal();
+                        pendingWhatsAppPayload = null;
+                    } else {
+                        const btn = document.getElementById('btn-wa-image');
+                        const progress = document.getElementById('copy-progress-bar');
+                        const orig = btn.innerHTML;
+                        
+                        progress.classList.remove('hidden');
+                        btn.querySelector('span').innerText = "Processing...";
+                        setTimeout(() => { progress.style.width = '60%'; }, 10);
+
+                        try {
+                            const blob = window.currentDraftBlob || await window.captureDraftBlob();
+                            progress.style.width = '100%';
+                            
+                            if (blob) {
+                                const item = new ClipboardItem({ "image/png": blob });
+                                await navigator.clipboard.write([item]);
+                                window.showStatus("Receipt Image Copied!");
+                                
+                                btn.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i> <span>Copy Done!</span>`;
+                                btn.classList.add('bg-emerald-100', 'text-emerald-700', 'border-emerald-200');
+                                
+                                setTimeout(() => { 
+                                    btn.innerHTML = orig; 
+                                    btn.classList.remove('bg-emerald-100', 'text-emerald-700', 'border-emerald-200');
+                                    progress.style.width = '0%';
+                                    progress.classList.add('hidden');
+                                    lucide.createIcons(); 
+                                }, 4000);
+                            }
+                            pendingWhatsAppPayload = null;
+                        } catch (err) {
+                            console.error(err);
+                            window.showStatus("Copy Failed", true);
+                            btn.innerHTML = orig;
+                            progress.style.width = '0%';
+                            progress.classList.add('hidden');
+                            lucide.createIcons();
+                        }
+                    }
+                };
+
+                window.preRenderDraft = async () => {
+                    window.currentDraftBlob = null;
+                    try {
+                        window.currentDraftBlob = await window.captureDraftBlob();
+                    } catch(e) { console.error("Pre-render failed", e); }
+                };
+
+                window.captureDraftBlob = async () => {
+                    const receipt = document.getElementById('mini-receipt-draft');
+                    if (!receipt) return null;
+                    const canvas = await html2canvas(receipt, { scale: 3, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                    return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                 };
 
                 if (!phone) {
@@ -1990,6 +2229,19 @@
                 } else {
                     proceedSend(phone);
                 }
+
+                // Add Keyboard Shortcut: Ctrl + C to copy image
+                const handleKbd = (e) => {
+                    if (e.ctrlKey && e.key.toLowerCase() === 'c') {
+                        const modal = document.getElementById('wa-draft-modal');
+                        if (modal && !modal.classList.contains('hidden')) {
+                            e.preventDefault();
+                            window.confirmWASend('image');
+                        }
+                    }
+                };
+                window.addEventListener('keydown', handleKbd);
+                // Cleanup listener when modal closes (simplified for this app structure)
             };
 
             window.copyReceiptAsImage = async () => {
@@ -2078,8 +2330,9 @@
                     }
 
                     let currentBal = openingBal;
-                    let msg = `*PETTYCASH PRO* 📜\n\n*ACCOUNT STATEMENT*\n👤 *Name:* ${personName}\n📅 *Period:* ${start ? new Date(start).toLocaleDateString('en-GB') : 'All'} to ${end ? new Date(end).toLocaleDateString('en-GB') : 'Today'}\n\n`;
+                    const periodStr = `${start ? new Date(start).toLocaleDateString('en-GB') : 'All'} to ${end ? new Date(end).toLocaleDateString('en-GB') : 'Today'}`;
                     
+                    const statementRows = [];
                     periodTxs.forEach(t => {
                         const amt = parseFloat(t.amount) || 0;
                         const ttype = (t.type || '').toLowerCase();
@@ -2096,15 +2349,27 @@
 
                         currentBal += flow;
                         if (flow !== 0) {
-                            msg += `🔹 *${dateStr}*: ${t.desc || t.desc_text || '-'}\n   *${symbol}${Math.abs(flow).toFixed(2)} AED*\n\n`;
+                            statementRows.push({
+                                date: dateStr,
+                                desc: t.desc || t.desc_text || '-',
+                                flow: `${symbol}${Math.abs(flow).toFixed(2)}`
+                            });
                         }
                     });
-                    msg += `🏦 *Opening Balance:* ${openingBal.toFixed(2)} AED\n`;
-                    msg += `💰 *Closing Balance:* *${currentBal.toFixed(2)} AED*`;
 
-                    const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
-                    window.open(url, '_blank');
-                    window.closeModal();
+                    pendingWhatsAppPayload = { 
+                        person: personName, 
+                        type: 'statement', 
+                        data: { 
+                            period: periodStr,
+                            rows: statementRows,
+                            opening: openingBal,
+                            closing: currentBal
+                        } 
+                    };
+                    window.executeWhatsAppSend();
+                    // ONLY close the statement selector, not the draft modal
+                    document.getElementById('statement-modal').classList.add('hidden');
                 };
 
                 if (!phone) {
@@ -2671,7 +2936,8 @@
                             
                             const voidTag = isVoided ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest"><i data-lucide="ban" class="w-2.5 h-2.5"></i> VOIDED: ${t.voidReason || 'No reason'}</div>` : '';
                             const editTag = (!isVoided && t.editReason) ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-0.5 border border-indigo-100 rounded text-[9px] font-black uppercase tracking-widest" title="Edit Reason: ${t.editReason}"><i data-lucide="pencil" class="w-2.5 h-2.5"></i> EDITED</div>` : '';
-                            const scanTag = t.invoiceUrl 
+                            const hasPhoto = (t.invoiceUrl || t.invoice_url);
+                            const scanTag = (hasPhoto && (t.type || '').toLowerCase() === 'expense')
                                 ? `<button onclick="window.viewInvoice('${t.id}')" class="mt-1.5 inline-flex items-center gap-1 bg-indigo-100 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded text-[9px] font-black uppercase hover:bg-indigo-200 transition-colors" title="View Attached Photo">
                                      <i data-lucide="image" class="w-2.5 h-2.5"></i> SCAN
                                    </button>` 
@@ -2883,33 +3149,68 @@
                 return new Date(now.getTime() - offset).toISOString().split('T')[0];
             };
 
-            let currentScanData = null;
-            window.handleScanPreview = (e) => {
+            let currentScanData = []; // Array of Base64 strings
+
+            window.handleScanPreview = (e, isAppend = false) => {
                 const file = e.target.files[0];
                 if (!file) return;
                 
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    currentScanData = event.target.result;
-                    const preview = document.getElementById('scan-preview');
-                    if (preview) preview.src = currentScanData;
-                    const container = document.getElementById('scan-preview-container');
-                    if (container) container.classList.remove('hidden');
-                    const label = document.getElementById('scan-label');
-                    if (label) label.innerText = "Invoice Attached!";
-                    lucide.createIcons();
+                    if (isAppend) {
+                        currentScanData.push(event.target.result);
+                    } else {
+                        currentScanData = [event.target.result];
+                    }
+                    window.renderScanPreviews();
+                    
+                    // Hide main tap area if we have scans
+                    if (currentScanData.length > 0) {
+                        const label = document.getElementById('scan-label');
+                        if (label) label.parentElement.parentElement.classList.add('hidden');
+                    }
                 };
                 reader.readAsDataURL(file);
             };
 
+            window.renderScanPreviews = () => {
+                const list = document.getElementById('scan-previews-list');
+                const addBtn = document.getElementById('add-page-btn');
+                if (!list || !addBtn) return;
+                list.innerHTML = "";
+                
+                currentScanData.forEach((data, index) => {
+                    const div = document.createElement('div');
+                    div.className = "relative w-12 h-12 rounded-lg overflow-hidden border border-slate-200 shadow-sm animate-in zoom-in duration-200";
+                    div.innerHTML = `
+                        <img src="${data}" class="w-full h-full object-cover">
+                        <button type="button" onclick="window.removeScanPage(${index})" class="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5 shadow-md hover:scale-110 transition-all">
+                            <i data-lucide="x" class="w-2.5 h-2.5"></i>
+                        </button>
+                    `;
+                    list.appendChild(div);
+                });
+                
+                if (currentScanData.length > 0) {
+                    addBtn.classList.remove('hidden');
+                } else {
+                    addBtn.classList.add('hidden');
+                    const label = document.getElementById('scan-label');
+                    if (label) label.parentElement.parentElement.classList.remove('hidden');
+                }
+                lucide.createIcons();
+            };
+
+            window.removeScanPage = (index) => {
+                currentScanData.splice(index, 1);
+                window.renderScanPreviews();
+            };
+
             window.clearScan = () => {
-                currentScanData = null;
+                currentScanData = [];
                 const input = document.getElementById('form-scan');
                 if (input) input.value = '';
-                const container = document.getElementById('scan-preview-container');
-                if (container) container.classList.add('hidden');
-                const label = document.getElementById('scan-label');
-                if (label) label.innerText = "Tap to Scan or Upload";
+                window.renderScanPreviews();
             };
 
             // Clipboard Paste Support
@@ -2931,13 +3232,9 @@
                                 const label = document.getElementById('edit-scan-label');
                                 if (label) label.innerText = "Scan Pasted!";
                             } else {
-                                currentScanData = event.target.result;
-                                const preview = document.getElementById('scan-preview');
-                                if (preview) preview.src = currentScanData;
-                                const container = document.getElementById('scan-preview-container');
-                                if (container) container.classList.remove('hidden');
-                                const label = document.getElementById('scan-label');
-                                if (label) label.innerText = "Invoice Pasted!";
+                                // Multi-page paste support
+                                currentScanData.push(event.target.result);
+                                window.renderScanPreviews();
                             }
                             lucide.createIcons();
                         };
@@ -3040,11 +3337,14 @@
                         return;
                     }
 
-                    if (currentScanData && activeTab === 'expense') {
+                    const txCollection = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions');
+                    const newTxRef = doc(txCollection);
+
+                    if (currentScanData && currentScanData.length > 0 && activeTab === 'expense') {
                         try {
                             btn.innerHTML = `<i data-lucide="upload-cloud" class="w-5 h-5 animate-pulse"></i> Uploading Scan...`;
                             lucide.createIcons();
-                            tx.invoice_url = await window.uploadInvoiceScan();
+                            tx.invoice_url = await window.uploadInvoiceScan(currentScanData, newTxRef.id);
                         } catch (err) {
                             console.error("Storage Error:", err);
                             if (!confirm("Invoice photo upload failed or timed out. Save transaction WITHOUT the photo?")) {
@@ -3056,7 +3356,7 @@
                         }
                     }
 
-                    const docRef = await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), tx);
+                    await setDoc(newTxRef, tx);
                     window.showStatus("Transaction Saved!");
                     
                     // Automatically show receipt modal
@@ -3273,27 +3573,87 @@
                 if (restoreBtn) restoreBtn.disabled = count === 0;
             };
 
-            let currentEditScanData = null;
-            window.handleEditScanPreview = (e) => {
+            let currentEditScanData = [];
+            window.handleEditScanPreview = (e, isAppend = false) => {
                 const file = e.target.files[0]; if (!file) return;
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    currentEditScanData = event.target.result;
-                    document.getElementById('edit-scan-preview').src = currentEditScanData;
-                    document.getElementById('edit-scan-preview-container').classList.remove('hidden');
-                    document.getElementById('edit-scan-label').innerText = "New Scan Attached!";
-                    lucide.createIcons();
+                    const newItem = { isExisting: false, preview: event.target.result, data: event.target.result };
+                    if (isAppend) {
+                        currentEditScanData.push(newItem);
+                    } else {
+                        currentEditScanData = [newItem];
+                    }
+                    window.renderEditScanPreviews();
                 };
                 reader.readAsDataURL(file);
+                e.target.value = '';
             };
-            window.clearEditScan = () => {
-                currentEditScanData = null;
-                const preview = document.getElementById('edit-scan-preview');
-                if (preview) preview.src = '';
-                const container = document.getElementById('edit-scan-preview-container');
-                if (container) container.classList.add('hidden');
+
+            window.renderEditScanPreviews = () => {
+                const list = document.getElementById('edit-scan-previews-list');
+                const addBtn = document.getElementById('edit-add-page-btn');
                 const label = document.getElementById('edit-scan-label');
-                if (label) label.innerText = "Change Scan or Paste (Ctrl+V)";
+                if (!list || !addBtn || !label) return;
+                
+                list.innerHTML = "";
+                currentEditScanData.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = "relative w-12 h-12 rounded-lg overflow-hidden border border-slate-200 shadow-sm animate-in zoom-in duration-200";
+                    
+                    const src = item.preview ? item.preview : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="%23cbd5e1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>';
+                    
+                    div.innerHTML = `
+                        <img src="${src}" class="w-full h-full object-cover cursor-pointer" onclick="window.viewFullPhoto('${src}')">
+                        <button type="button" onclick="window.removeEditScanPage(${index})" class="absolute top-0 right-0 w-5 h-5 bg-slate-900/70 backdrop-blur-sm text-white rounded-bl-lg flex items-center justify-center hover:bg-rose-600 transition-all">
+                            <i data-lucide="x" class="w-3 h-3"></i>
+                        </button>
+                    `;
+                    list.appendChild(div);
+                });
+                
+                if (currentEditScanData.length > 0) {
+                    addBtn.classList.remove('hidden');
+                    label.parentElement.parentElement.classList.add('hidden');
+                } else {
+                    addBtn.classList.add('hidden');
+                    label.parentElement.parentElement.classList.remove('hidden');
+                    label.innerText = "Change Scan or Paste (Ctrl+V)";
+                }
+                lucide.createIcons();
+            };
+
+            window.removeEditScanPage = (index) => {
+                currentEditScanData.splice(index, 1);
+                window.renderEditScanPreviews();
+            };
+
+            window.clearEditScan = () => {
+                currentEditScanData = [];
+                window.renderEditScanPreviews();
+            };
+
+            window.clearInvoiceUrl = () => {
+                if (!confirm("Are you sure you want to permanently remove all photos from this transaction?")) return;
+                const t = txs.find(x => x.id === editingTxId);
+                if (t) {
+                    t.invoice_url = null;
+                    t.invoiceUrl = null;
+                }
+                window.clearEditScan();
+            };
+
+            window.viewFullPhoto = (src) => {
+                if (!src || src.startsWith('data:image/svg')) return;
+                const overlay = document.createElement('div');
+                overlay.className = 'fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4 cursor-zoom-out';
+                overlay.onclick = () => overlay.remove();
+                overlay.innerHTML = `
+                    <div class="relative max-w-full max-h-full">
+                        <img src="${src}" class="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl">
+                        <button onclick="this.closest('.fixed').remove()" class="absolute -top-3 -right-3 w-8 h-8 bg-white text-slate-800 rounded-full font-black text-xs flex items-center justify-center shadow-lg hover:bg-rose-600 hover:text-white transition-all">&times;</button>
+                    </div>`;
+                document.body.appendChild(overlay);
             };
 
             window.compressImage = (base64Str, maxWidth = 1200, maxHeight = 1200, quality = 0.7) => {
@@ -3314,18 +3674,7 @@
                 });
             };
 
-            window.uploadInvoiceScan = async (data = currentScanData) => {
-                if (!data) return null;
-                try {
-                    const localId = "local-" + Date.now() + "-" + Math.floor(Math.random()*1000);
-                    const compressedData = await window.compressImage(data);
-                    await window.savePhotoLocal(localId, compressedData);
-                    return localId;
-                } catch (err) {
-                    console.error("Local Save Error:", err);
-                    throw err;
-                }
-            };
+
 
             window.restoreFromLegacy = async () => {
                 const ids = Array.from(window.selectedLegacyIds);
@@ -3886,6 +4235,54 @@
                 } catch (error) { window.showStatus("Error: " + error.message, true); }
             };
 
+            window.revertDiagnosticsPhotos = async () => {
+                if (!confirm("This will find any legacy photos that were linked incorrectly (time difference > 1 hour) and remove them. Continue?")) return;
+                
+                let unlinkedCount = 0;
+                const batch = writeBatch(db);
+                
+                for (const t of txs) {
+                    let urls = t.invoiceUrl || t.invoice_url;
+                    if (!urls) continue;
+                    if (!Array.isArray(urls)) urls = [urls];
+                    
+                    let newUrls = urls.filter(url => {
+                        if (url.startsWith('local-') && !url.includes(t.id)) {
+                            const parts = url.split('-');
+                            if (parts.length >= 2) {
+                                const photoTime = parseInt(parts[1]);
+                                if (!isNaN(photoTime) && t.timestamp) {
+                                    const txTime = new Date(t.timestamp).getTime();
+                                    const diffHrs = Math.abs(txTime - photoTime) / (1000 * 60 * 60);
+                                    if (diffHrs > 1) {
+                                        console.log(`Unlinking ${url} from tx ${t.desc_text} (Diff: ${diffHrs.toFixed(1)} hrs)`);
+                                        return false;
+                                    }
+                                }
+                            }
+                        }
+                        return true;
+                    });
+                    
+                    if (newUrls.length !== urls.length) {
+                        const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
+                        batch.update(docRef, { invoice_url: newUrls.length > 0 ? newUrls : deleteField() });
+                        unlinkedCount++;
+                    }
+                }
+                
+                if (unlinkedCount > 0) {
+                    try {
+                        await batch.commit();
+                        alert(`Successfully unlinked misplaced photos from ${unlinkedCount} transactions!`);
+                    } catch (e) {
+                        alert("Error: " + e.message);
+                    }
+                } else {
+                    alert("No misplaced auto-linked photos found.");
+                }
+            };
+
             window.editTx = (id) => {
                 editingTxId = id; const t = txs.find(x => x.id === id); if (!t) return;
                 document.getElementById('edit-modal').classList.remove('hidden');
@@ -3904,25 +4301,23 @@
                     document.getElementById('edit-tax-amount').value = t.taxAmount || '';
 
                     scanSection.classList.remove('hidden');
-                    currentEditScanData = null;
-                    if (t.invoiceUrl) {
-                        const preview = document.getElementById('edit-scan-preview');
-                        const container = document.getElementById('edit-scan-preview-container');
-                        const label = document.getElementById('edit-scan-label');
+                    currentEditScanData = [];
+                    let urls = t.invoiceUrl || t.invoice_url;
+                    
+                    if (urls) {
+                        if (!Array.isArray(urls)) urls = [urls];
                         
-                        if (t.invoiceUrl.startsWith('local-')) {
-                            window.getPhotoLocal(t.invoiceUrl).then(data => {
-                                if (data) {
-                                    preview.src = data;
-                                    container.classList.remove('hidden');
-                                    label.innerText = "Local Scan Attached";
-                                }
-                            });
-                        } else {
-                            preview.src = t.invoiceUrl;
-                            container.classList.remove('hidden');
-                            label.innerText = "Current Scan Attached";
-                        }
+                        Promise.all(urls.map(async (u) => {
+                            if (u.startsWith('local-')) {
+                                const base64 = await window.getPhotoLocal(u);
+                                return { isExisting: true, url: u, preview: base64 || '' };
+                            } else {
+                                return { isExisting: true, url: u, preview: u }; 
+                            }
+                        })).then(results => {
+                            currentEditScanData = results;
+                            window.renderEditScanPreviews();
+                        });
                     } else {
                         window.clearEditScan();
                     }
@@ -3977,21 +4372,38 @@
                     updateData.tax_amount = parseFloat(document.getElementById('edit-tax-amount').value) || 0;
                     updateData.net_amount = newAmount - updateData.tax_amount;
 
-                    if (currentEditScanData) {
+                    if (currentEditScanData && currentEditScanData.length > 0) {
                         try {
-                            btn.innerHTML = `<i data-lucide="upload-cloud" class="w-4 h-4 animate-pulse"></i> Uploading...`;
+                            btn.innerHTML = `<i data-lucide="upload-cloud" class="w-4 h-4 animate-pulse"></i> Saving Photos...`;
                             lucide.createIcons();
-                            const url = await window.uploadInvoiceScan(currentEditScanData);
-                            if (url) updateData.invoice_url = url;
+
+                            const existingUrls = currentEditScanData
+                                .filter(item => item.isExisting)
+                                .map(item => item.url);
+
+                            const newPhotos = currentEditScanData
+                                .filter(item => !item.isExisting)
+                                .map(item => item.data);
+
+                            let newUrls = [];
+                            if (newPhotos.length > 0) {
+                                const uploaded = await window.uploadInvoiceScan(newPhotos, editingTxId);
+                                newUrls = Array.isArray(uploaded) ? uploaded : [uploaded];
+                            }
+
+                            const allUrls = [...existingUrls, ...newUrls];
+                            updateData.invoice_url = allUrls.length === 1 ? allUrls[0] : allUrls;
                         } catch (err) { 
                             console.error("Edit Scan Error", err);
-                            if (!confirm("Invoice photo upload failed or timed out. Save changes WITHOUT the new photo?")) {
+                            if (!confirm("Invoice photo save failed. Save changes WITHOUT updating the photo?")) {
                                 btn.disabled = false;
                                 btn.innerHTML = originalText;
                                 lucide.createIcons();
                                 return;
                             }
                         }
+                    } else {
+                        updateData.invoice_url = deleteField();
                     }
                 }
 
@@ -4187,6 +4599,7 @@
                                 repaid_amount: data.repaidAmount || data.repaid_amount || 0,
                                 invoice_no: data.invoiceNo || data.invoice_no || null,
                                 invoice_date: data.invoiceDate || data.invoice_date || null,
+                                invoice_url: data.invoiceUrl || data.invoice_url || null,
                                 batch_id: data.batchId || data.batch_id || null
                             }));
 
@@ -4214,12 +4627,138 @@
                 reader.readAsText(file);
             };
 
+            window.exportMasterBackup = async () => {
+                try {
+                    window.showStatus("Preparing Master Backup...", false);
+                    const db = await window.initPhotoDB();
+                    const transaction = db.transaction([storeName], "readonly");
+                    const store = transaction.objectStore(storeName);
+                    const request = store.getAll();
+                    const keysRequest = store.getAllKeys();
+                    
+                    const [photos, keys] = await Promise.all([
+                        new Promise((resolve) => request.onsuccess = () => resolve(request.result)),
+                        new Promise((resolve) => keysRequest.onsuccess = () => resolve(keysRequest.result))
+                    ]);
+
+                    const backupData = { 
+                        txs, staff, sources, categories,
+                        photos: {}
+                    };
+                    keys.forEach((key, i) => { backupData.photos[key] = photos[i]; });
+                    
+                    const blob = new Blob([JSON.stringify(backupData)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `PettyCash_MasterBackup_${new Date().toISOString().split('T')[0]}.json`;
+                    a.click();
+                    localStorage.setItem('last_photo_backup_date', new Date().toISOString());
+                    window.showStatus("Master Backup Downloaded!");
+                } catch (err) {
+                    console.error("Master Backup Error", err);
+                    window.showStatus("Master Backup Failed", true);
+                }
+            };
+
+            window.importMasterBackup = async (event) => {
+                if (!currentUser) return;
+                const file = event.target.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const d = JSON.parse(e.target.result);
+                        window.showStatus("Restoring Master Backup...", false);
+
+                        // 1. Restore Text Data
+                        if (d.staff || d.sources || d.categories) {
+                            staff = d.staff || staff;
+                            sources = d.sources || sources;
+                            categories = d.categories || categories;
+                            await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { staff, sources, categories });
+                        }
+
+                        if (d.txs && Array.isArray(d.txs)) {
+                            const txData = d.txs.map(data => ({
+                                user_id: currentUser.uid || null,
+                                type: data.type || 'expense',
+                                amount: Math.abs(parseFloat(data.amount || 0)),
+                                person: data.person || null,
+                                desc_text: data.desc || data.desc_text || '',
+                                sub_date: data.subDate || data.sub_date || null,
+                                timestamp: data.timestamp || new Date().toISOString(),
+                                paid_from_box: Math.abs(parseFloat(data.paidFromBox || data.paid_from_box || 0)),
+                                staff_owed: data.staffOwed || data.staff_owed || 0,
+                                manager_owed: data.managerOwed || data.manager_owed || 0,
+                                allocations: data.allocations || [],
+                                is_deducted_from_advance: !!(data.isDeductedFromAdvance || data.is_deducted_from_advance),
+                                advance_amount_used: data.advanceAmountUsed || data.advance_amount_used || 0,
+                                settled: !!data.settled,
+                                tax_amount: data.taxAmount || data.tax_amount || 0,
+                                net_amount: data.netAmount || data.net_amount || 0,
+                                payment_method: data.paymentMethod || data.payment_method || 'Cash',
+                                status: data.status || 'Active',
+                                repaid_amount: data.repaidAmount || data.repaid_amount || 0,
+                                invoice_no: data.invoiceNo || data.invoice_no || null,
+                                invoice_date: data.invoiceDate || data.invoice_date || null,
+                                invoice_url: data.invoiceUrl || data.invoice_url || null,
+                                batch_id: data.batchId || data.batch_id || null
+                            }));
+
+                            const chunkSize = 100;
+                            for (let i = 0; i < txData.length; i += chunkSize) {
+                                const chunk = txData.slice(i, i + chunkSize);
+                                const batch = writeBatch(db);
+                                chunk.forEach(tx => {
+                                    // Use deterministic ID if possible, otherwise let Firestore generate
+                                    const txId = tx.id || doc(collection(db, 'artifacts')).id;
+                                    const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', txId);
+                                    batch.set(docRef, tx);
+                                });
+                                await batch.commit();
+                            }
+                        }
+
+                        // 2. Restore Photos
+                        if (d.photos) {
+                            const photoDB = await window.initPhotoDB();
+                            const transaction = photoDB.transaction([storeName], "readwrite");
+                            const store = transaction.objectStore(storeName);
+                            let count = 0;
+                            for (const key in d.photos) {
+                                store.put(d.photos[key], key);
+                                count++;
+                            }
+                            
+                            await new Promise((resolve, reject) => {
+                                transaction.oncomplete = () => resolve();
+                                transaction.onerror = () => reject(transaction.error);
+                            });
+                            console.log(`Restored ${count} photos from Master Backup.`);
+                        }
+
+                        window.showStatus("Master Restore Complete!", false);
+                        window.fetchTransactions();
+                    } catch (err) {
+                        console.error(err);
+                        alert("Master Restore Failed: " + err.message);
+                    } finally {
+                        event.target.value = '';
+                    }
+                };
+                reader.readAsText(file);
+            };
+
             window.openDiagnostics = () => {
                 const modal = document.getElementById('diag-modal');
                 modal.classList.remove('hidden');
                 const t = getTotals();
                 document.getElementById('diag-tx-count').innerText = txs.length;
                 document.getElementById('diag-balance').innerText = t.balance.toFixed(2);
+                
+                const photoCount = txs.filter(x => x.invoiceUrl || x.invoice_url).length;
+                document.getElementById('diag-photo-count').innerText = photoCount;
+
                 const list = document.getElementById('diag-tx-list');
                 list.innerHTML = "";
                 const sorted = [...txs].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
@@ -4477,7 +5016,7 @@
                 };
             }
 
-            async function fetchTransactions() {
+            window.fetchTransactions = async () => {
                 if (!currentUser) return;
                 try {
                     const q = query(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'));
@@ -4528,6 +5067,200 @@
             }
 
             // --- SYSTEM HEALTH CHECK ---
+            window.autoLinkOrphanedPhotos = async () => {
+                try {
+                    window.showStatus("Searching for Matches...", false);
+                    const photoDB = await window.initPhotoDB();
+                    const transaction = photoDB.transaction([storeName], "readonly");
+                    const store = transaction.objectStore(storeName);
+                    const keysRequest = store.getAllKeys();
+                    const keys = await new Promise((resolve) => keysRequest.onsuccess = () => resolve(keysRequest.result));
+
+                    const linkedKeys = new Set();
+                    txs.forEach(t => {
+                        const url = t.invoiceUrl || t.invoice_url;
+                        if (url && url.startsWith('local-')) linkedKeys.add(url);
+                    });
+                    
+                    const orphanedPhotos = keys.filter(k => !linkedKeys.has(k));
+                    if (orphanedPhotos.length === 0) {
+                        alert("No orphaned photos found to link!");
+                        window.showStatus("Auto-Link Complete");
+                        return;
+                    }
+
+                    let matchCount = 0;
+                    const batch = writeBatch(db);
+
+                    for (const photoKey of orphanedPhotos) {
+                        // First, try deterministic ID matching
+                        let match = txs.find(t => photoKey.includes(t.id));
+
+                        if (!match) {
+                            // Fallback to legacy timestamp matching
+                            const parts = photoKey.split('-');
+                            if (parts.length >= 2) {
+                                const photoTime = parseInt(parts[1]);
+                                if (!isNaN(photoTime)) {
+                                    // Find a transaction within 24 hours
+                                    match = txs.find(t => {
+                                        if (t.invoiceUrl || t.invoice_url) return false;
+                                        if (!t.timestamp) return false;
+                                        const txTime = new Date(t.timestamp).getTime();
+                                        return Math.abs(txTime - photoTime) <= 86400000;
+                                    });
+                                }
+                            }
+                        }
+
+                        if (match) {
+                            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', match.id);
+                            
+                            // If it already has an invoice_url, append it if it's an array, or convert to array
+                            let newUrl = photoKey;
+                            const currentUrl = match.invoiceUrl || match.invoice_url;
+                            if (currentUrl) {
+                                const arr = Array.isArray(currentUrl) ? currentUrl : [currentUrl];
+                                if (!arr.includes(photoKey)) {
+                                    arr.push(photoKey);
+                                    newUrl = arr;
+                                } else {
+                                    newUrl = currentUrl; // no change
+                                }
+                            }
+                            
+                            batch.update(docRef, { invoice_url: newUrl });
+                            matchCount++;
+                            match.invoiceUrl = newUrl; 
+                        }
+                    }
+
+                    if (matchCount > 0) {
+                        if (confirm(`Found matches for ${matchCount} out of ${orphanedPhotos.length} orphaned photos! Update the database to link them?`)) {
+                            await batch.commit();
+                            window.fetchTransactions();
+                            alert(`Successfully linked ${matchCount} photos!`);
+                        }
+                    } else {
+                        alert("Could not find matching transactions for the orphaned photos based on time.");
+                    }
+                    window.showStatus("Auto-Link Complete");
+                } catch (err) {
+                    console.error(err);
+                    alert("Auto-Link Failed: " + err.message);
+                }
+            };
+
+            window.deduplicatePhotos = async () => {
+                try {
+                    window.showStatus("Deduplicating Photos...", false);
+                    const photoDB = await window.initPhotoDB();
+                    const transaction = photoDB.transaction([storeName], "readwrite");
+                    const store = transaction.objectStore(storeName);
+                    
+                    const keysRequest = store.getAllKeys();
+                    const photosRequest = store.getAll();
+                    
+                    const [keys, photos] = await Promise.all([
+                        new Promise((resolve) => keysRequest.onsuccess = () => resolve(keysRequest.result)),
+                        new Promise((resolve) => photosRequest.onsuccess = () => resolve(photosRequest.result))
+                    ]);
+
+                    const contentMap = new Map(); // Content -> MainKey
+                    const duplicates = []; // Keys to delete
+                    const replacements = new Map(); // OldKey -> NewKey
+                    
+                    photos.forEach((data, i) => {
+                        const key = keys[i];
+                        if (contentMap.has(data)) {
+                            const mainKey = contentMap.get(data);
+                            duplicates.push(key);
+                            replacements.set(key, mainKey);
+                        } else {
+                            contentMap.set(data, key);
+                        }
+                    });
+
+                    if (duplicates.length === 0) {
+                        alert("No duplicate photos found based on image content.");
+                        window.showStatus("Deduplication Complete");
+                        return;
+                    }
+
+                    if (!confirm(`Found ${duplicates.length} duplicate photos. Delete them and update links?`)) return;
+
+                    // Delete duplicates
+                    duplicates.forEach(k => store.delete(k));
+                    
+                    // Update transactions in Firestore (Wait, this is slow if many, but we should do it)
+                    // We only update if the old key was being used
+                    const batch = writeBatch(db); 
+                    let updateCount = 0;
+                    txs.forEach(t => {
+                        const url = t.invoiceUrl || t.invoice_url;
+                        if (replacements.has(url)) {
+                            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
+                            batch.update(docRef, { invoice_url: replacements.get(url) });
+                            updateCount++;
+                        }
+                    });
+
+                    if (updateCount > 0) await batch.commit();
+
+                    alert(`Success: Removed ${duplicates.length} duplicate photos and updated ${updateCount} transaction links.`);
+                    window.fetchTransactions();
+                    window.showStatus("Deduplication Complete");
+                } catch (err) {
+                    console.error(err);
+                    alert("Deduplication Failed: " + err.message);
+                }
+            };
+
+            window.analyzePhotos = async () => {
+                try {
+                    window.showStatus("Analyzing Photo Store...", false);
+                    const photoDB = await window.initPhotoDB();
+                    const transaction = photoDB.transaction([storeName], "readonly");
+                    const store = transaction.objectStore(storeName);
+                    const keysRequest = store.getAllKeys();
+                    
+                    const keys = await new Promise((resolve) => keysRequest.onsuccess = () => resolve(keysRequest.result));
+                    
+                    if (keys.length === 0) {
+                        alert("No photos found in local storage (IndexedDB).");
+                        return;
+                    }
+
+                    const linkedKeys = new Set();
+                    txs.forEach(t => {
+                        const url = t.invoiceUrl || t.invoice_url;
+                        if (url && url.startsWith('local-')) linkedKeys.add(url);
+                    });
+                    
+                    const orphanedPhotos = keys.filter(k => !linkedKeys.has(k));
+                    const brokenLinks = Array.from(linkedKeys).filter(k => !keys.includes(k));
+
+                    let msg = `--- PHOTO ANALYSIS ---\n\n`;
+                    msg += `Total Photos in Storage: ${keys.length}\n`;
+                    msg += `Linked Photos: ${keys.length - orphanedPhotos.length}\n`;
+                    msg += `Orphaned Photos (In Storage but not in Tx): ${orphanedPhotos.length}\n`;
+                    msg += `Broken Links (Tx has ID but photo missing): ${brokenLinks.length}\n\n`;
+
+                    if (orphanedPhotos.length > 0) {
+                        msg += `TIP: You have ${orphanedPhotos.length} photos that are not linked to any transaction. This usually happens if you restored photos but not the matching transaction records.`;
+                    }
+
+                    console.log("Orphaned Photo Keys:", orphanedPhotos);
+                    console.log("Broken Transaction Links:", brokenLinks);
+                    
+                    alert(msg);
+                    window.showStatus("Analysis Complete");
+                } catch (err) {
+                    console.error(err);
+                    alert("Analysis Failed: " + err.message);
+                }
+            };
+
             window.runSystemHealthCheck = () => {
                 console.log("Starting System Health Check...");
                 const mockTxs = [];
@@ -4572,48 +5305,55 @@
             window.sendAlertWhatsApp = (txId) => {
                 const t = txs.find(tx => tx.id === txId);
                 if (!t) return;
-                const staffObj = staff.find(s => getStaffName(s) === t.person);
-                const phone = staffObj?.phone || '';
-                if (!phone) return alert("No phone number for " + t.person);
-                const amt = parseFloat(t.amount) || 0;
-                const debt = getDebtToStaff(t.person);
-                const wallet = getAdvanceWalletFor(t.person);
-                const method = t.paymentMethod || 'Cash';
-
-                let msg = `*PETTYCASH PRO* 🚨\n\n*TRANSACTION ALERT*\n\n`;
-                msg += `📅 *Date:* ${new Date(t.subDate).toLocaleDateString('en-GB')}\n`;
-                msg += `📝 *Desc:* ${t.desc || '-'}\n`;
-                msg += `💸 *Amount:* *${amt.toFixed(2)} AED*\n`;
-                msg += `💳 *Method:* ${method}\n\n`;
                 
-                const advUsed = parseFloat(t.advance_amount_used || t.advanceAmountUsed) || 0;
-                const addedDebt = parseFloat(t.staff_owed || t.addedToDebt) || 0;
-                
-                if (advUsed > 0) msg += `💡 _Deducted from Advance: ${advUsed.toFixed(2)} AED_\n`;
-                if (addedDebt > 0) msg += `⚠️ _Added to Balance Owed: ${addedDebt.toFixed(2)} AED_\n`;
-                if (advUsed > 0 || addedDebt > 0) msg += `\n`;
-                msg += `🏦 *ACTIVE ADVANCE:* ${wallet.toFixed(2)} AED\n`;
-                msg += `🤝 *BALANCE OWED TO YOU:* *${debt.toFixed(2)} AED*\n\n`;
-                msg += `*Please confirm by replying 'OK'. Thank you!*`;
-
-                const cleanNumber = phone.replace(/\D/g, '');
-                window.open(`https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+                pendingWhatsAppPayload = { 
+                    person: t.person, 
+                    type: 'receipt', 
+                    data: { 
+                        type: t.type || 'expense',
+                        amount: parseFloat(t.amount) || 0,
+                        desc: t.desc || t.desc_text || '-',
+                        invNo: t.invNo || t.invoice_no || '',
+                        invDate: t.invDate || t.invoice_date || '',
+                        paidFromAdv: parseFloat(t.advance_amount_used || t.advanceAmountUsed) || 0,
+                        addedToDebt: parseFloat(t.staff_owed || t.addedToDebt) || 0
+                    } 
+                };
+                window.executeWhatsAppSend();
             };
 
             window.viewInvoice = async (txId) => {
                 const t = txs.find(x => x.id === txId);
-                if (!t || !t.invoiceUrl) return;
+                const urlOrUrls = t ? (t.invoiceUrl || t.invoice_url) : null;
+                if (!urlOrUrls) return;
                 
-                let src = t.invoiceUrl;
-                if (src.startsWith('local-')) {
-                    window.showStatus("Loading Photo...", false);
-                    const localData = await window.getPhotoLocal(src);
-                    if (localData) src = localData;
-                    window.showStatus("Loaded");
+                const urls = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
+                window.showStatus(`Loading ${urls.length} Page(s)...`, false);
+                
+                const imageSrcs = [];
+                for (const url of urls) {
+                    let src = url;
+                    if (src.startsWith('local-')) {
+                        const localData = await window.getPhotoLocal(src);
+                        if (localData) src = localData;
+                    }
+                    imageSrcs.push(src);
                 }
                 
+                window.showStatus("Loaded");
                 const win = window.open('', '_blank');
-                win.document.write(`<html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;"><img src="${src}" style="max-width:100%;max-height:100vh;"></body></html>`);
+                const imagesHtml = imageSrcs.map(src => `<img src="${src}" style="max-width:100%;margin-bottom:20px;box-shadow:0 10px 30px rgba(0,0,0,0.5);">`).join('');
+                win.document.write(`
+                    <html>
+                    <body style="margin:0;background:#1a1a1a;display:flex;flex-direction:column;align-items:center;padding:20px;font-family:sans-serif;">
+                        <div style="background:#333;padding:10px 20px;border-radius:10px;color:white;margin-bottom:20px;font-weight:bold;position:sticky;top:10px;z-index:100;box-shadow:0 5px 15px rgba(0,0,0,0.3);">
+                            ${urls.length} Page(s) Attached
+                        </div>
+                        ${imagesHtml}
+                        <button onclick="window.print()" style="margin-top:20px;padding:10px 30px;border-radius:10px;border:none;background:#4f46e5;color:white;font-weight:bold;cursor:pointer;">Print Invoice</button>
+                    </body>
+                    </html>
+                `);
                 win.document.close();
             };
 
