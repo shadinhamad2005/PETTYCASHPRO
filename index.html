@@ -2159,8 +2159,7 @@
                     document.getElementById('wa-draft-modal').classList.remove('hidden');
                     lucide.createIcons();
 
-                    // Pre-render image in background
-                    setTimeout(() => { window.preRenderDraft(); }, 50);
+                    // Removed pre-rendering to prevent UI lag on modal open
                 };
 
                 window.confirmWASend = async (option) => {
@@ -2169,53 +2168,49 @@
                         window.open(url, '_blank');
                         window.closeModal();
                         pendingWhatsAppPayload = null;
-                    } else {
+                    } else if (option === 'image') {
                         const btn = document.getElementById('btn-wa-image');
                         const progress = document.getElementById('copy-progress-bar');
-                        const orig = btn.innerHTML;
+                        
+                        // Hardcode default HTML to prevent capturing "Processing..." if clicked multiple times
+                        const defaultHtml = `<i data-lucide="copy" class="w-5 h-5"></i> <span>Copy Receipt Image</span><div id="copy-progress-bar" class="absolute bottom-0 left-0 h-1 bg-indigo-600 transition-all duration-300 w-0 hidden"></div>`;
                         
                         progress.classList.remove('hidden');
                         btn.querySelector('span').innerText = "Processing...";
                         setTimeout(() => { progress.style.width = '60%'; }, 10);
 
-                        try {
-                            const blob = window.currentDraftBlob || await window.captureDraftBlob();
-                            progress.style.width = '100%';
-                            
-                            if (blob) {
-                                const item = new ClipboardItem({ "image/png": blob });
-                                await navigator.clipboard.write([item]);
-                                window.showStatus("Receipt Image Copied!");
+                        // Give UI a chance to paint the progress bar before freezing
+                        setTimeout(async () => {
+                            try {
+                                const blob = await window.captureDraftBlob();
+                                progress.style.width = '100%';
                                 
-                                btn.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i> <span>Copy Done!</span>`;
-                                btn.classList.add('bg-emerald-100', 'text-emerald-700', 'border-emerald-200');
-                                
-                                setTimeout(() => { 
-                                    btn.innerHTML = orig; 
-                                    btn.classList.remove('bg-emerald-100', 'text-emerald-700', 'border-emerald-200');
-                                    progress.style.width = '0%';
-                                    progress.classList.add('hidden');
-                                    lucide.createIcons(); 
-                                }, 4000);
+                                if (blob) {
+                                    const item = new ClipboardItem({ "image/png": blob });
+                                    await navigator.clipboard.write([item]);
+                                    window.showStatus("Receipt Image Copied!");
+                                    
+                                    btn.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i> <span>Copy Done!</span>`;
+                                    btn.classList.add('bg-emerald-100', 'text-emerald-700', 'border-emerald-200');
+                                    
+                                    setTimeout(() => { 
+                                        btn.innerHTML = defaultHtml; 
+                                        btn.classList.remove('bg-emerald-100', 'text-emerald-700', 'border-emerald-200');
+                                        lucide.createIcons(); 
+                                    }, 4000);
+                                }
+                                pendingWhatsAppPayload = null;
+                            } catch (err) {
+                                console.error(err);
+                                window.showStatus("Copy Failed", true);
+                                btn.innerHTML = defaultHtml;
+                                lucide.createIcons();
                             }
-                            pendingWhatsAppPayload = null;
-                        } catch (err) {
-                            console.error(err);
-                            window.showStatus("Copy Failed", true);
-                            btn.innerHTML = orig;
-                            progress.style.width = '0%';
-                            progress.classList.add('hidden');
-                            lucide.createIcons();
-                        }
+                        }, 50);
                     }
                 };
 
-                window.preRenderDraft = async () => {
-                    window.currentDraftBlob = null;
-                    try {
-                        window.currentDraftBlob = await window.captureDraftBlob();
-                    } catch(e) { console.error("Pre-render failed", e); }
-                };
+                // Pre-rendering removed to optimize performance
 
                 window.captureDraftBlob = async () => {
                     const receipt = document.getElementById('mini-receipt-draft');
@@ -2231,16 +2226,21 @@
                 }
 
                 // Add Keyboard Shortcut: Ctrl + C to copy image
-                const handleKbd = (e) => {
-                    if (e.ctrlKey && e.key.toLowerCase() === 'c') {
-                        const modal = document.getElementById('wa-draft-modal');
-                        if (modal && !modal.classList.contains('hidden')) {
-                            e.preventDefault();
-                            window.confirmWASend('image');
+                if (!window._waKbdListener) {
+                    window._waKbdListener = (e) => {
+                        if (e.ctrlKey && e.key.toLowerCase() === 'c') {
+                            const modal = document.getElementById('wa-draft-modal');
+                            if (modal && !modal.classList.contains('hidden')) {
+                                e.preventDefault();
+                                // Avoid re-triggering if already processing
+                                const btn = document.getElementById('btn-wa-image');
+                                if (btn && btn.innerText.includes('Processing')) return;
+                                window.confirmWASend('image');
+                            }
                         }
-                    }
-                };
-                window.addEventListener('keydown', handleKbd);
+                    };
+                    window.addEventListener('keydown', window._waKbdListener);
+                }
                 // Cleanup listener when modal closes (simplified for this app structure)
             };
 
