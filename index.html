@@ -4320,9 +4320,17 @@
                 const yyyy = today.getFullYear();
                 const dateStr = `${dd}.${mm}.${yyyy}`;
                 const invPrefix = `B${dd}${mm}${yyyy}`;
-                // Filename: mm-yyyy warehouse pettycash-ddmmyyyy
-                const fileName = `${mm}-${yyyy} warehouse pettycash-${dd}${mm}${yyyy}.xlsx`;
+                const fileName = `Pettycash - ${dd}${mm}${yyyy}.xlsx`;
 
+                const headingMap = {
+                    "warehouses": "Site maintenece-warehouse",
+                    "adnoc": "Petrol Chip Payment for EIC Cars",
+                    "hilux": "TOYOTA PickUp-Shj 72588",
+                    "crv": "CRV- SHJ 87318",
+                    "tucson": "Tucson- SHJ 57586",
+                    "admin building": "Admin & Showroom -Services",
+                    "open yard": "site maintenece-Openyards"
+                };
                 // No-VAT categories: admin drainage, vehicles (Tucson, CRV, Pickup), adnoc, hilux
                 const noVatCats = ['adnoc', 'hilux', 'crv', 'tucson', 'pickup', 'vehicles', 'admin drainage'];
 
@@ -4424,7 +4432,9 @@
                     titleRow.height = 25;
                     ws.mergeCells(2, 1, 2, lastColIndex);
                     const titleCell = ws.getCell(2, 1);
-                    titleCell.value = cat;
+                    const lowerCat = cat.toLowerCase();
+                    const displayCat = headingMap[lowerCat] || cat.split(' ').map(w => w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : '').join(' ');
+                    titleCell.value = displayCat;
                     titleCell.font = { bold: true, size: 13, name: 'Comic Sans MS' };
                     titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
@@ -4444,7 +4454,14 @@
                     dateCell.alignment = { horizontal: 'left', vertical: 'middle' };
 
                     const invRefCell = ws.getCell(3, isNoVat ? 4 : 5);
-                    invRefCell.value = `Invoice ${cat} ${invPrefix}`;
+                    const catWords = cat.split(' ').filter(w => w);
+                    let catInitials = '';
+                    if (catWords.length >= 2) {
+                        catInitials = catWords[0].charAt(0).toUpperCase() + catWords[1].charAt(0).toUpperCase();
+                    } else if (catWords.length === 1) {
+                        catInitials = catWords[0].charAt(0).toUpperCase();
+                    }
+                    invRefCell.value = `Invoice Ref No - ${catInitials}${dd}${mm}${yyyy}`;
                     invRefCell.font = { bold: true, size: 9, color: { argb: 'FFFF0000' }, name: 'Comic Sans MS' };
                     invRefCell.alignment = { horizontal: 'right', vertical: 'middle' };
 
