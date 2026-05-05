@@ -421,7 +421,7 @@
                                         <span
                                             class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
                                         <input type="number" id="form-amount" step="0.01" required placeholder="0.00"
-                                            oninput="window.checkAdvanceWallet(document.getElementById('form-person').value)"
+                                            oninput="window.checkAdvanceWallet(document.getElementById('form-person').value); if(window.calculateVAT) window.calculateVAT();"
                                             class="modern-input w-full pl-8 pr-4 py-4 rounded-xl text-xl font-bold text-slate-800">
                                     </div>
                                 </div>
@@ -489,6 +489,16 @@
                             </div>
 
                             <div id="reimburse-fields" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
+                                <div class="md:col-span-2 flex flex-col gap-2 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <label class="flex items-center gap-3 cursor-pointer">
+                                        <input type="checkbox" id="form-has-vat" class="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" checked onchange="window.calculateVAT()">
+                                        <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wide">Includes VAT (5%)</span>
+                                    </label>
+                                    <div id="vat-amount-container" class="flex items-center gap-3 mt-2">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">VAT Amount (AED)</label>
+                                        <input type="number" id="form-tax-amount" step="0.01" class="modern-input px-3 py-2 rounded-lg font-bold text-sm text-slate-800 w-32">
+                                    </div>
+                                </div>
                                 <div class="space-y-2">
                                     <label
                                         class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Invoice
@@ -4117,6 +4127,21 @@
 
 
 
+            window.calculateVAT = () => {
+                const amountInput = document.getElementById('form-amount');
+                const hasVatCheckbox = document.getElementById('form-has-vat');
+                const vatInput = document.getElementById('form-tax-amount');
+                if (!amountInput || !hasVatCheckbox || !vatInput) return;
+                
+                const amount = parseFloat(amountInput.value) || 0;
+                if (hasVatCheckbox.checked && amount > 0) {
+                    const vat = amount - (amount / 1.05);
+                    vatInput.value = vat.toFixed(2);
+                } else {
+                    vatInput.value = '';
+                }
+            };
+
             window.restoreFromLegacy = async () => {
                 const ids = Array.from(window.selectedLegacyIds);
                 if (ids.length === 0) return;
@@ -4419,8 +4444,8 @@
                     dateCell.alignment = { horizontal: 'left', vertical: 'middle' };
 
                     const invRefCell = ws.getCell(3, isNoVat ? 4 : 5);
-                    invRefCell.value = `Invoice Site Works ${invPrefix}`;
-                    invRefCell.font = { bold: true, size: 11, color: { argb: 'FFFF0000' }, name: 'Comic Sans MS' };
+                    invRefCell.value = `Invoice ${cat} ${invPrefix}`;
+                    invRefCell.font = { bold: true, size: 9, color: { argb: 'FFFF0000' }, name: 'Comic Sans MS' };
                     invRefCell.alignment = { horizontal: 'right', vertical: 'middle' };
 
                     // --- ROW 4: Column Headers (Bold, Comic Sans MS) ---
@@ -4459,7 +4484,12 @@
                         const desc = t.desc || '';
                         const billNo = t.invoiceNo || t.id.split('-').pop();
                         const total = parseFloat(t.amount || 0);
-                        const vat = parseFloat((total * 0.04762).toFixed(2));
+                        let vat = 0;
+                        if (t.tax_amount !== undefined) {
+                            vat = parseFloat(t.tax_amount || 0);
+                        } else {
+                            vat = parseFloat((total * 0.04762).toFixed(2));
+                        }
                         const amount = parseFloat((total - vat).toFixed(2));
                         const rowNum = dataStartRow + i;
 
@@ -4536,11 +4566,19 @@
                             cell.value = { formula: `SUM(E${dataStartRow}:E${dataEndRow})`, result: txsList.reduce((s,t)=>s+parseFloat(t.amount||0),0) };
                             cell.numFmt = '#,##0.00';
                         } else if (!isNoVat && c === 5) {
-                            const sumAmt = txsList.reduce((s,t)=>{ const tot=parseFloat(t.amount||0); return s+(tot-parseFloat((tot*0.04762).toFixed(2))); },0);
+                            const sumAmt = txsList.reduce((s,t)=>{ 
+                                const tot=parseFloat(t.amount||0); 
+                                const v = t.tax_amount !== undefined ? parseFloat(t.tax_amount||0) : parseFloat((tot*0.04762).toFixed(2));
+                                return s+(tot-v); 
+                            },0);
                             cell.value = { formula: `SUM(E${dataStartRow}:E${dataEndRow})`, result: parseFloat(sumAmt.toFixed(2)) };
                             cell.numFmt = '#,##0.00';
                         } else if (!isNoVat && c === 6) {
-                            const sumVat = txsList.reduce((s,t)=>s+parseFloat((parseFloat(t.amount||0)*0.04762).toFixed(2)),0);
+                            const sumVat = txsList.reduce((s,t)=> {
+                                const tot=parseFloat(t.amount||0);
+                                const v = t.tax_amount !== undefined ? parseFloat(t.tax_amount||0) : parseFloat((tot*0.04762).toFixed(2));
+                                return s + v;
+                            },0);
                             cell.value = { formula: `SUM(F${dataStartRow}:F${dataEndRow})`, result: parseFloat(sumVat.toFixed(2)) };
                             cell.numFmt = '#,##0.00';
                         } else if (!isNoVat && c === 7) {
