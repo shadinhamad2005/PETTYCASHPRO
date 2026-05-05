@@ -13,6 +13,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Excel generation -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <!-- ExcelJS for rich Excel reports with logo -->
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <!-- EIC Logo base64 data -->
+    <script src="logo_data.js"></script>
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -251,6 +255,7 @@
                     In</button>
 
                 <div class="flex flex-col gap-4 pt-2">
+
                     <div class="flex items-center gap-3">
                         <div class="flex-1 h-px bg-slate-200"></div>
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Options</span>
@@ -726,35 +731,82 @@
 
             <!-- View: Setup -->
             <div id="view-settings" class="hidden space-y-8 animate-in fade-in duration-500">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="modern-card p-8 flex items-center justify-between gap-6 border-l-4 border-l-amber-500">
-                        <div>
-                            <h3 class="text-amber-900 font-extrabold uppercase tracking-tight text-lg">Legacy Archive</h3>
-                            <p class="text-slate-500 text-xs mt-1 font-medium">View and restore invoices that were previously marked as legacy/archived.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Storage & Integration -->
+                    <div class="space-y-6">
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="p-2 bg-slate-100 text-slate-600 rounded-lg"><i data-lucide="cloud" class="w-5 h-5"></i></div>
+                                <div>
+                                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">OneDrive Integration</h4>
+                                    <p class="text-[10px] text-slate-500 font-medium">Automatic Folder Sync</p>
+                                </div>
+                            </div>
+                            
+                            <div class="relative z-10">
+                                <div class="flex justify-between items-start mb-6">
+                                    <div>
+                                        <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">OneDrive Integration</h4>
+                                        <p class="text-[10px] text-slate-500 font-medium" id="onedrive-status-label">Automatic Folder Sync</p>
+                                    </div>
+                                    <div id="onedrive-status-badge" class="hidden px-2 py-0.5 bg-amber-100 text-amber-700 text-[8px] font-black uppercase rounded-full">Reconnect Required</div>
+                                </div>
+                                
+                                <button id="btn-sync-to-onedrive" onclick="window.syncBrowserToOneDrive()"
+                                    class="w-full bg-white text-slate-800 border border-slate-200 py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all flex items-center gap-2 justify-center hidden hover:bg-slate-50">
+                                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> <span>Sync Browser to OneDrive</span>
+                                </button>
+                            </div>
                         </div>
-                        <button onclick="window.openLegacyArchive()"
-                            class="bg-amber-600 text-white px-6 py-3 rounded-xl font-bold text-xs hover:bg-amber-700 shadow-lg shadow-amber-200 transition-all flex items-center gap-2">
-                            <i data-lucide="archive"></i> Manage Legacy
-                        </button>
+
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-slate-100 text-slate-600 rounded-lg"><i data-lucide="archive" class="w-5 h-5"></i></div>
+                                <div>
+                                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">Legacy Archive</h4>
+                                    <p class="text-[10px] text-slate-500 font-medium">Archived Transactions</p>
+                                </div>
+                            </div>
+                            <button onclick="window.openLegacyArchive()"
+                                class="bg-slate-100 text-slate-700 px-5 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-slate-200 transition-all border border-slate-200">
+                                View Records
+                            </button>
+                        </div>
                     </div>
 
-                    <div
-                        class="modern-card p-8 flex items-center justify-between gap-6 border-l-4 border-l-indigo-500">
-                        <div>
-                            <h3 class="text-indigo-900 font-extrabold uppercase tracking-tight text-lg">Data & Backup</h3>
-                            <p class="text-slate-500 text-xs mt-1 font-medium">Securely export your financial data and 
-                                invoice photos to your computer.</p>
-                        </div>
-                        <div class="flex flex-col gap-3">
-                            <div class="flex gap-4">
-                                <button onclick="window.exportMasterBackup()"
-                                    class="bg-amber-500 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-amber-200 hover:bg-amber-600 transition-all flex items-center gap-2 flex-1 justify-center"><i
-                                        data-lucide="package"></i> Master Backup (All Data)</button>
-                                <label
-                                    class="cursor-pointer bg-white text-amber-600 border border-amber-500 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-amber-50 transition-all text-center flex items-center gap-2 flex-1 justify-center"><i
-                                        data-lucide="package-open"></i> Master Restore<input type="file" id="import-master-input"
-                                        class="hidden" accept=".json" onchange="window.importMasterBackup(event)"></label>
+                    <!-- Data Administration -->
+                    <div class="space-y-6">
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><i data-lucide="database" class="w-5 h-5"></i></div>
+                                <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">Ledger Administration</h4>
                             </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="window.exportMasterBackup()"
+                                    class="bg-indigo-600 text-white px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100">
+                                    Export Ledger
+                                </button>
+                                <label class="cursor-pointer bg-white text-indigo-600 border border-indigo-200 px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-50 transition-all text-center">
+                                    Import Ledger <input type="file" accept=".json" onchange="window.importMasterBackup(event)" class="hidden">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="p-2 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="image" class="w-5 h-5"></i></div>
+                                <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">Photo Archives</h4>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="window.backupPhotos()"
+                                    class="bg-amber-500 text-white px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-amber-600 transition-all shadow-md shadow-amber-100">
+                                    Backup Photos
+                                </button>
+                                <label class="cursor-pointer bg-white text-amber-600 border border-amber-200 px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-amber-50 transition-all text-center">
+                                    Restore Photos <input type="file" accept=".json" onchange="window.restorePhotos(event)" class="hidden">
+                                </label>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -1487,6 +1539,10 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
 
+        // Export for global access by admin tools
+        window.db = db;
+        window.FirebaseFirestore = { doc, updateDoc, deleteField };
+
         {
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'petty-cash-pro';
 
@@ -1576,9 +1632,34 @@
                 
                 for (let i = 0; i < items.length; i++) {
                     const data = items[i];
-                    // If txId is provided, use deterministic naming. Otherwise fallback to random.
+                    // Professional Naming: YYYY-MM-DD_ID_Desc_PageX.jpg
+                    const tx = txs.find(x => x.id === txId) || {};
+                    const dateStr = tx.subDate || new Date().toISOString().split('T')[0];
+                    const descStr = (tx.desc || tx.desc_text || "Invoice").substring(0, 15).replace(/[^a-z0-9]/gi, '_');
+                    
                     const localId = txId ? `local-${txId}-page${i}` : "local-" + Date.now() + "-" + Math.floor(Math.random()*10000);
+                    const fileName = `${dateStr}_${descStr}_${localId.replace('local-', '')}.jpg`;
                     const compressedData = await window.compressImage(data);
+                    
+                    // 1. Save to OneDrive Folder if active
+                    if (!onedriveFolderHandle && sessionStorage.getItem('onedrive_prompted') !== 'true') {
+                        if (confirm("Your OneDrive folder is not linked for this session. Link it now for direct-to-disk backup?")) {
+                            await window.linkOneDriveFolder();
+                        }
+                        sessionStorage.setItem('onedrive_prompted', 'true');
+                    }
+
+                    if (onedriveFolderHandle) {
+                        try {
+                            const fileHandle = await onedriveFolderHandle.getFileHandle(fileName, { create: true });
+                            const writable = await fileHandle.createWritable();
+                            const res = await fetch(compressedData);
+                            const blob = await res.blob();
+                            await writable.write(blob);
+                            await writable.close();
+                        } catch (err) { console.error("OneDrive Save Error", err); }
+                    }
+
                     await window.savePhotoLocal(localId, compressedData);
                     uploadedIds.push(localId);
                 }
@@ -1597,15 +1678,218 @@
                 });
             };
 
-            window.getPhotoLocal = async (id) => {
-                const db = await window.initPhotoDB();
-                return new Promise((resolve, reject) => {
+            let onedriveFolderHandle = null;
+
+            window.linkOneDriveFolder = async () => {
+                try {
+                    onedriveFolderHandle = await window.showDirectoryPicker({
+                        mode: 'readwrite'
+                    });
+                    
+                    const btn = document.getElementById('btn-link-onedrive');
+                    const text = document.getElementById('link-status-text');
+                    
+                    if (onedriveFolderHandle) {
+                        btn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                        btn.classList.remove('bg-slate-800', 'text-white');
+                        text.innerText = "OneDrive Link Active";
+                        document.getElementById('btn-sync-to-onedrive').classList.remove('hidden');
+                        const badge = document.getElementById('onedrive-status-badge');
+                        if (badge) badge.classList.add('hidden');
+                        window.showStatus("OneDrive Connected");
+                        sessionStorage.setItem('onedrive_active', 'true');
+                        
+                        // Run a quick sync check
+                        window.verifyAllSyncStatus();
+                    }
+                } catch (err) {
+                    console.error("Folder Link Error:", err);
+                    if (err.name !== 'AbortError') window.showStatus("Failed to link folder", true);
+                }
+            };
+
+            window.verifyAllSyncStatus = async () => {
+                if (!onedriveFolderHandle) return;
+                
+                let updated = false;
+                for (const t of txs) {
+                    if (t.invoiceUrl || t.invoice_url) {
+                        const localId = Array.isArray(t.invoiceUrl || t.invoice_url) 
+                            ? (t.invoiceUrl || t.invoice_url)[0] 
+                            : (t.invoiceUrl || t.invoice_url);
+                        
+                        if (typeof localId === 'string' && localId.startsWith('local-')) {
+                            // Professional Naming: YYYY-MM-DD_ID_Desc_PageX.jpg
+                            const dateStr = t.subDate || new Date().toISOString().split('T')[0];
+                            const descStr = (t.desc || t.desc_text || "Invoice").substring(0, 15).replace(/[^a-z0-9]/gi, '_');
+                            const fileName = `${dateStr}_${descStr}_${localId.replace('local-', '')}.jpg`;
+                            
+                            try {
+                                await onedriveFolderHandle.getFileHandle(fileName);
+                                if (!t.isSynced) { t.isSynced = true; updated = true; }
+                            } catch (e) {
+                                // Double-Check: Legacy naming fallback
+                                try {
+                                    const legacyName = `${localId.replace('local-', '')}.jpg`;
+                                    await onedriveFolderHandle.getFileHandle(legacyName);
+                                    if (!t.isSynced) { t.isSynced = true; updated = true; }
+                                } catch(e2) {
+                                    if (t.isSynced) { t.isSynced = false; updated = true; }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Force UI update
+                window.renderAll();
+                if (window.lucide) lucide.createIcons();
+            };
+
+            window.syncBrowserToOneDrive = async () => {
+                if (!onedriveFolderHandle) {
+                    alert("Please link your OneDrive folder first.");
+                    return;
+                }
+
+                try {
+                    window.showStatus("Syncing browser storage to OneDrive...", false);
+                    const db = await window.initPhotoDB();
                     const transaction = db.transaction([storeName], "readonly");
                     const store = transaction.objectStore(storeName);
-                    const request = store.get(id);
-                    request.onsuccess = () => resolve(request.result);
-                    request.onerror = (e) => reject(e.target.error);
-                });
+                    const keysRequest = store.getAllKeys();
+                    const photosRequest = store.getAll();
+
+                    const [keys, photos] = await Promise.all([
+                        new Promise((resolve) => keysRequest.onsuccess = () => resolve(keysRequest.result)),
+                        new Promise((resolve) => photosRequest.onsuccess = () => resolve(photosRequest.result))
+                    ]);
+
+                    let count = 0;
+                    for (let i = 0; i < keys.length; i++) {
+                        const localId = keys[i];
+                        const data = photos[i];
+                        
+                        // Use existing naming logic
+                        const txId = localId.split('-')[1]; // Try to get txId
+                        const tx = txs.find(x => x.id === txId) || {};
+                        const dateStr = tx.subDate || new Date().toISOString().split('T')[0];
+                        const descStr = (tx.desc || tx.desc_text || "Archived").substring(0, 15).replace(/[^a-z0-9]/gi, '_');
+                        const fileName = `${dateStr}_${descStr}_${localId.replace('local-', '')}.jpg`;
+
+                        try {
+                            // Check if already exists to skip
+                            await onedriveFolderHandle.getFileHandle(fileName);
+                        } catch (e) {
+                            // Doesn't exist, so we write it
+                            const fileHandle = await onedriveFolderHandle.getFileHandle(fileName, { create: true });
+                            const writable = await fileHandle.createWritable();
+                            const res = await fetch(data);
+                            const blob = await res.blob();
+                            await writable.write(blob);
+                            await writable.close();
+                            count++;
+                        }
+                    }
+
+                    window.showStatus(`Sync Complete! ${count} new photos moved to OneDrive.`);
+                    await window.verifyAllSyncStatus(); // Refresh checkmarks
+                    alert(`Successfully moved ${count} photos from browser memory to your OneDrive folder.`);
+                } catch (err) {
+                    console.error("Sync Error:", err);
+                    window.showStatus("Sync Failed", true);
+                }
+            };
+
+            window.clearAllLocalPhotos = async () => {
+                const confirmed = confirm("⚠️ DANGER ZONE: This will permanently delete ALL invoice photos from your browser's local memory.\n\nOnly do this if you have ALREADY synced them to OneDrive or have a backup.\n\nProceed with cleanup?");
+                if (!confirmed) return;
+                
+                const secondConfirm = confirm("Are you 100% sure? This cannot be undone.");
+                if (!secondConfirm) return;
+
+                try {
+                    window.showStatus("Clearing browser storage...");
+                    const db = await window.initPhotoDB();
+                    const transaction = db.transaction([storeName], "readwrite");
+                    const store = transaction.objectStore(storeName);
+                    const request = store.clear();
+                    
+                    request.onsuccess = () => {
+                        window.showStatus("Browser memory cleared!");
+                        alert("Cleanup Successful. All local browser photos have been removed. Your OneDrive files are safe.");
+                        window.renderAll();
+                    };
+                } catch (err) {
+                    console.error("Clear Error:", err);
+                    window.showStatus("Cleanup Failed", true);
+                }
+            };
+
+            window.resetAllInvoiceLinks = async () => {
+                const confirmed = confirm("🚨 MASTER RESET: This will remove ALL invoice links from ALL transactions in your cloud database.\n\nOld transactions will no longer show 'Missing' or 'Attached'.\n\nThis is PERMANENT. Start Fresh today?");
+                if (!confirmed) return;
+
+                const secondConfirm = confirm("Are you 100% sure? This will update your entire database.");
+                if (!secondConfirm) return;
+
+                try {
+                    window.showStatus("Resetting all system links...", false);
+                    
+                    // Use existing global Firebase tools
+                    const { doc, updateDoc, deleteField } = window.FirebaseFirestore || {};
+                    if (!updateDoc || !deleteField || !window.db) {
+                        throw new Error("Database connection not ready. Please wait 5 seconds and try again.");
+                    }
+                    
+                    let count = 0;
+                    for (const t of txs) {
+                        if (t.invoiceUrl || t.invoice_url) {
+                            const ref = doc(window.db, "transactions", t.id);
+                            await updateDoc(ref, {
+                                invoice_url: deleteField(),
+                                invoiceUrl: deleteField()
+                            });
+                            count++;
+                        }
+                    }
+
+                    window.showStatus(`System Reset Successful! ${count} links removed.`);
+                    alert(`Done! ${count} old invoice references have been removed.`);
+                    window.location.reload();
+                } catch (err) {
+                    console.error("Master Reset Error:", err);
+                    window.showStatus("Reset Failed: " + err.message, true);
+                }
+            };
+
+            window.getPhotoLocal = async (id) => {
+                try {
+                    // Try OneDrive Folder First
+                    if (onedriveFolderHandle) {
+                        try {
+                            const fileName = `${id.replace('local-', '')}.jpg`;
+                            const fileHandle = await onedriveFolderHandle.getFileHandle(fileName);
+                            const file = await fileHandle.getFile();
+                            return file; // Return as Blob
+                        } catch (e) {
+                            console.warn("Not found in OneDrive, checking DB...");
+                        }
+                    }
+
+                    // Fallback to IndexedDB
+                    const db = await window.initPhotoDB();
+                    return new Promise((resolve, reject) => {
+                        const transaction = db.transaction([storeName], "readonly");
+                        const store = transaction.objectStore(storeName);
+                        const request = store.get(id);
+                        request.onsuccess = () => resolve(request.result);
+                        request.onerror = (e) => reject(e.target.error);
+                    });
+                } catch (err) {
+                    console.error("Photo Fetch Error:", err);
+                    return null;
+                }
             };
 
             window.backupPhotos = async () => {
@@ -1644,12 +1928,85 @@
                 }
             };
 
+            window.exportMasterBackup = async () => {
+                try {
+                    window.showStatus("Preparing Master Backup...", false);
+                    const backup = {
+                        version: "2.0",
+                        timestamp: new Date().toISOString(),
+                        transactions: txs,
+                        config: { staff, sources, categories, last_cash_count_date: lastCashCountDate }
+                    };
+                    
+                    const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `PettyCash_Ledger_Backup_${new Date().toISOString().split('T')[0]}.json`;
+                    a.click();
+                    window.showStatus("Ledger Backup Downloaded!");
+                } catch (err) {
+                    console.error("Backup Error", err);
+                    window.showStatus("Backup Failed", true);
+                }
+            };
+
+            window.importMasterBackup = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (!confirm("WARNING: This will replace your current transactions and settings. Continue?")) {
+                    e.target.value = '';
+                    return;
+                }
+
+                try {
+                    window.showStatus("Importing Ledger Data...", false);
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+                    
+                    if (!data.transactions) throw new Error("Invalid backup file format.");
+
+                    // Batch update Firestore
+                    const batch = writeBatch(db);
+                    
+                    // 1. Update Config
+                    if (data.config) {
+                        const configRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings');
+                        batch.set(configRef, data.config);
+                    }
+
+                    // 2. Clear & Import Transactions
+                    // Note: We don't delete old ones to prevent data loss, we just add missing ones or update
+                    for (const t of data.transactions) {
+                        const txRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id || doc(collection(db, 'temp')).id);
+                        const cleanTx = { ...t };
+                        delete cleanTx.id; // Don't store ID inside the document
+                        // Map back to DB names if necessary
+                        cleanTx.desc_text = t.desc || t.desc_text;
+                        cleanTx.invoice_no = t.invNo || t.invoice_no;
+                        cleanTx.invoice_date = t.invDate || t.invoice_date;
+                        cleanTx.advance_amount_used = t.advanceAmountUsed || t.advance_amount_used;
+                        cleanTx.staff_owed = t.staffOwed || t.staff_owed;
+                        
+                        batch.set(txRef, cleanTx, { merge: true });
+                    }
+
+                    await batch.commit();
+                    window.showStatus("Ledger Successfully Restored!");
+                    setTimeout(() => window.location.reload(), 1000);
+                } catch (err) {
+                    console.error("Import Error", err);
+                    window.showStatus("Import Failed: " + err.message, true);
+                }
+                e.target.value = '';
+            };
+
             window.restorePhotos = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
                 
                 try {
-                    window.showStatus("Reading Backup File...", false);
+                    window.showStatus("Unpacking Photo Warehouse...", false);
                     const text = await file.text();
                     const backupData = JSON.parse(text);
                     const db = await window.initPhotoDB();
@@ -1665,6 +2022,7 @@
                     
                     transaction.oncomplete = () => {
                         window.showStatus(`Successfully Restored ${count} Photos!`);
+                        window.analyzePhotos(); // Update health dashboard
                         e.target.value = ''; 
                     };
                 } catch (err) {
@@ -2937,11 +3295,24 @@
                             const voidTag = isVoided ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest"><i data-lucide="ban" class="w-2.5 h-2.5"></i> VOIDED: ${t.voidReason || 'No reason'}</div>` : '';
                             const editTag = (!isVoided && t.editReason) ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-0.5 border border-indigo-100 rounded text-[9px] font-black uppercase tracking-widest" title="Edit Reason: ${t.editReason}"><i data-lucide="pencil" class="w-2.5 h-2.5"></i> EDITED</div>` : '';
                             const hasPhoto = (t.invoiceUrl || t.invoice_url);
-                            const scanTag = (hasPhoto && (t.type || '').toLowerCase() === 'expense')
-                                ? `<button onclick="window.viewInvoice('${t.id}')" class="mt-1.5 inline-flex items-center gap-1 bg-indigo-100 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded text-[9px] font-black uppercase hover:bg-indigo-200 transition-colors" title="View Attached Photo">
-                                     <i data-lucide="image" class="w-2.5 h-2.5"></i> SCAN
-                                   </button>` 
-                                : '';
+                            let scanTag = '';
+                            if (hasPhoto && (t.type || '').toLowerCase() === 'expense') {
+                                if (t.isSynced) {
+                                    scanTag = `<button onclick="window.viewInvoice('${t.id}')" class="mt-1.5 inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-100 px-1.5 py-0.5 rounded text-[9px] font-black uppercase hover:opacity-80 transition-colors">
+                                                 <i data-lucide="check-circle" class="w-2.5 h-2.5"></i> SYNCED
+                                               </button>`;
+                                } else if (onedriveFolderHandle) {
+                                    // Folder is linked but file not found there
+                                    scanTag = `<button onclick="window.viewInvoice('${t.id}')" class="mt-1.5 inline-flex items-center gap-1 bg-rose-50 text-rose-600 border border-rose-100 px-1.5 py-0.5 rounded text-[9px] font-black uppercase hover:opacity-80 transition-colors">
+                                                 <i data-lucide="alert-circle" class="w-2.5 h-2.5"></i> MISSING
+                                               </button>`;
+                                } else {
+                                    // Folder not linked, assume it's in browser
+                                    scanTag = `<button onclick="window.viewInvoice('${t.id}')" class="mt-1.5 inline-flex items-center gap-1 bg-slate-100 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded text-[9px] font-black uppercase hover:opacity-80 transition-colors">
+                                                 <i data-lucide="paperclip" class="w-2.5 h-2.5"></i> ATTACHED
+                                               </button>`;
+                                }
+                            }
 
                             return `<tr class="hover:bg-slate-50 transition-colors group ${voidStyle}">
                             <td class="px-6 py-4 font-bold text-slate-500 font-mono text-xs ${isVoided ? 'line-through' : ''}">${window.formatSafeDate(t.invoiceDate || t.subDate)}</td>
@@ -3812,15 +4183,17 @@
                             const today = new Date().toISOString();
 
                             selectedCats.forEach(cat => {
-                                const folderExpenses = window.processingTxs.filter(t => (t.allocations?.some(a => a.category === cat) || t.category === cat));
-                                folderExpenses.forEach(t => {
-                                    const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
-                                    batch.update(docRef, { 
-                                        batch_id: batchId,
-                                        staged_date: today,
-                                        status: 'Batching'
+                                const folderData = window.currentStagedFolders.find(f => f.cat === cat);
+                                if (folderData && folderData.txs) {
+                                    folderData.txs.forEach(t => {
+                                        const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
+                                        batch.update(docRef, { 
+                                            batch_id: batchId,
+                                            staged_date: today,
+                                            status: 'Batching'
+                                        });
                                     });
-                                });
+                                }
                             });
 
                             await batch.commit();
@@ -3833,7 +4206,7 @@
                 });
             };
 
-            window.exportBatchExcel = (batchId) => {
+            window.exportBatchExcel = async (batchId) => {
                 if (!window.globalBatchMap || !window.globalBatchMap[batchId]) return;
                 
                 const batch = window.globalBatchMap[batchId];
@@ -3846,77 +4219,163 @@
                     catGroups[cat].push(t);
                 });
 
-                const wb = XLSX.utils.book_new();
                 const today = new Date();
-                const dateStr = `${today.getDate().toString().padStart(2,'0')}.${(today.getMonth()+1).toString().padStart(2,'0')}.${today.getFullYear()}`;
-                const invPrefix = `B${today.getDate().toString().padStart(2,'0')}${(today.getMonth()+1).toString().padStart(2,'0')}${today.getFullYear()}`;
+                const dd = today.getDate().toString().padStart(2,'0');
+                const mm = (today.getMonth()+1).toString().padStart(2,'0');
+                const yyyy = today.getFullYear();
+                const dateStr = `${dd}.${mm}.${yyyy}`;
+                const invPrefix = `B${dd}${mm}${yyyy}`;
+                // Filename: mm-yyyy warehouse pettycash-ddmmyyyy
+                const fileName = `${mm}-${yyyy} warehouse pettycash-${dd}${mm}${yyyy}.xlsx`;
 
-                const noVatCats = ['adnoc', 'hilux', 'crv', 'tucson'];
+                // No-VAT categories: admin drainage, vehicles (Tucson, CRV, Pickup), adnoc, hilux
+                const noVatCats = ['adnoc', 'hilux', 'crv', 'tucson', 'pickup', 'vehicles', 'admin drainage'];
 
-                const style_header = {
-                    fill: { fgColor: { rgb: "F2F2F2" } },
-                    font: { bold: true, sz: 11, name: "Arial" },
-                    alignment: { horizontal: "center", vertical: "center" },
-                    border: {
-                        top: { style: "thin" }, bottom: { style: "thin" },
-                        left: { style: "thin" }, right: { style: "thin" }
-                    }
+                // --- Logo from embedded JS constant (works with file:// protocol) ---
+                const logoBase64 = window.EIC_LOGO_B64 || null;
+                const logoExtension = 'jpeg';
+
+                const ExcelJSWorkbook = window.ExcelJS ? window.ExcelJS.Workbook : null;
+                if (!ExcelJSWorkbook) {
+                    window.showStatus('ExcelJS not loaded, using fallback', true);
+                    return;
+                }
+
+                const wb = new ExcelJSWorkbook();
+
+                // Helper: apply thin border to a cell
+                const thinBorder = {
+                    top: { style: 'thin' }, bottom: { style: 'thin' },
+                    left: { style: 'thin' }, right: { style: 'thin' }
                 };
 
-                const style_cell = {
-                    font: { sz: 10, name: "Arial" },
-                    border: {
-                        top: { style: "thin" }, bottom: { style: "thin" },
-                        left: { style: "thin" }, right: { style: "thin" }
-                    },
-                    alignment: { vertical: "center" }
-                };
-
-                const style_num = { ...style_cell, alignment: { horizontal: "right", vertical: "center" } };
-                const style_center = { ...style_cell, alignment: { horizontal: "center", vertical: "center" } };
-                const style_total = { ...style_num, font: { bold: true, sz: 11, name: "Arial" } };
-
-                Object.keys(catGroups).forEach(cat => {
-                    const txs = catGroups[cat];
+                for (const cat of Object.keys(catGroups)) {
+                    const txsList = catGroups[cat].slice().sort((a, b) => {
+                        const da = new Date(a.invoiceDate || a.subDate || a.sub_date || 0);
+                        const db = new Date(b.invoiceDate || b.subDate || b.sub_date || 0);
+                        return da - db;
+                    });
                     const isNoVat = noVatCats.includes(cat.toLowerCase());
-                    const wsData = [];
-                    const lastCol = isNoVat ? 4 : 6;
+                    const lastColIndex = isNoVat ? 5 : 7; // 1-based column count
 
-                    wsData.push([{ v: "Emirates For Ind. Cities Co.", s: { font: { bold: true, sz: 14, color: { rgb: "C00000" } }, alignment: { horizontal: "center" } } }]);
-                    wsData.push([{ v: cat, s: { font: { bold: true, sz: 16 }, alignment: { horizontal: "center" } } }]);
-                    
+                    let safeSheetName = cat.replace(/[\\/\*\?:\[\]]/g, '').substring(0, 31);
+                    const ws = wb.addWorksheet(safeSheetName);
+
+                    // Auto-fit column widths based on content
+                    const colWidths = isNoVat ? [6, 12, 10, 12, 10] : [6, 12, 10, 12, 10, 8, 10];
+                    // Measure description max length
+                    const maxDesc = txsList.reduce((m, t) => Math.max(m, (t.desc||'').length), 30);
+                    const descWidth = Math.min(Math.max(maxDesc + 2, 35), 65);
+                    const maxBill = txsList.reduce((m, t) => Math.max(m, (t.invoiceNo||'').length), 8);
+                    const billWidth = Math.max(maxBill + 2, 12);
                     if (isNoVat) {
-                        wsData.push([
-                            { v: dateStr, s: { font: { bold: true, sz: 12 } } }, 
-                            "", "", 
-                            { v: `Invoice ${cat} ${invPrefix}`, s: { font: { bold: true, sz: 11, color: { rgb: "FF0000" } }, alignment: { horizontal: "right" } } }
-                        ]);
-                        wsData.push([
-                            { v: "Sl No", s: style_header },
-                            { v: "Date", s: style_header },
-                            { v: "Description of bill", s: style_header },
-                            { v: "Bill number", s: style_header },
-                            { v: "Total", s: style_header }
-                        ]);
+                        ws.columns = [
+                            { width: 7 },         // A: Sl No
+                            { width: 13 },        // B: Date
+                            { width: descWidth }, // C: Description
+                            { width: billWidth }, // D: Bill number
+                            { width: 12 }         // E: Total
+                        ];
                     } else {
-                        wsData.push([
-                            { v: dateStr, s: { font: { bold: true, sz: 12 } } }, 
-                            "", "", "", "", 
-                            { v: `Invoice ${cat} ${invPrefix}`, s: { font: { bold: true, sz: 11, color: { rgb: "FF0000" } }, alignment: { horizontal: "right" } } }
-                        ]);
-                        wsData.push([
-                            { v: "Sl No", s: style_header },
-                            { v: "Date", s: style_header },
-                            { v: "Description of bill", s: style_header },
-                            { v: "Bill number", s: style_header },
-                            { v: "Amount", s: style_header },
-                            { v: "Vat", s: style_header },
-                            { v: "Total", s: style_header }
-                        ]);
+                        ws.columns = [
+                            { width: 7 },         // A: Sl No
+                            { width: 13 },        // B: Date
+                            { width: descWidth }, // C: Description
+                            { width: billWidth }, // D: Bill number
+                            { width: 12 },        // E: Amount
+                            { width: 10 },        // F: Vat
+                            { width: 12 }         // G: Total
+                        ];
                     }
-                    
-                    let rowIndex = 4;
-                    txs.forEach((t, i) => {
+
+                    // --- ROW 1: Logo row (tall, matching template) ---
+                    const logoRow = ws.addRow([]);
+                    logoRow.height = 75;
+                    // Merge entire logo row
+                    ws.mergeCells(1, 1, 1, lastColIndex);
+                    const logoCell = ws.getCell(1, 1);
+                    logoCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+                    if (logoBase64) {
+                        const imgId = wb.addImage({ base64: logoBase64, extension: logoExtension });
+                        // Use known column widths to calculate true center
+                        const knownWidths = isNoVat
+                            ? [7, 13, descWidth, billWidth, 12]
+                            : [7, 13, descWidth, billWidth, 12, 10, 12];
+                        const totalCharW   = knownWidths.reduce((s, w) => s + w, 0);
+                        const logoCharW    = 110 / 7.5; // 110px logo ÷ ~7.5px per char unit
+                        const logoStartCh  = (totalCharW - logoCharW) / 2;
+                        // Walk columns to find which col+fraction logoStartCh falls at
+                        let cumW = 0, logoTlCol = 0;
+                        for (let ci = 0; ci < knownWidths.length; ci++) {
+                            if (cumW + knownWidths[ci] >= logoStartCh) {
+                                logoTlCol = ci + (logoStartCh - cumW) / knownWidths[ci];
+                                break;
+                            }
+                            cumW += knownWidths[ci];
+                        }
+                        ws.addImage(imgId, {
+                            tl: { col: logoTlCol, row: 0.08 },
+                            ext: { width: 110, height: 58 },
+                            editAs: 'oneCell'
+                        });
+                    } else {
+                        logoCell.value = 'Emirates For Ind. Cities Co.';
+                        logoCell.font = { bold: true, size: 14, color: { argb: 'FFC00000' }, name: 'Arial' };
+                    }
+
+                    // --- ROW 2: Category Title (category name only) ---
+                    const titleRow = ws.addRow([]);
+                    titleRow.height = 25;
+                    ws.mergeCells(2, 1, 2, lastColIndex);
+                    const titleCell = ws.getCell(2, 1);
+                    titleCell.value = cat;
+                    titleCell.font = { bold: true, size: 13, name: 'Comic Sans MS' };
+                    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+                    // --- ROW 3: Date + Invoice ref ---
+                    const refRow = ws.addRow([]);
+                    refRow.height = 25;
+                    if (isNoVat) {
+                        ws.mergeCells(3, 1, 3, 3);
+                        ws.mergeCells(3, 4, 3, lastColIndex);
+                    } else {
+                        ws.mergeCells(3, 1, 3, 4);
+                        ws.mergeCells(3, 5, 3, lastColIndex);
+                    }
+                    const dateCell = ws.getCell(3, 1);
+                    dateCell.value = dateStr;
+                    dateCell.font = { bold: true, size: 12, name: 'Comic Sans MS' };
+                    dateCell.alignment = { horizontal: 'left', vertical: 'middle' };
+
+                    const invRefCell = ws.getCell(3, isNoVat ? 4 : 5);
+                    invRefCell.value = `Invoice Site Works ${invPrefix}`;
+                    invRefCell.font = { bold: true, size: 11, color: { argb: 'FFFF0000' }, name: 'Comic Sans MS' };
+                    invRefCell.alignment = { horizontal: 'right', vertical: 'middle' };
+
+                    // --- ROW 4: Column Headers (Bold, Comic Sans MS) ---
+                    const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
+                    const headerFont = { bold: true, size: 10, name: 'Comic Sans MS' };
+                    const centerAlign = { horizontal: 'center', vertical: 'middle', wrapText: false };
+
+                    let headers;
+                    if (isNoVat) {
+                        headers = ['Sl No', 'Date', 'Description of bill', 'Bill number', 'Total'];
+                    } else {
+                        headers = ['Sl No', 'Date', 'Description of bill', 'Bill number', 'Amount', 'Vat', 'Total'];
+                    }
+                    const hdrRow = ws.addRow(headers);
+                    hdrRow.height = 25;
+                    hdrRow.eachCell((cell, colNumber) => {
+                        cell.fill = headerFill;
+                        cell.font = headerFont;
+                        cell.alignment = centerAlign;
+                        cell.border = thinBorder;
+                    });
+
+                    // --- DATA ROWS ---
+                    const dataStartRow = 5;
+                    txsList.forEach((t, i) => {
                         const invDate = t.invoiceDate || t.subDate || '';
                         let dateFormatted = '';
                         if (invDate) {
@@ -3928,143 +4387,368 @@
                             }
                         }
                         const desc = t.desc || '';
-                        let billNo = t.invoiceNo || t.id.split('-').pop();
+                        const billNo = t.invoiceNo || t.id.split('-').pop();
                         const total = parseFloat(t.amount || 0);
+                        const vat = parseFloat((total * 0.04762).toFixed(2));
+                        const amount = parseFloat((total - vat).toFixed(2));
+                        const rowNum = dataStartRow + i;
 
+                        let rowData;
                         if (isNoVat) {
-                            wsData.push([
-                                { v: i + 1, s: style_center },
-                                { v: dateFormatted, s: style_center },
-                                { v: desc, s: style_cell },
-                                { v: billNo, s: style_center },
-                                { v: total, s: style_num, t: 'n', z: '#,##0.00' }
-                            ]);
+                            rowData = [i + 1, dateFormatted, desc, billNo, total];
                         } else {
-                            const rowNum = rowIndex + 1;
-                            const vatFormula = `G${rowNum}*0.04762`;
-                            const amtFormula = `G${rowNum}-F${rowNum}`;
-                            wsData.push([
-                                { v: i + 1, s: style_center },
-                                { v: dateFormatted, s: style_center },
-                                { v: desc, s: style_cell },
-                                { v: billNo, s: style_center },
-                                { f: amtFormula, s: style_num, t: 'n', z: '#,##0.00' },
-                                { f: vatFormula, s: style_num, t: 'n', z: '#,##0.00' },
-                                { v: total, s: style_total, t: 'n', z: '#,##0.00' }
-                            ]);
+                            rowData = [
+                                i + 1,
+                                dateFormatted,
+                                desc,
+                                billNo,
+                                { formula: `G${rowNum}-F${rowNum}`, result: amount },  // Amount = Total - VAT
+                                { formula: `G${rowNum}*4.762%`, result: vat },           // VAT = Total * 4.762%
+                                total
+                            ];
                         }
-                        rowIndex++;
+                        const dataRow = ws.addRow(rowData);
+                        dataRow.height = 25;
+                        dataRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+                            cell.border = thinBorder;
+                            if (colNumber === 1) {
+                                // Sl No: centered, Arial
+                                cell.font = { size: 9, name: 'Arial' };
+                                cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                            } else if (colNumber === 2) {
+                                // Date: Arial Unicode MS, centered
+                                cell.font = { size: 9, name: 'Arial Unicode MS' };
+                                cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                            } else if (colNumber === 3) {
+                                // Description: Arial Unicode MS, black, left
+                                cell.font = { size: 9, name: 'Arial Unicode MS', color: { argb: 'FF000000' } };
+                                cell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: false };
+                            } else if (colNumber === 4) {
+                                // Bill number: Arial Unicode MS, centered
+                                cell.font = { size: 9, name: 'Arial Unicode MS' };
+                                cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                            } else if (!isNoVat && colNumber === 5) {
+                                // Amount: Bold, Arial Unicode MS, centered
+                                cell.font = { bold: true, size: 9, name: 'Arial Unicode MS' };
+                                cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                                cell.numFmt = '#,##0.00';
+                            } else if (!isNoVat && colNumber === 6) {
+                                // VAT: Arial, centered
+                                cell.font = { size: 9, name: 'Arial' };
+                                cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                                cell.numFmt = '#,##0.00';
+                            } else {
+                                // Total (or noVat Total): Bold, Comic Sans MS, centered
+                                cell.font = { bold: true, size: 9, name: 'Comic Sans MS' };
+                                cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                                cell.numFmt = '#,##0.00';
+                            }
+                        });
                     });
-                    
-                    const endRow = rowIndex;
-                    const startRow = 5;
-                    if (isNoVat) {
-                        wsData.push([
-                            "", "", "", 
-                            { v: "TOTAL", s: { ...style_header, alignment: { horizontal: "right" } } },
-                            { f: `SUM(E${startRow}:E${endRow})`, s: style_total, t: 'n', z: '#,##0.00' }
-                        ]);
-                    } else {
-                        wsData.push([
-                            "", "", "", 
-                            { v: "TOTAL", s: { ...style_header, alignment: { horizontal: "right" } } },
-                            { f: `SUM(E${startRow}:E${endRow})`, s: style_total, t: 'n', z: '#,##0.00' },
-                            { f: `SUM(F${startRow}:F${endRow})`, s: style_total, t: 'n', z: '#,##0.00' },
-                            { f: `SUM(G${startRow}:G${endRow})`, s: style_total, t: 'n', z: '#,##0.00' }
-                        ]);
-                    }
-                    
-                    wsData.push([]);
-                    wsData.push([{ v: "for approval", s: { font: { bold: true } } }]);
-                    wsData.push([]);
-                    wsData.push([{ v: "Mohammed Al Hazzaa", s: { font: { bold: true, sz: 12 } } }]);
-                    wsData.push([{ v: "C.E.O", s: { font: { bold: true } } }]);
-                    wsData.push([{ v: "Emirates Industrial City, Sharjah", s: { font: { sz: 10 } } }]);
-                    
-                    const ws = XLSX.utils.aoa_to_sheet(wsData);
-                    
-                    ws['!merges'] = [
-                        { s: {r: 0, c: 0}, e: {r: 0, c: lastCol} },
-                        { s: {r: 1, c: 0}, e: {r: 1, c: lastCol} },
-                        { s: {r: 2, c: 0}, e: {r: 2, c: 2} },
-                        { s: {r: 2, c: 3}, e: {r: 2, c: lastCol} }
-                    ];
-                    
-                    if (isNoVat) {
-                        ws['!cols'] = [{ wch: 8 }, { wch: 15 }, { wch: 60 }, { wch: 15 }, { wch: 15 }];
-                    } else {
-                        ws['!cols'] = [{ wch: 8 }, { wch: 15 }, { wch: 60 }, { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 12 }];
+
+                    // --- TOTALS ROW (Bold, Arial Unicode MS) ---
+                    const dataEndRow = dataStartRow + txsList.length - 1;
+                    const totalRow = ws.addRow([]);
+                    totalRow.height = 25;
+
+                    // Set cells: blank A-C, TOTAL label D, SUM formulas E (and F,G if VAT)
+                    for (let c = 1; c <= lastColIndex; c++) {
+                        const cell = totalRow.getCell(c);
+                        cell.border = thinBorder;
+                        cell.font = { bold: true, size: 11, name: 'Arial Unicode MS' };
+                        cell.alignment = { horizontal: 'right', vertical: 'middle' };
+                        if (c < 4) {
+                            cell.value = '';
+                        } else if (c === 4) {
+                            cell.value = 'TOTAL';
+                            cell.alignment = { horizontal: 'right', vertical: 'middle' };
+                        } else if (isNoVat && c === 5) {
+                            cell.value = { formula: `SUM(E${dataStartRow}:E${dataEndRow})`, result: txsList.reduce((s,t)=>s+parseFloat(t.amount||0),0) };
+                            cell.numFmt = '#,##0.00';
+                        } else if (!isNoVat && c === 5) {
+                            const sumAmt = txsList.reduce((s,t)=>{ const tot=parseFloat(t.amount||0); return s+(tot-parseFloat((tot*0.04762).toFixed(2))); },0);
+                            cell.value = { formula: `SUM(E${dataStartRow}:E${dataEndRow})`, result: parseFloat(sumAmt.toFixed(2)) };
+                            cell.numFmt = '#,##0.00';
+                        } else if (!isNoVat && c === 6) {
+                            const sumVat = txsList.reduce((s,t)=>s+parseFloat((parseFloat(t.amount||0)*0.04762).toFixed(2)),0);
+                            cell.value = { formula: `SUM(F${dataStartRow}:F${dataEndRow})`, result: parseFloat(sumVat.toFixed(2)) };
+                            cell.numFmt = '#,##0.00';
+                        } else if (!isNoVat && c === 7) {
+                            cell.value = { formula: `SUM(G${dataStartRow}:G${dataEndRow})`, result: txsList.reduce((s,t)=>s+parseFloat(t.amount||0),0) };
+                            cell.numFmt = '#,##0.00';
+                        }
                     }
 
-                    let safeSheetName = cat.replace(/[\\/*?:\[\]]/g, '').substring(0, 31);
-                    XLSX.utils.book_append_sheet(wb, ws, safeSheetName);
-                });
+                    // --- FOOTER ---
+                    ws.addRow([]).height = 8;
+                    const approvalRow = ws.addRow(['for approval']);
+                    approvalRow.getCell(1).font = { bold: true, size: 10, name: 'Arial' };
+                    ws.addRow([]);
+                    ws.addRow([]);
+                    const ceoNameRow = ws.addRow(['Mohammed Al Hazzaa']);
+                    ceoNameRow.getCell(1).font = { bold: true, size: 12, name: 'Arial' };
+                    const ceoTitleRow = ws.addRow(['C.E.O']);
+                    ceoTitleRow.getCell(1).font = { bold: true, size: 11, name: 'Arial' };
+                    const companyRow = ws.addRow(['Emirates Industrial City, Sharjah']);
+                    companyRow.getCell(1).font = { size: 10, name: 'Arial' };
+                }
 
-                XLSX.writeFile(wb, `Report_${batchId}.xlsx`);
+                // --- SAVE FILE ---
+                const buffer = await wb.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                window.showStatus(`Excel exported: ${fileName}`, false);
             };
 
             window.printBatchInvoices = async (batchId) => {
-                const batch = window.globalBatchMap[batchId];
-                if (!batch || !batch.txs) return;
-                
-                const invoices = batch.txs.filter(t => t.invoiceUrl);
-                if (invoices.length === 0) {
+                const batchData = window.globalBatchMap[batchId];
+                if (!batchData || !batchData.txs) return;
+
+                // Helper to find ANY image URL in a transaction (deep search)
+                const getAnyUrl = (t) => {
+                    const candidates = [];
+                    const search = (val) => {
+                        if (!val) return;
+                        if (typeof val === 'string') {
+                            if (val.startsWith('local-') || val.startsWith('data:') || val.startsWith('http')) candidates.push(val);
+                        } else if (Array.isArray(val)) {
+                            val.forEach(search);
+                        } else if (typeof val === 'object') {
+                            Object.values(val).forEach(search);
+                        }
+                    };
+                    // Priority search in known fields
+                    search(t.invoiceUrl);
+                    search(t.invoice_url);
+                    // Fallback search in entire object if known fields are empty
+                    if (candidates.length === 0) search(t);
+                    return candidates;
+                };
+
+                // Group invoices by category
+                const catMap = {};
+                batchData.txs.forEach(t => {
+                    const urls = getAnyUrl(t);
+                    if (urls.length === 0) return; // Skip transactions with no images
+                    
+                    let cat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category)
+                        ? t.allocations[0].category : (t.category || 'Uncategorized');
+                    cat = String(cat).trim();
+                    if (!catMap[cat]) catMap[cat] = [];
+                    catMap[cat].push({ tx: t, urls });
+                });
+
+                const categories = Object.keys(catMap).sort();
+                if (categories.length === 0) {
                     alert("No scanned invoices found in this batch.");
                     return;
                 }
-                
-                window.showStatus("Preparing Invoices...", false);
-                
-                const invoiceRows = await Promise.all(invoices.map(async t => {
-                    let src = t.invoiceUrl;
-                    
-                    if (src && src.startsWith('local-')) {
-                        try {
-                            const localData = await window.getPhotoLocal(src);
-                            if (localData) src = localData;
-                        } catch (e) { console.error("Local Fetch Error", e); }
-                    }
-                    
-                    return `
-                        <div class="invoice-container">
-                            <div class="header">
-                                <h1>Invoice: ${t.invoiceNo || 'N/A'}</h1>
-                                <div class="meta">
-                                    <span>Date: ${window.formatSafeDate(t.invoiceDate || t.subDate)}</span>
-                                    <span style="margin-left: 20px;">Amount: ${(t.amount || 0).toFixed(2)} AED</span>
-                                    <span style="margin-left: 20px;">Person: ${t.person || 'N/A'}</span>
-                                </div>
-                                <p style="margin: 10px 0 0; color: #475569; font-weight: 500;">${t.desc || t.desc_text || ''}</p>
-                            </div>
-                            <img src="${src}" />
-                        </div>
-                    `;
-                }));
 
-                let html = `
-                <html>
-                <head>
-                    <title>Invoices - ${batchId}</title>
-                    <style>
-                        @media print { .no-print { display: none; } }
-                        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; text-align: center; background: #f8fafc; }
-                        .invoice-container { page-break-after: always; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 40px; border: 1px solid #e2e8f0; }
-                        img { max-width: 100%; max-height: 850px; border-radius: 12px; margin-top: 30px; border: 1px solid #cbd5e1; }
-                        .header { text-align: left; border-bottom: 2px solid #3b82f6; padding-bottom: 20px; margin-bottom: 20px; }
-                        h1 { font-size: 24px; color: #1e293b; margin: 0; font-weight: 800; }
-                        .meta { display: flex; justify-between; color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-top: 8px; }
-                    </style>
-                </head>
-                <body>
-                    ${invoiceRows.join('')}
-                </body>
-                </html>
+                // Show category selector modal
+                window.showInvoicePrintModal(batchId, catMap, categories);
+            };
+
+            window.showInvoicePrintModal = (batchId, catMap, categories) => {
+                const existing = document.getElementById('invoice-cat-print-modal');
+                if (existing) existing.remove();
+
+                const modal = document.createElement('div');
+                modal.id = 'invoice-cat-print-modal';
+                modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,0.75);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px;';
+
+                const inner = document.createElement('div');
+                inner.style.cssText = 'background:white;border-radius:24px;padding:32px;min-width:400px;max-width:520px;width:100%;box-shadow:0 25px 50px rgba(0,0,0,0.3);max-height:80vh;overflow-y:auto;';
+
+                const rows = categories.map(cat => {
+                    const pages = catMap[cat].reduce((sum, item) => sum + item.urls.length, 0);
+                    return `
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#f8fafc;border-radius:14px;margin-bottom:10px;border:1px solid #e2e8f0;">
+                        <div>
+                            <div style="font-weight:800;color:#1e293b;font-size:13px;text-transform:uppercase;letter-spacing:0.03em;">${cat}</div>
+                            <div style="color:#64748b;font-size:11px;font-weight:600;margin-top:2px;">${catMap[cat].length} Tx • ${pages} Page${pages !== 1 ? 's' : ''}</div>
+                        </div>
+                        <button onclick="window.printCategoryInvoices('${batchId}','${cat.replace(/'/g, "\\'")}')"
+                            style="background:#4f46e5;color:white;border:none;border-radius:10px;padding:9px 18px;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                            🖨 Print PDF
+                        </button>
+                    </div>
+                `;}).join('');
+
+                inner.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <h2 style="font-size:18px;font-weight:900;color:#1e293b;margin:0;">Print Invoices by Category</h2>
+                        <button onclick="document.getElementById('invoice-cat-print-modal').remove()"
+                            style="background:#f1f5f9;border:none;border-radius:10px;width:32px;height:32px;cursor:pointer;color:#64748b;font-size:16px;display:flex;align-items:center;justify-content:center;">✕</button>
+                    </div>
+                    <p style="color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 20px;">Select a category — each prints as a separate PDF</p>
+                    <div style="max-height:400px;overflow-y:auto;padding-right:4px;">${rows}</div>
                 `;
-                
-                const win = window.open('', '_blank');
-                win.document.write(html);
-                win.document.close();
-                win.onload = () => { setTimeout(() => { win.print(); }, 500); };
+
+                modal.appendChild(inner);
+                modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+                document.body.appendChild(modal);
+            };
+
+            window.printCategoryInvoices = async (batchId, category) => {
+                const batchData = window.globalBatchMap[batchId];
+                if (!batchData || !batchData.txs) return;
+
+                const getAnyUrl = (t) => {
+                    const candidates = new Set();
+                    const search = (val) => {
+                        if (!val) return;
+                        if (typeof val === 'string') {
+                            if (val.startsWith('local-') || val.startsWith('data:') || val.startsWith('http')) candidates.add(val);
+                        } else if (val instanceof Blob) {
+                            candidates.add(val);
+                        } else if (Array.isArray(val)) {
+                            val.forEach(search);
+                        } else if (typeof val === 'object') {
+                            Object.values(val).forEach(search);
+                        }
+                    };
+                    search(t.invoiceUrl); search(t.invoice_url);
+                    if (candidates.size === 0) search(t);
+                    return Array.from(candidates);
+                };
+
+                const allUrls = [];
+                batchData.txs.forEach(t => {
+                    let rawCat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category)
+                        ? t.allocations[0].category : (t.category || 'Uncategorized');
+                    if (String(rawCat).trim() === category) {
+                        allUrls.push(...getAnyUrl(t));
+                    }
+                });
+
+                if (allUrls.length === 0) {
+                    window.showStatus("No images found for this category.", true);
+                    return;
+                }
+
+                // Close modal
+                const modal = document.getElementById('invoice-cat-print-modal');
+                if (modal) modal.remove();
+
+                window.showStatus(`Loading ${allUrls.length} image(s)... 0%`, false);
+
+                const resolveUrl = async (url, index) => {
+                    try {
+                        let result = null;
+                        if (url instanceof Blob) {
+                            result = URL.createObjectURL(url);
+                        } else if (typeof url === 'string' && url.startsWith('local-')) {
+                            const data = await window.getPhotoLocal(url);
+                            if (!data) {
+                                console.warn(`Missing from local storage: ${url}`);
+                                return null;
+                            }
+                            if (data instanceof Blob) result = URL.createObjectURL(data);
+                            else if (typeof data === 'string' && !data.startsWith('data:')) result = `data:image/jpeg;base64,${data}`;
+                            else result = data;
+                        } else {
+                            result = url;
+                        }
+                        
+                        const pct = Math.round(((index + 1) / allUrls.length) * 100);
+                        window.showStatus(`Loading ${allUrls.length} image(s)... ${pct}%`, false);
+                        return result;
+                    } catch (e) {
+                        console.error("Resolve Error", e);
+                        return null;
+                    }
+                };
+
+                const resolvedSrcs = await Promise.all(allUrls.map((u, i) => resolveUrl(u, i)));
+                const validSrcs = resolvedSrcs.filter(src => src && typeof src === 'string' && src.length > 20);
+
+                if (validSrcs.length < allUrls.length) {
+                    const missing = allUrls.length - validSrcs.length;
+                    console.warn(`${missing} images could not be loaded from storage.`);
+                    // We still proceed with whatever we found
+                }
+
+                if (validSrcs.length === 0) {
+                    window.showStatus("Failed to load any images from storage.", true);
+                    return;
+                }
+
+                window.showStatus("Rendering print layout...", false);
+
+                ['invoice-print-overlay', 'invoice-print-style'].forEach(id => {
+                    const el = document.getElementById(id); if (el) el.remove();
+                });
+
+                const overlay = document.createElement('div');
+                overlay.id = 'invoice-print-overlay';
+                validSrcs.forEach((src, i) => {
+                    const page = document.createElement('div');
+                    page.className = i < validSrcs.length - 1 ? 'inv-print-page inv-print-break' : 'inv-print-page';
+                    const img = document.createElement('img');
+                    img.src = src;
+                    page.appendChild(img);
+                    overlay.appendChild(page);
+                });
+                document.body.appendChild(overlay);
+
+                const style = document.createElement('style');
+                style.id = 'invoice-print-style';
+                style.textContent = `
+                    #invoice-print-overlay { display: none; }
+                    @media print {
+                        body > *:not(#invoice-print-overlay) { display: none !important; }
+                        #invoice-print-overlay { display: block !important; }
+                        .inv-print-page {
+                            width: 100vw; height: 100vh;
+                            display: flex; align-items: center; justify-content: center;
+                            overflow: hidden; margin: 0; padding: 0;
+                            page-break-inside: avoid;
+                        }
+                        .inv-print-break { page-break-after: always; }
+                        .inv-print-page img {
+                            max-width: 100%; max-height: 100vh;
+                            width: auto; height: auto;
+                            object-fit: contain; display: block;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+
+                const images = overlay.querySelectorAll('img');
+                let loaded = 0;
+                const total = images.length;
+
+                const doPrint = () => {
+                    window.showStatus('Opening print dialog... please wait.');
+                    setTimeout(() => {
+                        window.print();
+                        overlay.remove();
+                        style.remove();
+                        validSrcs.forEach(s => { if (typeof s === 'string' && s.startsWith('blob:')) URL.revokeObjectURL(s); });
+                        window.showStatus('Print complete!');
+                    }, 800);
+                };
+
+                if (total === 0) {
+                    doPrint();
+                } else {
+                    images.forEach(img => {
+                        if (img.complete && img.naturalWidth > 0) {
+                            loaded++; if (loaded >= total) doPrint();
+                        } else {
+                            img.onload = () => { loaded++; if (loaded >= total) doPrint(); };
+                            img.onerror = () => { loaded++; if (loaded >= total) doPrint(); };
+                        }
+                    });
+                    setTimeout(() => { if (loaded < total) doPrint(); }, 6000);
+                }
             };
 
             window.receiveBatchCash = async (batchId, amount) => {
@@ -5012,7 +5696,8 @@
                     batchId: dbTx.batch_id || null,
                     voidReason: dbTx.void_reason || '',
                     editReason: dbTx.edit_reason || '',
-                    invoiceUrl: dbTx.invoice_url || ''
+                    invoiceUrl: dbTx.invoice_url || '',
+                    isSynced: false // Will be updated by health check or sync
                 };
             }
 
@@ -5234,26 +5919,44 @@
                     const linkedKeys = new Set();
                     txs.forEach(t => {
                         const url = t.invoiceUrl || t.invoice_url;
-                        if (url && url.startsWith('local-')) linkedKeys.add(url);
+                        if (url) {
+                            if (Array.isArray(url)) url.forEach(u => { if (typeof u === 'string' && u.startsWith('local-')) linkedKeys.add(u); });
+                            else if (typeof url === 'string' && url.startsWith('local-')) linkedKeys.add(url);
+                        }
                     });
                     
                     const orphanedPhotos = keys.filter(k => !linkedKeys.has(k));
                     const brokenLinks = Array.from(linkedKeys).filter(k => !keys.includes(k));
 
-                    let msg = `--- PHOTO ANALYSIS ---\n\n`;
-                    msg += `Total Photos in Storage: ${keys.length}\n`;
-                    msg += `Linked Photos: ${keys.length - orphanedPhotos.length}\n`;
-                    msg += `Orphaned Photos (In Storage but not in Tx): ${orphanedPhotos.length}\n`;
-                    msg += `Broken Links (Tx has ID but photo missing): ${brokenLinks.length}\n\n`;
-
-                    if (orphanedPhotos.length > 0) {
-                        msg += `TIP: You have ${orphanedPhotos.length} photos that are not linked to any transaction. This usually happens if you restored photos but not the matching transaction records.`;
+                    // Update UI Dashboard if it exists
+                    const healthCard = document.getElementById('photo-health-card');
+                    if (healthCard) {
+                        healthCard.classList.remove('hidden');
+                        document.getElementById('health-stored').innerText = keys.length;
+                        document.getElementById('health-linked').innerText = linkedKeys.size - brokenLinks.length;
+                        document.getElementById('health-missing').innerText = brokenLinks.length;
+                        
+                        const badge = document.getElementById('health-status-badge');
+                        if (brokenLinks.length > 0) {
+                            badge.innerText = "Action Required";
+                            badge.className = "px-2 py-1 bg-rose-500 text-[8px] rounded-full";
+                        } else {
+                            badge.innerText = "Optimal";
+                            badge.className = "px-2 py-1 bg-emerald-500 text-[8px] rounded-full";
+                        }
                     }
 
-                    console.log("Orphaned Photo Keys:", orphanedPhotos);
-                    console.log("Broken Transaction Links:", brokenLinks);
+                    let msg = `--- PHOTO ANALYSIS ---\n\n`;
+                    msg += `Total Photos in Storage: ${keys.length}\n`;
+                    msg += `Broken Links (Tx has ID but photo missing): ${brokenLinks.length}\n\n`;
+
+                    if (brokenLinks.length > 0) {
+                        msg += `TIP: You are missing ${brokenLinks.length} image files. This usually happens if you switch computers. Please RESTORE your Photo Backup on this device.`;
+                        alert(msg);
+                    } else if (!healthCard) {
+                        alert(msg + "All links are healthy!");
+                    }
                     
-                    alert(msg);
                     window.showStatus("Analysis Complete");
                 } catch (err) {
                     console.error(err);
@@ -5324,40 +6027,109 @@
 
             window.viewInvoice = async (txId) => {
                 const t = txs.find(x => x.id === txId);
-                const urlOrUrls = t ? (t.invoiceUrl || t.invoice_url) : null;
-                if (!urlOrUrls) return;
+                if (!t) return;
                 
-                const urls = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
+                // Use the same Deep Discovery logic as the printer
+                const getAnyUrl = (tx) => {
+                    const candidates = new Set();
+                    const search = (val) => {
+                        if (!val) return;
+                        if (typeof val === 'string') {
+                            if (val.startsWith('local-') || val.startsWith('data:') || val.startsWith('http')) candidates.add(val);
+                        } else if (val instanceof Blob) {
+                            candidates.add(val);
+                        } else if (Array.isArray(val)) {
+                            val.forEach(search);
+                        } else if (typeof val === 'object') {
+                            Object.values(val).forEach(search);
+                        }
+                    };
+                    search(tx.invoiceUrl); search(tx.invoice_url);
+                    if (candidates.size === 0) search(tx);
+                    return Array.from(candidates);
+                };
+
+                const urls = getAnyUrl(t);
+                if (urls.length === 0) {
+                    window.showStatus("No invoice attached", true);
+                    return;
+                }
+                
                 window.showStatus(`Loading ${urls.length} Page(s)...`, false);
                 
                 const imageSrcs = [];
                 for (const url of urls) {
                     let src = url;
-                    if (src.startsWith('local-')) {
+                    if (typeof src === 'string' && src.startsWith('local-')) {
                         const localData = await window.getPhotoLocal(src);
-                        if (localData) src = localData;
+                        if (localData) {
+                            if (localData instanceof Blob) src = URL.createObjectURL(localData);
+                            else if (typeof localData === 'string' && !localData.startsWith('data:')) src = `data:image/jpeg;base64,${localData}`;
+                            else src = localData;
+                        } else {
+                            src = null; // Mark as failed
+                        }
+                    } else if (src instanceof Blob) {
+                        src = URL.createObjectURL(src);
                     }
-                    imageSrcs.push(src);
+                    if (src) imageSrcs.push(src);
                 }
                 
+                if (imageSrcs.length === 0) {
+                    window.showStatus("Invoice image files are missing from storage!", true);
+                    return;
+                }
+
                 window.showStatus("Loaded");
                 const win = window.open('', '_blank');
-                const imagesHtml = imageSrcs.map(src => `<img src="${src}" style="max-width:100%;margin-bottom:20px;box-shadow:0 10px 30px rgba(0,0,0,0.5);">`).join('');
+                const imagesHtml = imageSrcs.map(src => `<img src="${src}" style="max-width:100%;margin-bottom:20px;box-shadow:0 10px 30px rgba(0,0,0,0.5);border-radius:8px;">`).join('');
                 win.document.write(`
                     <html>
-                    <body style="margin:0;background:#1a1a1a;display:flex;flex-direction:column;align-items:center;padding:20px;font-family:sans-serif;">
-                        <div style="background:#333;padding:10px 20px;border-radius:10px;color:white;margin-bottom:20px;font-weight:bold;position:sticky;top:10px;z-index:100;box-shadow:0 5px 15px rgba(0,0,0,0.3);">
-                            ${urls.length} Page(s) Attached
+                    <head><title>Invoice Preview - PettyCash Pro</title></head>
+                    <body style="margin:0;background:#0f172a;display:flex;flex-direction:column;align-items:center;padding:40px 20px;font-family:system-ui,-apple-system,sans-serif;">
+                        <div style="background:rgba(30,41,59,0.8);backdrop-filter:blur(10px);padding:12px 24px;border-radius:16px;color:white;margin-bottom:32px;font-weight:800;position:sticky;top:20px;z-index:100;box-shadow:0 10px 25px rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:12px;">
+                            <span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;"></span>
+                            ${imageSrcs.length} Page(s) Resolved
                         </div>
-                        ${imagesHtml}
-                        <button onclick="window.print()" style="margin-top:20px;padding:10px 30px;border-radius:10px;border:none;background:#4f46e5;color:white;font-weight:bold;cursor:pointer;">Print Invoice</button>
+                        <div style="max-width:900px;width:100%;display:flex;flex-direction:column;align-items:center;">
+                            ${imagesHtml}
+                        </div>
+                        <div style="position:fixed;bottom:30px;display:flex;gap:12px;">
+                            <button onclick="window.print()" style="padding:14px 32px;border-radius:14px;border:none;background:#4f46e5;color:white;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 10px 20px rgba(79,70,229,0.3);transition:all 0.2s;">🖨 Print Invoice</button>
+                            <button onclick="window.close()" style="padding:14px 32px;border-radius:14px;border:none;background:#334155;color:white;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;">Close</button>
+                        </div>
                     </body>
                     </html>
                 `);
                 win.document.close();
             };
 
-            window.onload = () => lucide.createIcons();
+            window.onload = () => {
+                lucide.createIcons();
+                
+                // Device detection logic
+                const currentDeviceId = localStorage.getItem('petty_cash_device_id');
+                if (!currentDeviceId) {
+                    // First time on this computer/browser
+                    const newId = 'device-' + Date.now();
+                    localStorage.setItem('petty_cash_device_id', newId);
+                } else {
+                    // Check if we need a photo reminder
+                    const lastBackup = localStorage.getItem('last_photo_backup_date');
+                    if (!lastBackup) {
+                        setTimeout(() => {
+                            window.showStatus("Don't forget to Export a Photo Backup if you've scanned new invoices!", false);
+                        }, 5000);
+                    }
+                }
+                
+                // Request Storage Persistence again to be safe
+                if (navigator.storage && navigator.storage.persist) {
+                    navigator.storage.persist().then(granted => {
+                        if (granted) console.log("Storage persistence secured.");
+                    });
+                }
+            };
         }
     </script>
 </body>
