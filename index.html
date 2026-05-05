@@ -752,6 +752,11 @@
                                     <div id="onedrive-status-badge" class="hidden px-2 py-0.5 bg-amber-100 text-amber-700 text-[8px] font-black uppercase rounded-full">Reconnect Required</div>
                                 </div>
                                 
+                                <button id="btn-link-onedrive" onclick="window.linkOneDriveFolder()"
+                                    class="w-full bg-slate-800 text-white shadow-md shadow-slate-200 py-3.5 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:-translate-y-0.5 hover:shadow-lg transition-all flex items-center gap-2 justify-center mb-3">
+                                    <i data-lucide="folder-sync" class="w-5 h-5 text-indigo-400"></i> <span id="link-status-text">Link OneDrive Folder</span>
+                                </button>
+                                
                                 <button id="btn-sync-to-onedrive" onclick="window.syncBrowserToOneDrive()"
                                     class="w-full bg-white text-slate-800 border border-slate-200 py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all flex items-center gap-2 justify-center hidden hover:bg-slate-50">
                                     <i data-lucide="refresh-cw" class="w-4 h-4"></i> <span>Sync Browser to OneDrive</span>
@@ -1680,31 +1685,96 @@
 
             let onedriveFolderHandle = null;
 
+            // --- ONEDRIVE HANDLE PERSISTENCE (survives page refresh/reopen) ---
+            const OD_DB = 'PettyCashOneDrive', OD_STORE = 'handles';
+
+            window.saveOneDriveHandle = async (handle) => {
+                return new Promise((resolve, reject) => {
+                    const req = indexedDB.open(OD_DB, 1);
+                    req.onupgradeneeded = (e) => { e.target.result.createObjectStore(OD_STORE); };
+                    req.onsuccess = (e) => {
+                        const tx = e.target.result.transaction([OD_STORE], 'readwrite');
+                        tx.objectStore(OD_STORE).put(handle, 'folder');
+                        tx.oncomplete = () => resolve();
+                        tx.onerror = (ev) => reject(ev.target.error);
+                    };
+                    req.onerror = (e) => reject(e.target.error);
+                });
+            };
+
+            window.loadOneDriveHandle = async () => {
+                return new Promise((resolve) => {
+                    const req = indexedDB.open(OD_DB, 1);
+                    req.onupgradeneeded = (e) => { e.target.result.createObjectStore(OD_STORE); };
+                    req.onsuccess = (e) => {
+                        const tx = e.target.result.transaction([OD_STORE], 'readonly');
+                        const r = tx.objectStore(OD_STORE).get('folder');
+                        r.onsuccess = () => resolve(r.result || null);
+                        r.onerror = () => resolve(null);
+                    };
+                    req.onerror = () => resolve(null);
+                });
+            };
+
+            window.updateOneDriveUI = (active) => {
+                const btn  = document.getElementById('btn-link-onedrive');
+                const text = document.getElementById('link-status-text');
+                const sync = document.getElementById('btn-sync-to-onedrive');
+                const badge = document.getElementById('onedrive-status-badge');
+                if (!btn || !text) return;
+                if (active) {
+                    btn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                    btn.classList.remove('bg-slate-800', 'text-white');
+                    text.innerText = 'OneDrive Link Active';
+                    if (sync) sync.classList.remove('hidden');
+                    if (badge) badge.classList.add('hidden');
+                } else {
+                    btn.classList.remove('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                    btn.classList.add('bg-slate-800', 'text-white');
+                    text.innerText = 'Link OneDrive Folder';
+                    if (sync) sync.classList.add('hidden');
+                }
+            };
+
+            // Restores saved handle on page load — no full directory picker needed
+            window.initOneDriveHandle = async () => {
+                try {
+                    const stored = await window.loadOneDriveHandle();
+                    if (!stored) return;
+                    const perm = await stored.queryPermission({ mode: 'readwrite' });
+                    if (perm === 'granted') {
+                        onedriveFolderHandle = stored;
+                        window.updateOneDriveUI(true);
+                        window.showStatus('OneDrive Auto-Connected ✓');
+                        window.verifyAllSyncStatus();
+                    } else if (perm === 'prompt') {
+                        // Ask for re-grant — browser shows a small one-click prompt, NOT the full picker
+                        const result = await stored.requestPermission({ mode: 'readwrite' });
+                        if (result === 'granted') {
+                            onedriveFolderHandle = stored;
+                            window.updateOneDriveUI(true);
+                            window.showStatus('OneDrive Re-Connected ✓');
+                            window.verifyAllSyncStatus();
+                        }
+                    }
+                } catch (err) {
+                    console.log('OneDrive restore skipped:', err.message);
+                }
+            };
+
             window.linkOneDriveFolder = async () => {
                 try {
-                    onedriveFolderHandle = await window.showDirectoryPicker({
-                        mode: 'readwrite'
-                    });
-                    
-                    const btn = document.getElementById('btn-link-onedrive');
-                    const text = document.getElementById('link-status-text');
-                    
+                    onedriveFolderHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
                     if (onedriveFolderHandle) {
-                        btn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
-                        btn.classList.remove('bg-slate-800', 'text-white');
-                        text.innerText = "OneDrive Link Active";
-                        document.getElementById('btn-sync-to-onedrive').classList.remove('hidden');
-                        const badge = document.getElementById('onedrive-status-badge');
-                        if (badge) badge.classList.add('hidden');
-                        window.showStatus("OneDrive Connected");
+                        await window.saveOneDriveHandle(onedriveFolderHandle); // persist for future sessions
+                        window.updateOneDriveUI(true);
+                        window.showStatus('OneDrive Connected & Saved ✓');
                         sessionStorage.setItem('onedrive_active', 'true');
-                        
-                        // Run a quick sync check
                         window.verifyAllSyncStatus();
                     }
                 } catch (err) {
-                    console.error("Folder Link Error:", err);
-                    if (err.name !== 'AbortError') window.showStatus("Failed to link folder", true);
+                    console.error('Folder Link Error:', err);
+                    if (err.name !== 'AbortError') window.showStatus('Failed to link folder', true);
                 }
             };
 
@@ -4304,7 +4374,7 @@
                             : [7, 13, descWidth, billWidth, 12, 10, 12];
                         const totalCharW   = knownWidths.reduce((s, w) => s + w, 0);
                         const logoCharW    = 110 / 7.5; // 110px logo ÷ ~7.5px per char unit
-                        const logoStartCh  = (totalCharW - logoCharW) / 2;
+                        const logoStartCh  = (totalCharW - logoCharW) / 2 + 20.16; // +20.16 chars ≈ +4cm shift right
                         // Walk columns to find which col+fraction logoStartCh falls at
                         let cumW = 0, logoTlCol = 0;
                         for (let ci = 0; ci < knownWidths.length; ci++) {
@@ -5624,7 +5694,10 @@
                     // Initial Fetch & Realtime Subscription
                     fetchSettings();
                     fetchTransactions();
-                    setupRealtime(); 
+                    setupRealtime();
+
+                    // Restore OneDrive folder handle from previous session
+                    window.initOneDriveHandle();
 
                     const today = window.getLocalDate();
                     document.getElementById('form-sub-date').value = today;
