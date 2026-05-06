@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PettyCash Pro - Production Edition</title>
+    <title>PettyCash Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Professional PDF generation -->
@@ -2084,7 +2084,21 @@
                                     await onedriveFolderHandle.getFileHandle(legacyName);
                                     if (!t.isSynced) { t.isSynced = true; updated = true; }
                                 } catch (e2) {
-                                    if (t.isSynced) { t.isSynced = false; updated = true; }
+                                    // Deep Scan Fallback: Check if ANY file contains the ID
+                                    let found = false;
+                                    const targetId = localId.replace('local-', '');
+                                    for await (const entry of onedriveFolderHandle.values()) {
+                                        if (entry.kind === 'file' && entry.name.includes(targetId)) {
+                                            found = true;
+                                            break;
+                                        }
+                                    }
+                                    
+                                    if (found) {
+                                        if (!t.isSynced) { t.isSynced = true; updated = true; }
+                                    } else {
+                                        if (t.isSynced) { t.isSynced = false; updated = true; }
+                                    }
                                 }
                             }
                         }
@@ -2213,17 +2227,57 @@
                 }
             };
 
-            window.getPhotoLocal = async (id) => {
+            window.getPhotoLocal = async (id, optionalTx = null) => {
                 try {
                     // Try OneDrive Folder First
                     if (onedriveFolderHandle) {
                         try {
-                            const fileName = `${id.replace('local-', '')}.jpg`;
-                            const fileHandle = await onedriveFolderHandle.getFileHandle(fileName);
-                            const file = await fileHandle.getFile();
-                            return file; // Return as Blob
+                            const tx = optionalTx || (typeof txs !== 'undefined' ? txs.find(t => {
+                                const urls = t.invoiceUrl || t.invoice_url;
+                                if (Array.isArray(urls)) return urls.includes(id);
+                                return urls === id;
+                            }) : null);
+
+                            const legacyName = `${id.replace('local-', '')}.jpg`;
+                            let fileHandle = null;
+
+                            if (tx) {
+                                const dateStr = tx.subDate || new Date().toISOString().split('T')[0];
+                                const descStr = (tx.desc || tx.desc_text || "Invoice").substring(0, 15).replace(/[^a-z0-9]/gi, '_');
+                                const professionalName = `${dateStr}_${descStr}_${id.replace('local-', '')}.jpg`;
+                                
+                                try {
+                                    fileHandle = await onedriveFolderHandle.getFileHandle(professionalName);
+                                } catch (e1) {
+                                    try {
+                                        fileHandle = await onedriveFolderHandle.getFileHandle(legacyName);
+                                    } catch (e2) {}
+                                }
+                            } else {
+                                try {
+                                    fileHandle = await onedriveFolderHandle.getFileHandle(legacyName);
+                                } catch (e) {}
+                            }
+
+                            // If not found by direct lookup, scan the directory for the ID
+                            if (!fileHandle) {
+                                const targetId = id.replace('local-', '');
+                                for await (const entry of onedriveFolderHandle.values()) {
+                                    if (entry.kind === 'file' && entry.name.includes(targetId)) {
+                                        fileHandle = entry;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (fileHandle) {
+                                const file = await fileHandle.getFile();
+                                return file; // Return as Blob
+                            } else {
+                                console.warn(`Not found in OneDrive for ${id}, checking DB...`);
+                            }
                         } catch (e) {
-                            console.warn("Not found in OneDrive, checking DB...");
+                            console.warn("OneDrive fetch failed, checking DB...", e);
                         }
                     }
 
@@ -3649,7 +3703,7 @@
                             if (hasPhoto && (t.type || '').toLowerCase() === 'expense') {
                                 if (t.isSynced) {
                                     scanTag = `<button onclick="window.viewInvoice('${t.id}')" class="mt-1.5 inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-100 px-1.5 py-0.5 rounded text-[9px] font-black uppercase hover:opacity-80 transition-colors">
-                                                 <i data-lucide="check-circle" class="w-2.5 h-2.5"></i> SYNCED
+                                                 <i data-lucide="eye" class="w-2.5 h-2.5"></i> VIEW RECEIPT
                                                </button>`;
                                 } else if (onedriveFolderHandle) {
                                     // Folder is linked but file not found there
@@ -4630,8 +4684,8 @@
 
                 for (const cat of Object.keys(catGroups)) {
                     const txsList = catGroups[cat].slice().sort((a, b) => {
-                        const da = new Date(a.invoiceDate || a.subDate || a.sub_date || 0);
-                        const db = new Date(b.invoiceDate || b.subDate || b.sub_date || 0);
+                        const da = new Date(a.invoiceDate || 0);
+                        const db = new Date(b.invoiceDate || 0);
                         return da - db;
                     });
                     const isNoVat = noVatCats.includes(cat.toLowerCase());
@@ -4952,7 +5006,8 @@
                     return;
                 }
 
-                // Show category selector modal
+                // Store catMap globally for printCategoryInvoices
+                window.lastCatMap = catMap;
                 window.showInvoicePrintModal(batchId, catMap, categories);
             };
 
@@ -5000,7 +5055,10 @@
 
             window.printCategoryInvoices = async (batchId, category) => {
                 const batchData = window.globalBatchMap[batchId];
-                if (!batchData || !batchData.txs) return;
+                if (!batchData || !batchData.txs) {
+                    console.error("No batch data found for", batchId);
+                    return;
+                }
 
                 const getAnyUrl = (t) => {
                     const candidates = new Set();
@@ -5021,17 +5079,28 @@
                     return Array.from(candidates);
                 };
 
-                const allUrls = [];
-                batchData.txs.forEach(t => {
-                    let rawCat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category)
-                        ? t.allocations[0].category : (t.category || 'Uncategorized');
-                    if (String(rawCat).trim() === category) {
-                        allUrls.push(...getAnyUrl(t));
-                    }
+                // Use the cached catMap if available for this category
+                const catData = window.lastCatMap ? window.lastCatMap[category] : null;
+                
+                if (!catData) {
+                    window.showStatus(`No cached data found for category: ${category}. Refreshing...`, true);
+                    return;
+                }
+
+                // Sort by invoice date
+                const sortedItems = [...catData].sort((a, b) => {
+                    const da = new Date(a.tx.invoiceDate || 0);
+                    const db = new Date(b.tx.invoiceDate || 0);
+                    return da - db;
                 });
 
-                if (allUrls.length === 0) {
-                    window.showStatus("No images found for this category.", true);
+                const allItems = [];
+                sortedItems.forEach(item => {
+                    item.urls.forEach(u => allItems.push({ url: u, tx: item.tx }));
+                });
+
+                if (allItems.length === 0) {
+                    window.showStatus(`No images found for category: ${category}`, true);
                     return;
                 }
 
@@ -5039,15 +5108,17 @@
                 const modal = document.getElementById('invoice-cat-print-modal');
                 if (modal) modal.remove();
 
-                window.showStatus(`Loading ${allUrls.length} image(s)... 0%`, false);
+                window.showStatus(`Loading ${allItems.length} image(s)...`, false);
 
-                const resolveUrl = async (url, index) => {
+                const resolveUrl = async (itemObj, index) => {
                     try {
                         let result = null;
+                        const url = itemObj.url;
+                        const tx = itemObj.tx;
                         if (url instanceof Blob) {
                             result = URL.createObjectURL(url);
                         } else if (typeof url === 'string' && url.startsWith('local-')) {
-                            const data = await window.getPhotoLocal(url);
+                            const data = await window.getPhotoLocal(url, tx);
                             if (!data) {
                                 console.warn(`Missing from local storage: ${url}`);
                                 return null;
@@ -5058,9 +5129,8 @@
                         } else {
                             result = url;
                         }
-
-                        const pct = Math.round(((index + 1) / allUrls.length) * 100);
-                        window.showStatus(`Loading ${allUrls.length} image(s)... ${pct}%`, false);
+                        const pct = Math.round(((index + 1) / allItems.length) * 100);
+                        window.showStatus(`Loading images... ${pct}%`, false);
                         return result;
                     } catch (e) {
                         console.error("Resolve Error", e);
@@ -5068,17 +5138,11 @@
                     }
                 };
 
-                const resolvedSrcs = await Promise.all(allUrls.map((u, i) => resolveUrl(u, i)));
+                const resolvedSrcs = await Promise.all(allItems.map((itemObj, i) => resolveUrl(itemObj, i)));
                 const validSrcs = resolvedSrcs.filter(src => src && typeof src === 'string' && src.length > 20);
 
-                if (validSrcs.length < allUrls.length) {
-                    const missing = allUrls.length - validSrcs.length;
-                    console.warn(`${missing} images could not be loaded from storage.`);
-                    // We still proceed with whatever we found
-                }
-
                 if (validSrcs.length === 0) {
-                    window.showStatus("Failed to load any images from storage.", true);
+                    window.showStatus(`Failed to load any images from storage (found ${allItems.length} links).`, true);
                     return;
                 }
 
@@ -5105,17 +5169,18 @@
                 style.textContent = `
                     #invoice-print-overlay { display: none; }
                     @media print {
+                        @page { size: auto; margin: 0; }
                         body > *:not(#invoice-print-overlay) { display: none !important; }
-                        #invoice-print-overlay { display: block !important; }
+                        #invoice-print-overlay { display: block !important; margin: 0; padding: 0; }
                         .inv-print-page {
-                            width: 100vw; height: 100vh;
+                            width: 100%;
                             display: flex; align-items: center; justify-content: center;
                             overflow: hidden; margin: 0; padding: 0;
                             page-break-inside: avoid;
                         }
                         .inv-print-break { page-break-after: always; }
                         .inv-print-page img {
-                            max-width: 100%; max-height: 100vh;
+                            max-width: 100vw; max-height: 96vh;
                             width: auto; height: auto;
                             object-fit: contain; display: block;
                         }
@@ -5891,7 +5956,11 @@
                 const filterProp = document.getElementById('filter-prop').value.toLowerCase().trim();
                 const filterPerson = document.getElementById('filter-person') ? document.getElementById('filter-person').value : 'all';
 
-                const sortedAll = [...txs].sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
+                const sortedAll = [...txs].sort((a, b) => {
+                    const da = new Date(a.invoiceDate || a.subDate || 0);
+                    const db = new Date(b.invoiceDate || b.subDate || 0);
+                    return da - db;
+                });
                 let openingBalance = 0;
                 if (start) {
                     sortedAll.forEach(t => {
@@ -5950,7 +6019,11 @@
             };
 
             window.generateReportPDF = function () {
-                const sortedAll = [...txs].sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
+                const sortedAll = [...txs].sort((a, b) => {
+                    const da = new Date(a.invoiceDate || a.subDate || 0);
+                    const db = new Date(b.invoiceDate || b.subDate || 0);
+                    return da - db;
+                });
                 const start = document.getElementById('filter-start').value;
                 const end = document.getElementById('filter-end').value;
                 const filterPerson = document.getElementById('filter-person-history') ? document.getElementById('filter-person-history').value : '';
