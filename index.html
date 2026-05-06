@@ -15,6 +15,8 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <!-- ExcelJS for rich Excel reports with logo -->
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <!-- Panzoom for Maker/Checker image zoom -->
+    <script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
     <!-- EIC Logo base64 data -->
     <script src="logo_data.js"></script>
     <!-- Supabase SDK -->
@@ -285,7 +287,8 @@
                                 data-lucide="shield-check" class="text-white w-5 h-5"></i></div>
                         <div>
                             <h1 class="font-extrabold text-xl tracking-tight text-slate-900">PettyCash<span
-                                    class="text-indigo-600">Pro</span> <span class="text-xs text-rose-500" id="version-tag">v5.5</span></h1>
+                                    class="text-indigo-600">Pro</span> <span class="text-xs text-rose-500"
+                                    id="version-tag">v5.5</span></h1>
                             <p
                                 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">
                                 Enterprise Finance</p>
@@ -302,8 +305,8 @@
                                 class="hidden sm:inline">Reports</span></button>
                         <button onclick="window.switchView('ledger')" id="nav-ledger"
                             class="flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all text-slate-500 hover:text-slate-700 hover:bg-white/60 font-bold text-xs"><i
-                                data-lucide="users" class="w-4 h-4"></i> <span
-                                class="hidden sm:inline">Staff Ledger</span></button>
+                                data-lucide="users" class="w-4 h-4"></i> <span class="hidden sm:inline">Staff
+                                Ledger</span></button>
                         <button onclick="window.switchView('reimbursements')" id="nav-reimbursements"
                             class="flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all text-slate-500 hover:text-slate-700 hover:bg-white/60 font-bold text-xs"><i
                                 data-lucide="refresh-cw" class="w-4 h-4"></i> <span
@@ -338,19 +341,24 @@
 
             <!-- View: Dashboard -->
             <div id="view-dashboard" class="space-y-8 animate-in fade-in duration-500">
-                
+
                 <!-- Backup Reminder Alert -->
-                <div id="backup-reminder-box" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div id="backup-reminder-box"
+                    class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
                             <i data-lucide="shield-alert" class="w-6 h-6"></i>
                         </div>
                         <div>
-                            <h4 class="font-black text-slate-800 text-sm uppercase tracking-tight">Photo Backup Recommended</h4>
-                            <p class="text-slate-500 text-xs font-medium">It's been over 30 days since your last local photo backup. Keep your invoices safe!</p>
+                            <h4 class="font-black text-slate-800 text-sm uppercase tracking-tight">Photo Backup
+                                Recommended</h4>
+                            <p class="text-slate-500 text-xs font-medium">It's been over 30 days since your last local
+                                photo backup. Keep your invoices safe!</p>
                         </div>
                     </div>
-                    <button onclick="window.switchView('settings')" class="bg-amber-600 text-white px-6 py-2.5 rounded-xl font-bold text-xs hover:bg-amber-700 transition-all shadow-md shadow-amber-100">Go to Backup</button>
+                    <button onclick="window.switchView('settings')"
+                        class="bg-amber-600 text-white px-6 py-2.5 rounded-xl font-bold text-xs hover:bg-amber-700 transition-all shadow-md shadow-amber-100">Go
+                        to Backup</button>
                 </div>
 
                 <!-- Financial Summary Cards -->
@@ -489,14 +497,21 @@
                             </div>
 
                             <div id="reimburse-fields" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
-                                <div class="md:col-span-2 flex flex-col gap-2 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                                <div
+                                    class="md:col-span-2 flex flex-col gap-2 p-4 bg-slate-50 border border-slate-200 rounded-xl">
                                     <label class="flex items-center gap-3 cursor-pointer">
-                                        <input type="checkbox" id="form-has-vat" class="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" checked onchange="window.calculateVAT()">
-                                        <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wide">Includes VAT (5%)</span>
+                                        <input type="checkbox" id="form-has-vat"
+                                            class="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                            checked onchange="window.calculateVAT()">
+                                        <span
+                                            class="text-[11px] font-bold text-slate-700 uppercase tracking-wide">Includes
+                                            VAT (5%)</span>
                                     </label>
                                     <div id="vat-amount-container" class="flex items-center gap-3 mt-2">
-                                        <label class="text-[10px] font-bold text-slate-500 uppercase">VAT Amount (AED)</label>
-                                        <input type="number" id="form-tax-amount" step="0.01" class="modern-input px-3 py-2 rounded-lg font-bold text-sm text-slate-800 w-32">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">VAT Amount
+                                            (AED)</label>
+                                        <input type="number" id="form-tax-amount" step="0.01"
+                                            class="modern-input px-3 py-2 rounded-lg font-bold text-sm text-slate-800 w-32">
                                     </div>
                                 </div>
                                 <div class="space-y-2">
@@ -514,24 +529,33 @@
                                         class="modern-input w-full px-4 py-3 rounded-xl font-bold text-sm text-slate-800">
                                 </div>
                                 <div class="md:col-span-2 space-y-2">
-                                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Scan / Attach Invoice (Optional)</label>
+                                    <label
+                                        class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Scan /
+                                        Attach Invoice (Optional)</label>
                                     <div class="flex gap-3 items-center">
                                         <label class="flex-1 cursor-pointer group">
-                                            <div class="w-full px-4 py-3 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center gap-2 group-hover:border-indigo-400 group-hover:bg-indigo-50 transition-all">
-                                                <i data-lucide="camera" class="w-5 h-5 text-slate-400 group-hover:text-indigo-500"></i>
-                                                <span id="scan-label" class="text-xs font-bold text-slate-500 group-hover:text-indigo-600">Tap to Scan or Upload</span>
+                                            <div
+                                                class="w-full px-4 py-3 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center gap-2 group-hover:border-indigo-400 group-hover:bg-indigo-50 transition-all">
+                                                <i data-lucide="camera"
+                                                    class="w-5 h-5 text-slate-400 group-hover:text-indigo-500"></i>
+                                                <span id="scan-label"
+                                                    class="text-xs font-bold text-slate-500 group-hover:text-indigo-600">Tap
+                                                    to Scan or Upload</span>
                                             </div>
-                                            <input type="file" id="form-scan" accept="image/*" capture="environment" class="hidden" onchange="window.handleScanPreview(event)">
+                                            <input type="file" id="form-scan" accept="image/*" capture="environment"
+                                                class="hidden" onchange="window.handleScanPreview(event)">
                                         </label>
                                         <div id="scan-previews-list" class="flex flex-wrap gap-2">
                                             <!-- Previews will be injected here -->
                                         </div>
                                         <div id="add-page-btn" class="hidden">
                                             <label class="cursor-pointer">
-                                                <div class="w-12 h-12 bg-slate-100 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center text-slate-400 hover:border-indigo-400 hover:text-indigo-500 transition-all">
+                                                <div
+                                                    class="w-12 h-12 bg-slate-100 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center text-slate-400 hover:border-indigo-400 hover:text-indigo-500 transition-all">
                                                     <i data-lucide="plus" class="w-5 h-5"></i>
                                                 </div>
-                                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="window.handleScanPreview(event, true)">
+                                                <input type="file" accept="image/*" capture="environment" class="hidden"
+                                                    onchange="window.handleScanPreview(event, true)">
                                             </label>
                                         </div>
                                     </div>
@@ -587,10 +611,12 @@
             <!-- View: Staff Ledger -->
             <div id="view-ledger" class="space-y-8 hidden animate-in fade-in duration-500">
                 <div class="bg-indigo-600 text-white p-8 rounded-[2rem] shadow-xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-8 opacity-10"><i data-lucide="users" class="w-48 h-48"></i></div>
+                    <div class="absolute top-0 right-0 p-8 opacity-10"><i data-lucide="users" class="w-48 h-48"></i>
+                    </div>
                     <div class="relative z-10">
                         <h2 class="text-3xl font-black mb-2 tracking-tight">Staff Ledger</h2>
-                        <p class="text-indigo-100 font-bold opacity-80 uppercase text-[10px] tracking-widest">Individual spending & advance tracking</p>
+                        <p class="text-indigo-100 font-bold opacity-80 uppercase text-[10px] tracking-widest">Individual
+                            spending & advance tracking</p>
                     </div>
                 </div>
                 <div id="staff-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -601,33 +627,175 @@
             <!-- View: Reimbursements -->
             <div id="view-reimbursements" class="space-y-8 hidden animate-in fade-in duration-500">
                 <div class="bg-blue-600 text-white p-8 rounded-[2rem] shadow-xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-8 opacity-10"><i data-lucide="refresh-cw" class="w-48 h-48"></i></div>
+                    <div class="absolute top-0 right-0 p-8 opacity-10"><i data-lucide="refresh-cw"
+                            class="w-48 h-48"></i></div>
                     <div class="relative z-10 flex justify-between items-center">
                         <div>
                             <h2 class="text-3xl font-black mb-2 tracking-tight">Reimbursements</h2>
-                            <p class="text-blue-100 font-bold opacity-80 uppercase text-[10px] tracking-widest">Submit & track batches for Accounts replenishment</p>
+                            <p class="text-blue-100 font-bold opacity-80 uppercase text-[10px] tracking-widest">Submit &
+                                track batches for Accounts replenishment</p>
                         </div>
-                        <button onclick="window.submitToAccounts()" class="bg-white text-blue-600 px-6 py-3 rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all flex items-center gap-2">
-                            <i data-lucide="plus-circle" class="w-5 h-5"></i> Stage New Invoices
-                        </button>
+                        <div class="flex items-center gap-3">
+                            <button onclick="window.openMakerChecker()"
+                                class="bg-amber-400 text-amber-900 px-6 py-3 rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all flex items-center gap-2">
+                                <i data-lucide="check-square" class="w-5 h-5"></i> Audit Invoices
+                            </button>
+                            <button onclick="window.submitToAccounts()"
+                                class="bg-white text-blue-600 px-6 py-3 rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all flex items-center gap-2">
+                                <i data-lucide="plus-circle" class="w-5 h-5"></i> Stage New Invoices
+                            </button>
+                        </div>
                     </div>
                 </div>
-                
-                <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight mb-4 mt-8 flex items-center gap-2"><i data-lucide="folder-open" class="text-blue-500 w-6 h-6"></i> Currently Processing (Staged)</h3>
+
+                <h3
+                    class="text-xl font-black text-slate-800 uppercase tracking-tight mb-4 mt-8 flex items-center gap-2">
+                    <i data-lucide="folder-open" class="text-blue-500 w-6 h-6"></i> Currently Processing (Staged)</h3>
                 <div id="reimbursement-staged-folders" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Staged folders injected via JS -->
                 </div>
                 <div class="flex justify-end mt-4 mb-8">
-                    <button onclick="window.finalizeStagedBatch()" class="bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-emerald-700 transition-all flex items-center gap-2 disabled:opacity-50" id="finalize-batch-btn" disabled>
+                    <button onclick="window.finalizeStagedBatch()"
+                        class="bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-emerald-700 transition-all flex items-center gap-2 disabled:opacity-50"
+                        id="finalize-batch-btn" disabled>
                         <i data-lucide="check-circle-2" class="w-5 h-5"></i> Finalize Selected Folders into Batch
                     </button>
                 </div>
-                
+
                 <hr class="border-slate-200">
 
-                <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight mb-4 mt-8 flex items-center gap-2"><i data-lucide="archive" class="text-slate-400 w-6 h-6"></i> Pending Reimbursement Batches</h3>
+                <h3
+                    class="text-xl font-black text-slate-800 uppercase tracking-tight mb-4 mt-8 flex items-center gap-2">
+                    <i data-lucide="archive" class="text-slate-400 w-6 h-6"></i> Pending Reimbursement Batches</h3>
                 <div id="reimbursement-batches" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Batches injected via JS -->
+                </div>
+            </div>
+
+            <!-- Maker/Checker Full Screen View (Professional Audit) -->
+            <div id="maker-checker-view" class="fixed inset-0 z-[3000] hidden flex bg-slate-950 font-sans">
+                <!-- Left Column: High-End Document Viewer (65%, deep dark) -->
+                <div class="w-[65%] bg-slate-950 flex flex-col relative h-full border-r border-slate-800 shadow-2xl">
+                    <div class="absolute top-6 left-6 z-20 flex gap-3">
+                        <button onclick="window.closeMakerChecker()"
+                            class="p-4 bg-white/10 backdrop-blur-md text-white hover:bg-white/20 rounded-2xl shadow-2xl transition-all border border-white/10 group">
+                            <i data-lucide="arrow-left"
+                                class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i>
+                        </button>
+                        <div class="h-12 w-px bg-white/10 mx-1"></div>
+                        <button onclick="window.rotateMakerImage()"
+                            class="px-6 py-4 bg-white/10 backdrop-blur-md text-white hover:bg-white/20 rounded-2xl shadow-2xl transition-all border border-white/10 flex items-center gap-3 font-bold text-xs">
+                            <i data-lucide="rotate-cw" class="w-4 h-4"></i> ROTATE VIEW
+                        </button>
+                    </div>
+
+                    <div class="absolute top-6 right-6 z-20">
+                        <div
+                            class="bg-indigo-600/20 backdrop-blur-md border border-indigo-500/30 px-4 py-2 rounded-xl text-indigo-400 text-[10px] font-black tracking-widest uppercase">
+                            HD Document Preview
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-hidden flex items-center justify-center p-12">
+                        <div id="maker-image-container"
+                            class="w-full h-full flex items-center justify-center bg-slate-900/50 rounded-[2rem] border border-white/5 relative group cursor-zoom-in">
+                            <img id="maker-image" src="" alt="Receipt Loading..."
+                                class="max-w-[90%] max-h-[90%] object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 scale-95 group-hover:scale-100"
+                                style="transform: rotate(0deg);">
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20">
+                        <div
+                            class="bg-slate-900/80 backdrop-blur-xl border border-white/10 px-6 py-3 rounded-2xl flex items-center gap-6 shadow-2xl">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+                                    id="maker-queue-status">Batch Processing</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Premium Data Panel (35%, sophisticated light/glass) -->
+                <div class="w-[35%] bg-slate-900 flex flex-col h-full relative overflow-hidden">
+                    <!-- Background Accent -->
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-600/10 blur-[100px] -z-10"></div>
+                    <div class="absolute bottom-0 left-0 w-64 h-64 bg-emerald-600/10 blur-[100px] -z-10"></div>
+
+                    <div class="p-10 flex-1 overflow-y-auto no-scrollbar">
+                        <div class="flex justify-between items-start mb-10">
+                            <div>
+                                <div
+                                    class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest mb-4 border border-indigo-500/20">
+                                    <i data-lucide="shield-check" class="w-3 h-3"></i> Verification Mode
+                                </div>
+                                <h2 class="text-3xl font-black text-white tracking-tight leading-tight">Invoice Audit
+                                </h2>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <!-- ID Card -->
+                            <div class="bg-white/5 backdrop-blur-sm border border-white/10 p-5 rounded-2xl">
+                                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                                    Transaction Identity</p>
+                                <p class="text-lg font-bold text-indigo-400" id="maker-expense-id">ID: EXP-0000</p>
+                            </div>
+
+                            <!-- Form Card -->
+                            <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl border border-white/10 space-y-8">
+                                <div class="space-y-6">
+                                    <div class="group">
+                                        <label
+                                            class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block group-focus-within:text-indigo-600 transition-colors">Subtotal
+                                            Amount</label>
+                                        <div class="relative">
+                                            <span
+                                                class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black">AED</span>
+                                            <input type="number" id="maker-subtotal"
+                                                class="w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl text-xl font-black text-slate-800 focus:border-indigo-500 focus:bg-white outline-none transition-all"
+                                                step="0.01" oninput="window.updateMakerTotal()">
+                                        </div>
+                                    </div>
+
+                                    <div class="group">
+                                        <label
+                                            class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block group-focus-within:text-indigo-600 transition-colors">VAT
+                                            (5% Recovery)</label>
+                                        <div class="relative">
+                                            <span
+                                                class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black">AED</span>
+                                            <input type="number" id="maker-vat"
+                                                class="w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl text-xl font-black text-slate-800 focus:border-indigo-500 focus:bg-white outline-none transition-all"
+                                                step="0.01" oninput="window.updateMakerTotal()">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="pt-6 border-t-2 border-dashed border-slate-100">
+                                    <div class="flex justify-between items-center px-2">
+                                        <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Total
+                                            Valuation</span>
+                                        <span class="text-4xl font-black text-slate-900 tracking-tighter"
+                                            id="maker-total">0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sticky Professional Action Bar -->
+                    <div class="p-10 bg-slate-900/50 backdrop-blur-2xl border-t border-white/10 flex flex-col gap-4">
+                        <button onclick="window.approveMakerExpense()"
+                            class="w-full py-6 bg-emerald-500 text-white hover:bg-emerald-600 hover:shadow-[0_20px_40px_rgba(16,185,129,0.3)] rounded-2xl font-black text-sm uppercase tracking-widest transition-all flex justify-center items-center gap-3 transform active:scale-[0.98]">
+                            <i data-lucide="check-circle-2" class="w-6 h-6"></i> CONFIRM & NEXT
+                        </button>
+                        <button onclick="window.skipMakerExpense()"
+                            class="w-full py-5 bg-white/5 text-amber-500 hover:bg-white/10 border border-white/5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex justify-center items-center gap-3">
+                            <i data-lucide="skip-forward" class="w-4 h-4"></i> SKIP TRANSACTION
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -746,39 +914,50 @@
                     <div class="space-y-6">
                         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                             <div class="flex items-center gap-3 mb-6">
-                                <div class="p-2 bg-slate-100 text-slate-600 rounded-lg"><i data-lucide="cloud" class="w-5 h-5"></i></div>
+                                <div class="p-2 bg-slate-100 text-slate-600 rounded-lg"><i data-lucide="cloud"
+                                        class="w-5 h-5"></i></div>
                                 <div>
-                                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">OneDrive Integration</h4>
+                                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">OneDrive
+                                        Integration</h4>
                                     <p class="text-[10px] text-slate-500 font-medium">Automatic Folder Sync</p>
                                 </div>
                             </div>
-                            
+
                             <div class="relative z-10">
                                 <div class="flex justify-between items-start mb-6">
                                     <div>
-                                        <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">OneDrive Integration</h4>
-                                        <p class="text-[10px] text-slate-500 font-medium" id="onedrive-status-label">Automatic Folder Sync</p>
+                                        <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">OneDrive
+                                            Integration</h4>
+                                        <p class="text-[10px] text-slate-500 font-medium" id="onedrive-status-label">
+                                            Automatic Folder Sync</p>
                                     </div>
-                                    <div id="onedrive-status-badge" class="hidden px-2 py-0.5 bg-amber-100 text-amber-700 text-[8px] font-black uppercase rounded-full">Reconnect Required</div>
+                                    <div id="onedrive-status-badge"
+                                        class="hidden px-2 py-0.5 bg-amber-100 text-amber-700 text-[8px] font-black uppercase rounded-full">
+                                        Reconnect Required</div>
                                 </div>
-                                
+
                                 <button id="btn-link-onedrive" onclick="window.linkOneDriveFolder()"
                                     class="w-full bg-slate-800 text-white shadow-md shadow-slate-200 py-3.5 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:-translate-y-0.5 hover:shadow-lg transition-all flex items-center gap-2 justify-center mb-3">
-                                    <i data-lucide="folder-sync" class="w-5 h-5 text-indigo-400"></i> <span id="link-status-text">Link OneDrive Folder</span>
+                                    <i data-lucide="folder-sync" class="w-5 h-5 text-indigo-400"></i> <span
+                                        id="link-status-text">Link OneDrive Folder</span>
                                 </button>
-                                
+
                                 <button id="btn-sync-to-onedrive" onclick="window.syncBrowserToOneDrive()"
                                     class="w-full bg-white text-slate-800 border border-slate-200 py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all flex items-center gap-2 justify-center hidden hover:bg-slate-50">
-                                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> <span>Sync Browser to OneDrive</span>
+                                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> <span>Sync Browser to
+                                        OneDrive</span>
                                 </button>
                             </div>
                         </div>
 
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div
+                            class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                             <div class="flex items-center gap-3">
-                                <div class="p-2 bg-slate-100 text-slate-600 rounded-lg"><i data-lucide="archive" class="w-5 h-5"></i></div>
+                                <div class="p-2 bg-slate-100 text-slate-600 rounded-lg"><i data-lucide="archive"
+                                        class="w-5 h-5"></i></div>
                                 <div>
-                                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">Legacy Archive</h4>
+                                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">Legacy
+                                        Archive</h4>
                                     <p class="text-[10px] text-slate-500 font-medium">Archived Transactions</p>
                                 </div>
                             </div>
@@ -793,32 +972,40 @@
                     <div class="space-y-6">
                         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                             <div class="flex items-center gap-3 mb-6">
-                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><i data-lucide="database" class="w-5 h-5"></i></div>
-                                <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">Ledger Administration</h4>
+                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><i data-lucide="database"
+                                        class="w-5 h-5"></i></div>
+                                <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">Ledger
+                                    Administration</h4>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <button onclick="window.exportMasterBackup()"
                                     class="bg-indigo-600 text-white px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100">
                                     Export Ledger
                                 </button>
-                                <label class="cursor-pointer bg-white text-indigo-600 border border-indigo-200 px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-50 transition-all text-center">
-                                    Import Ledger <input type="file" accept=".json" onchange="window.importMasterBackup(event)" class="hidden">
+                                <label
+                                    class="cursor-pointer bg-white text-indigo-600 border border-indigo-200 px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-50 transition-all text-center">
+                                    Import Ledger <input type="file" accept=".json"
+                                        onchange="window.importMasterBackup(event)" class="hidden">
                                 </label>
                             </div>
                         </div>
 
                         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                             <div class="flex items-center gap-3 mb-6">
-                                <div class="p-2 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="image" class="w-5 h-5"></i></div>
-                                <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">Photo Archives</h4>
+                                <div class="p-2 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="image"
+                                        class="w-5 h-5"></i></div>
+                                <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">Photo Archives
+                                </h4>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <button onclick="window.backupPhotos()"
                                     class="bg-amber-500 text-white px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-amber-600 transition-all shadow-md shadow-amber-100">
                                     Backup Photos
                                 </button>
-                                <label class="cursor-pointer bg-white text-amber-600 border border-amber-200 px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-amber-50 transition-all text-center">
-                                    Restore Photos <input type="file" accept=".json" onchange="window.restorePhotos(event)" class="hidden">
+                                <label
+                                    class="cursor-pointer bg-white text-amber-600 border border-amber-200 px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-amber-50 transition-all text-center">
+                                    Restore Photos <input type="file" accept=".json"
+                                        onchange="window.restorePhotos(event)" class="hidden">
                                 </label>
                             </div>
 
@@ -1040,17 +1227,22 @@
         <!-- Unified Message Draft / Choice Modal -->
         <div id="wa-draft-modal"
             class="hidden fixed inset-0 z-[6000] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/60 backdrop-blur-md">
-            <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
+            <div
+                class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
                 <div class="p-6 bg-slate-900 text-white flex justify-between items-center shrink-0">
                     <h3 class="text-sm font-black uppercase tracking-widest">Message Draft</h3>
-                    <button onclick="window.closeModal()" class="text-slate-400 hover:text-white transition-smooth"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    <button onclick="window.closeModal()" class="text-slate-400 hover:text-white transition-smooth"><i
+                            data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
                 <div class="p-6 text-center space-y-4 shrink-0">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Preview &amp; Choose Option</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Preview &amp; Choose
+                        Option</p>
                 </div>
                 <!-- Universal Mini Receipt Preview - scrollable -->
-                <div id="draft-preview-container" class="mx-6 p-3 bg-slate-50 border border-slate-100 rounded-2xl overflow-y-auto shadow-inner flex-1 min-h-0">
-                    <div id="mini-receipt-draft" class="bg-white p-6 shadow-sm text-left font-mono text-[10px] leading-snug border border-slate-200">
+                <div id="draft-preview-container"
+                    class="mx-6 p-3 bg-slate-50 border border-slate-100 rounded-2xl overflow-y-auto shadow-inner flex-1 min-h-0">
+                    <div id="mini-receipt-draft"
+                        class="bg-white p-6 shadow-sm text-left font-mono text-[10px] leading-snug border border-slate-200">
                         <div class="text-center border-b-2 border-dashed border-slate-400 pb-3 mb-3">
                             <p class="font-black text-[14px] tracking-wider">PETTYCASH PRO</p>
                             <p id="draft-rec-date" class="text-[11px] mt-0.5">DATE: --/--/----</p>
@@ -1058,7 +1250,8 @@
                         <div id="draft-rec-content" class="space-y-2 mb-3">
                             <!-- Dynamic Content -->
                         </div>
-                        <div id="draft-footer" class="mt-4 text-center text-[9px] text-slate-500 border-t-2 border-dashed border-slate-400 pt-2">
+                        <div id="draft-footer"
+                            class="mt-4 text-center text-[9px] text-slate-500 border-t-2 border-dashed border-slate-400 pt-2">
                             <p>*** THANK YOU ***</p>
                         </div>
                     </div>
@@ -1071,7 +1264,9 @@
                     <button id="btn-wa-image" onclick="window.confirmWASend('image')"
                         class="relative overflow-hidden bg-slate-100 text-slate-800 py-4 rounded-2xl font-black text-xs hover:bg-slate-200 transition-all flex items-center justify-center gap-3">
                         <i data-lucide="copy" class="w-5 h-5"></i> <span>Copy Receipt Image</span>
-                        <div id="copy-progress-bar" class="absolute bottom-0 left-0 h-1 bg-indigo-600 transition-all duration-300 w-0 hidden"></div>
+                        <div id="copy-progress-bar"
+                            class="absolute bottom-0 left-0 h-1 bg-indigo-600 transition-all duration-300 w-0 hidden">
+                        </div>
                     </button>
                 </div>
             </div>
@@ -1080,19 +1275,24 @@
         <!-- Classic Receipt Modal (Triggered after confirmation) -->
         <div id="receipt-modal"
             class="hidden fixed inset-0 z-[6000] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/60 backdrop-blur-md">
-            <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
+            <div
+                class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
                 <div class="p-6 bg-slate-900 text-white flex justify-between items-center">
                     <h3 class="text-sm font-black uppercase tracking-widest">Transaction Success</h3>
-                    <button onclick="window.closeModal()" class="text-slate-400 hover:text-white transition-smooth"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    <button onclick="window.closeModal()" class="text-slate-400 hover:text-white transition-smooth"><i
+                            data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
                 <div class="p-8 text-center">
-                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <div
+                        class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
                         <i data-lucide="check-circle" class="w-8 h-8"></i>
                     </div>
                     <h2 class="text-2xl font-black text-slate-800 mb-1 tracking-tight">Saved Successfully</h2>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Transaction recorded in ledger</p>
-                    
-                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-left mb-8 font-mono text-[10px] leading-relaxed shadow-inner">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Transaction recorded in
+                        ledger</p>
+
+                    <div
+                        class="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-left mb-8 font-mono text-[10px] leading-relaxed shadow-inner">
                         <div class="text-center border-b border-dashed border-slate-300 pb-3 mb-4">
                             <p class="font-black text-xs">PETTYCASH PRO</p>
                             <p id="rec-date" class="text-slate-400 mt-1">DATE: --/--/----</p>
@@ -1110,7 +1310,8 @@
                                 <span class="text-slate-400 font-bold">AMOUNT:</span>
                                 <span id="rec-amount" class="font-black text-slate-900 text-xs">0.00 AED</span>
                             </div>
-                            <div id="rec-adv-section" class="hidden space-y-1 pt-1 bg-amber-50/50 -mx-2 px-2 rounded-lg">
+                            <div id="rec-adv-section"
+                                class="hidden space-y-1 pt-1 bg-amber-50/50 -mx-2 px-2 rounded-lg">
                                 <div class="flex justify-between">
                                     <span class="text-amber-600 font-bold">FROM ADVANCE:</span>
                                     <span id="rec-adv-used" class="font-black text-amber-700">0.00</span>
@@ -1125,7 +1326,8 @@
                                 <p id="rec-desc" class="text-slate-800 font-medium leading-normal break-words">--</p>
                             </div>
                         </div>
-                        <div class="mt-6 text-center text-[8px] text-slate-300 border-t border-dashed border-slate-200 pt-3">
+                        <div
+                            class="mt-6 text-center text-[8px] text-slate-300 border-t border-dashed border-slate-200 pt-3">
                             <p>*** TRANSACTION COMPLETED ***</p>
                         </div>
                     </div>
@@ -1134,8 +1336,8 @@
                         class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black text-xs hover:bg-emerald-700 shadow-xl shadow-emerald-200 transition-all flex items-center justify-center gap-3">
                         <i data-lucide="message-circle" class="w-5 h-5"></i> Send to WhatsApp
                     </button>
-                    
-                    <button onclick="window.closeModal()" 
+
+                    <button onclick="window.closeModal()"
                         class="w-full mt-3 py-3 rounded-xl font-bold text-xs text-slate-400 hover:bg-slate-50 transition-all uppercase tracking-widest">
                         Maybe Later
                     </button>
@@ -1146,14 +1348,17 @@
         <!-- Custom Phone Input Modal -->
         <div id="phone-modal"
             class="hidden fixed inset-0 z-[7000] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/40 backdrop-blur-sm">
-            <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100 p-8 text-center space-y-4">
-                <div class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-indigo-600 mb-2">
+            <div
+                class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100 p-8 text-center space-y-4">
+                <div
+                    class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-indigo-600 mb-2">
                     <i data-lucide="phone" class="w-8 h-8"></i>
                 </div>
                 <h3 class="text-xl font-black uppercase tracking-tight text-slate-800">WhatsApp Number</h3>
-                <p id="phone-modal-subtitle" class="text-xs text-slate-500 font-bold uppercase tracking-widest">Enter number for Staff Member</p>
+                <p id="phone-modal-subtitle" class="text-xs text-slate-500 font-bold uppercase tracking-widest">Enter
+                    number for Staff Member</p>
                 <div class="relative">
-                    <input type="tel" id="modal-phone-input" 
+                    <input type="tel" id="modal-phone-input"
                         class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-center text-xl font-black text-slate-800 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                         placeholder="971501234567">
                 </div>
@@ -1161,7 +1366,8 @@
                     <button onclick="document.getElementById('phone-modal').classList.add('hidden')"
                         class="py-4 rounded-2xl font-bold text-xs text-slate-400 hover:bg-slate-50 transition-all uppercase tracking-widest">Cancel</button>
                     <button id="btn-submit-phone"
-                        class="bg-indigo-600 text-white py-4 rounded-2xl font-bold text-xs hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all uppercase tracking-widest">Save & Send</button>
+                        class="bg-indigo-600 text-white py-4 rounded-2xl font-bold text-xs hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all uppercase tracking-widest">Save
+                        & Send</button>
                 </div>
             </div>
         </div>
@@ -1169,12 +1375,16 @@
         <!-- Custom Confirmation Modal -->
         <div id="confirm-modal"
             class="hidden fixed inset-0 z-[8000] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/60 backdrop-blur-sm">
-            <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100 p-8 text-center space-y-4">
-                <div id="confirm-modal-icon-bg" class="bg-amber-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-amber-600 mb-2">
+            <div
+                class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100 p-8 text-center space-y-4">
+                <div id="confirm-modal-icon-bg"
+                    class="bg-amber-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-amber-600 mb-2">
                     <i id="confirm-modal-icon" data-lucide="help-circle" class="w-8 h-8"></i>
                 </div>
-                <h3 id="confirm-modal-title" class="text-xl font-black uppercase tracking-tight text-slate-800">Confirm Action</h3>
-                <p id="confirm-modal-body" class="text-sm text-slate-500 font-medium">Are you sure you want to proceed?</p>
+                <h3 id="confirm-modal-title" class="text-xl font-black uppercase tracking-tight text-slate-800">Confirm
+                    Action</h3>
+                <p id="confirm-modal-body" class="text-sm text-slate-500 font-medium">Are you sure you want to proceed?
+                </p>
                 <div class="grid grid-cols-2 gap-3 pt-4">
                     <button id="btn-confirm-cancel"
                         class="py-4 rounded-2xl font-bold text-xs text-slate-400 hover:bg-slate-50 transition-all uppercase tracking-widest">Cancel</button>
@@ -1267,36 +1477,50 @@
                             class="modern-input w-full px-4 py-3 rounded-xl font-medium text-sm">
                     </div>
                     <div class="space-y-3">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Category Allocations</label>
-                        <div id="edit-allocations-list" class="space-y-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Category
+                            Allocations</label>
+                        <div id="edit-allocations-list"
+                            class="space-y-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                             <!-- Dynamic rows here -->
                         </div>
-                        <button onclick="window.addEditAllocationRow()" class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest flex items-center gap-1 hover:text-indigo-700">
+                        <button onclick="window.addEditAllocationRow()"
+                            class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest flex items-center gap-1 hover:text-indigo-700">
                             <i data-lucide="plus-circle" class="w-3 h-3"></i> Add Allocation
                         </button>
                     </div>
                     <div class="space-y-3 hidden" id="edit-scan-section">
                         <div class="flex justify-between items-center">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Invoice Scans / Images</label>
-                            <button type="button" id="edit-add-page-btn" onclick="document.getElementById('edit-scan-input-append').click()" class="hidden text-indigo-600 hover:text-indigo-700 font-bold text-xs flex items-center gap-1">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Invoice Scans
+                                / Images</label>
+                            <button type="button" id="edit-add-page-btn"
+                                onclick="document.getElementById('edit-scan-input-append').click()"
+                                class="hidden text-indigo-600 hover:text-indigo-700 font-bold text-xs flex items-center gap-1">
                                 <i data-lucide="plus" class="w-3 h-3"></i> Add Page
                             </button>
-                            <input type="file" id="edit-scan-input-append" accept="image/*" capture="environment" class="hidden" onchange="window.handleEditScanPreview(event, true)">
+                            <input type="file" id="edit-scan-input-append" accept="image/*" capture="environment"
+                                class="hidden" onchange="window.handleEditScanPreview(event, true)">
                         </div>
                         <div class="flex flex-col gap-3">
                             <label class="flex-1 cursor-pointer group">
-                                <div class="w-full px-4 py-3 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center gap-2 group-hover:border-indigo-400 group-hover:bg-indigo-50 transition-all">
-                                    <i data-lucide="camera" class="w-5 h-5 text-slate-400 group-hover:text-indigo-500"></i>
-                                    <span id="edit-scan-label" class="text-xs font-bold text-slate-500 group-hover:text-indigo-600">Change Scan or Paste (Ctrl+V)</span>
+                                <div
+                                    class="w-full px-4 py-3 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center gap-2 group-hover:border-indigo-400 group-hover:bg-indigo-50 transition-all">
+                                    <i data-lucide="camera"
+                                        class="w-5 h-5 text-slate-400 group-hover:text-indigo-500"></i>
+                                    <span id="edit-scan-label"
+                                        class="text-xs font-bold text-slate-500 group-hover:text-indigo-600">Change Scan
+                                        or Paste (Ctrl+V)</span>
                                 </div>
-                                <input type="file" id="edit-scan-input" accept="image/*" capture="environment" class="hidden" onchange="window.handleEditScanPreview(event, false)">
+                                <input type="file" id="edit-scan-input" accept="image/*" capture="environment"
+                                    class="hidden" onchange="window.handleEditScanPreview(event, false)">
                             </label>
                             <div id="edit-scan-previews-list" class="flex flex-wrap gap-3 mt-1"></div>
                         </div>
                     </div>
                     <div class="space-y-1.5">
-                        <label class="text-[10px] font-bold text-rose-500 uppercase tracking-widest">Reason for Edit <span class="text-rose-400">*</span></label>
-                        <input type="text" id="edit-reason" required placeholder="Why are you changing this record? (Required)"
+                        <label class="text-[10px] font-bold text-rose-500 uppercase tracking-widest">Reason for Edit
+                            <span class="text-rose-400">*</span></label>
+                        <input type="text" id="edit-reason" required
+                            placeholder="Why are you changing this record? (Required)"
                             class="modern-input w-full px-4 py-3 rounded-xl font-medium text-sm border-rose-200 focus:border-rose-500 focus:ring-rose-50 bg-rose-50/30">
                     </div>
                 </div>
@@ -1342,18 +1566,24 @@
                         Transaction</button></div>
             </div>
         </div>
-        <div id="legacy-archive-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 modal-overlay no-print transition-smooth">
-            <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
+        <div id="legacy-archive-modal"
+            class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 modal-overlay no-print transition-smooth">
+            <div
+                class="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
                 <div class="p-8 bg-amber-600 text-white flex justify-between items-center shrink-0">
                     <div>
                         <h3 class="text-xl font-black uppercase tracking-tight">Legacy Archive</h3>
-                        <p class="text-[10px] text-amber-100 mt-1 uppercase font-bold tracking-wider">Invoices Hidden from Dashboard</p>
+                        <p class="text-[10px] text-amber-100 mt-1 uppercase font-bold tracking-wider">Invoices Hidden
+                            from Dashboard</p>
                     </div>
-                    <button onclick="window.closeModal()" class="text-amber-100 hover:text-white transition-smooth"><i data-lucide="x"></i></button>
+                    <button onclick="window.closeModal()" class="text-amber-100 hover:text-white transition-smooth"><i
+                            data-lucide="x"></i></button>
                 </div>
                 <div class="p-4 bg-slate-50 border-b border-slate-100">
                     <div class="relative">
-                        <input type="text" id="legacy-search" oninput="window.renderLegacyList()" placeholder="Search archived invoices..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all">
+                        <input type="text" id="legacy-search" oninput="window.renderLegacyList()"
+                            placeholder="Search archived invoices..."
+                            class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all">
                         <div class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                             <i data-lucide="search" class="w-3.5 h-3.5"></i>
                         </div>
@@ -1362,22 +1592,28 @@
                 <div class="flex-1 overflow-y-auto p-0 no-scrollbar">
                     <table class="w-full text-left border-collapse">
                         <thead class="sticky top-0 bg-slate-50 z-10">
-                            <tr class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest border-b border-slate-100">
-                                <th class="px-8 py-4 w-12"><input type="checkbox" id="legacy-select-all" onchange="window.toggleAllLegacy(this.checked)" class="w-4 h-4 rounded cursor-pointer"></th>
+                            <tr
+                                class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                                <th class="px-8 py-4 w-12"><input type="checkbox" id="legacy-select-all"
+                                        onchange="window.toggleAllLegacy(this.checked)"
+                                        class="w-4 h-4 rounded cursor-pointer"></th>
                                 <th class="px-4 py-4">Date</th>
                                 <th class="px-4 py-4">Details</th>
                                 <th class="px-4 py-4">Person</th>
                                 <th class="px-4 py-4 text-right">Amount</th>
                             </tr>
                         </thead>
-                        <tbody id="legacy-archive-body" class="divide-y divide-slate-100 text-xs text-slate-600"></tbody>
+                        <tbody id="legacy-archive-body" class="divide-y divide-slate-100 text-xs text-slate-600">
+                        </tbody>
                     </table>
                 </div>
                 <div class="p-8 bg-slate-50 border-t border-slate-100 flex justify-between items-center shrink-0">
                     <p id="legacy-selected-count" class="text-xs font-bold text-slate-500">0 items selected</p>
                     <div class="flex gap-3">
-                        <button onclick="window.closeModal()" class="px-6 py-3 font-bold text-slate-500 hover:text-slate-700 transition-all text-xs uppercase tracking-widest">Close</button>
-                        <button id="btn-restore-legacy" onclick="window.restoreFromLegacy()" disabled class="bg-emerald-600 text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-200 hover:bg-emerald-700 disabled:opacity-50 disabled:shadow-none transition-all flex items-center gap-2">
+                        <button onclick="window.closeModal()"
+                            class="px-6 py-3 font-bold text-slate-500 hover:text-slate-700 transition-all text-xs uppercase tracking-widest">Close</button>
+                        <button id="btn-restore-legacy" onclick="window.restoreFromLegacy()" disabled
+                            class="bg-emerald-600 text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-200 hover:bg-emerald-700 disabled:opacity-50 disabled:shadow-none transition-all flex items-center gap-2">
                             <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Restore to Pending
                         </button>
                     </div>
@@ -1389,40 +1625,51 @@
             <div class="bg-white rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                     <div class="flex flex-col">
-                        <h3 id="staff-modal-name" class="font-black text-2xl text-slate-800 tracking-tight">Staff Name</h3>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Detailed Ledger &amp; Analytics</p>
+                        <h3 id="staff-modal-name" class="font-black text-2xl text-slate-800 tracking-tight">Staff Name
+                        </h3>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Detailed Ledger
+                            &amp; Analytics</p>
                     </div>
                     <div class="flex items-center gap-3">
-                        <button id="btn-staff-whatsapp" class="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-2">
+                        <button id="btn-staff-whatsapp"
+                            class="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-2">
                             <i data-lucide="message-square" class="w-4 h-4"></i> Send Statement
                         </button>
-                        <button onclick="document.getElementById('staff-modal').classList.add('hidden')" class="p-2 hover:bg-slate-200 rounded-full transition-colors"><i data-lucide="x" class="text-slate-500 w-5 h-5"></i></button>
+                        <button onclick="document.getElementById('staff-modal').classList.add('hidden')"
+                            class="p-2 hover:bg-slate-200 rounded-full transition-colors"><i data-lucide="x"
+                                class="text-slate-500 w-5 h-5"></i></button>
                     </div>
                 </div>
-                
+
                 <div class="p-6 flex-grow overflow-y-auto no-scrollbar space-y-6">
                     <!-- Analytics Grid -->
                     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
                         <div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Spending</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total
+                                Spending</p>
                             <h4 id="sm-total" class="text-xl font-black text-slate-800">0.00</h4>
                         </div>
                         <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-2xl">
-                            <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">This Month</p>
+                            <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">This Month
+                            </p>
                             <h4 id="sm-this-month" class="text-xl font-black text-indigo-800">0.00</h4>
                         </div>
                         <div class="p-4 bg-rose-50 border border-rose-100 rounded-2xl">
-                            <p class="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-1">Pending Owed</p>
+                            <p class="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-1">Pending Owed
+                            </p>
                             <h4 id="sm-debt" class="text-xl font-black text-rose-800">0.00</h4>
                         </div>
                         <div class="p-4 bg-blue-50 border border-blue-100 rounded-2xl">
-                            <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1">Monthly Avg</p>
+                            <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1">Monthly Avg
+                            </p>
                             <h4 id="sm-avg" class="text-xl font-black text-blue-800">0.00</h4>
                         </div>
                         <div class="p-4 bg-amber-50 border border-amber-100 rounded-2xl">
-                            <p class="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">Current Balance</p>
+                            <p class="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">Current
+                                Balance</p>
                             <h4 id="sm-balance" class="text-xl font-black text-amber-700">0.00</h4>
-                            <p id="sm-balance-label" class="text-[9px] font-bold text-amber-600 mt-1 uppercase">Pending Advance</p>
+                            <p id="sm-balance-label" class="text-[9px] font-bold text-amber-600 mt-1 uppercase">Pending
+                                Advance</p>
                         </div>
                     </div>
 
@@ -1448,18 +1695,23 @@
         </div>
 
         <!-- REIMBURSEMENT SELECTION MODAL -->
-        <div id="reimburse-select-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-overlay no-print transition-smooth">
-            <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
+        <div id="reimburse-select-modal"
+            class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-overlay no-print transition-smooth">
+            <div
+                class="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
                 <div class="p-6 bg-blue-600 text-white flex justify-between items-center">
                     <div>
                         <h3 class="text-xl font-black uppercase tracking-tight">Select Expenses for Reimbursement</h3>
-                        <p class="text-[10px] text-blue-200 mt-1 uppercase font-bold tracking-wider">Choose which unbatched expenses to process</p>
+                        <p class="text-[10px] text-blue-200 mt-1 uppercase font-bold tracking-wider">Choose which
+                            unbatched expenses to process</p>
                     </div>
-                    <button onclick="window.closeModal()" class="text-blue-200 hover:text-white transition-smooth"><i data-lucide="x"></i></button>
+                    <button onclick="window.closeModal()" class="text-blue-200 hover:text-white transition-smooth"><i
+                            data-lucide="x"></i></button>
                 </div>
                 <div class="p-6 overflow-y-auto no-scrollbar flex-grow bg-slate-50">
                     <div class="flex items-center justify-between mb-4">
-                        <select id="reimburse-category-filter" onchange="window.filterReimburseModal()" class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:border-blue-500 transition-all">
+                        <select id="reimburse-category-filter" onchange="window.filterReimburseModal()"
+                            class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:border-blue-500 transition-all">
                             <option value="">All Categories</option>
                         </select>
                     </div>
@@ -1467,7 +1719,9 @@
                         <table class="w-full text-left">
                             <thead class="bg-slate-100 text-[10px] font-black text-slate-500 uppercase tracking-widest">
                                 <tr>
-                                    <th class="p-3 w-10 text-center"><input type="checkbox" id="reimburse-select-all" class="w-4 h-4 rounded text-blue-600 cursor-pointer" onchange="window.toggleAllReimburse(this.checked)"></th>
+                                    <th class="p-3 w-10 text-center"><input type="checkbox" id="reimburse-select-all"
+                                            class="w-4 h-4 rounded text-blue-600 cursor-pointer"
+                                            onchange="window.toggleAllReimburse(this.checked)"></th>
                                     <th class="p-3">Date (Inv)</th>
                                     <th class="p-3">Description</th>
                                     <th class="p-3">Person</th>
@@ -1480,13 +1734,16 @@
                     </div>
                 </div>
                 <div class="p-6 bg-white border-t border-slate-100 flex justify-between items-center">
-                    <button onclick="window.markLegacyProcessed()" class="text-[10px] font-bold text-slate-400 hover:text-rose-600 uppercase tracking-widest transition-colors flex items-center gap-1.5"><i data-lucide="archive" class="w-3.5 h-3.5"></i> Mark Selected as Legacy (Hide)</button>
+                    <button onclick="window.markLegacyProcessed()"
+                        class="text-[10px] font-bold text-slate-400 hover:text-rose-600 uppercase tracking-widest transition-colors flex items-center gap-1.5"><i
+                            data-lucide="archive" class="w-3.5 h-3.5"></i> Mark Selected as Legacy (Hide)</button>
                     <div class="flex items-center gap-4">
                         <div class="text-right">
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Selected Total</p>
                             <p id="reimburse-selected-total" class="text-xl font-black text-blue-600">0.00 AED</p>
                         </div>
-                        <button onclick="window.confirmBatchSubmission()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
+                        <button onclick="window.confirmBatchSubmission()"
+                            class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
                             <i data-lucide="play-circle" class="w-5 h-5"></i> Start Processing (Stage)
                         </button>
                     </div>
@@ -1495,38 +1752,51 @@
         </div>
 
         <!-- CASH COUNT AUTOMATION MODAL -->
-        <div id="cash-count-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/95 backdrop-blur-md">
-            <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
+        <div id="cash-count-modal"
+            class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/95 backdrop-blur-md">
+            <div
+                class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
                 <div class="p-8 bg-indigo-600 text-white text-center">
                     <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i data-lucide="wallet" class="w-8 h-8 text-white"></i>
                     </div>
                     <h3 class="text-2xl font-black uppercase tracking-tight text-white">7-Day Cash Count</h3>
-                    <p class="text-xs font-bold text-indigo-200 uppercase tracking-widest mt-2">Mandatory Reconciliation</p>
+                    <p class="text-xs font-bold text-indigo-200 uppercase tracking-widest mt-2">Mandatory Reconciliation
+                    </p>
                 </div>
                 <div class="p-8 space-y-6">
                     <div class="bg-slate-50 border border-slate-100 p-4 rounded-xl text-center">
-                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">System Expected Balance</p>
-                        <p id="cc-expected" class="text-3xl font-black text-slate-800">0.00 <span class="text-base text-slate-400">AED</span></p>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">System Expected
+                            Balance</p>
+                        <p id="cc-expected" class="text-3xl font-black text-slate-800">0.00 <span
+                                class="text-base text-slate-400">AED</span></p>
                     </div>
                     <div class="space-y-1.5">
-                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Actual Physical Cash</label>
-                        <input type="number" id="cc-actual" step="0.01" placeholder="Enter amount..." class="modern-input w-full px-4 py-4 rounded-xl text-xl font-bold text-slate-800 text-center" oninput="window.evalCashCount()">
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Actual
+                            Physical Cash</label>
+                        <input type="number" id="cc-actual" step="0.01" placeholder="Enter amount..."
+                            class="modern-input w-full px-4 py-4 rounded-xl text-xl font-bold text-slate-800 text-center"
+                            oninput="window.evalCashCount()">
                     </div>
                     <div id="cc-discrepancy-section" class="hidden space-y-4 pt-4 border-t border-slate-100">
                         <div class="p-4 rounded-xl text-center" id="cc-discrepancy-box">
-                            <p class="text-[10px] font-bold uppercase tracking-widest mb-1 text-rose-500" id="cc-discrepancy-label">Shortage</p>
+                            <p class="text-[10px] font-bold uppercase tracking-widest mb-1 text-rose-500"
+                                id="cc-discrepancy-label">Shortage</p>
                             <p id="cc-discrepancy-amt" class="text-2xl font-black text-rose-600"></p>
                             <p id="cc-discrepancy-desc" class="text-xs text-rose-500 mt-1 font-bold"></p>
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Reason / Explanation</label>
-                            <input type="text" id="cc-reason" placeholder="Required explanation..." class="modern-input w-full px-4 py-3 rounded-xl font-medium text-sm">
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Reason /
+                                Explanation</label>
+                            <input type="text" id="cc-reason" placeholder="Required explanation..."
+                                class="modern-input w-full px-4 py-3 rounded-xl font-medium text-sm">
                         </div>
                     </div>
                 </div>
                 <div class="p-8 pt-0 flex gap-3">
-                    <button id="btn-cc-verify" onclick="window.verifyCashCount()" class="w-full bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition-all text-lg">Verify & Record</button>
+                    <button id="btn-cc-verify" onclick="window.verifyCashCount()"
+                        class="w-full bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition-all text-lg">Verify
+                        & Record</button>
                 </div>
             </div>
         </div>
@@ -1585,14 +1855,14 @@
             // --- LOCAL STORAGE (IndexedDB) FOR PHOTOS ---
             const dbName = "PettyCashPhotos";
             const storeName = "invoices";
-            
+
             // Request persistent storage
             if (navigator.storage && navigator.storage.persist) {
                 navigator.storage.persist().then(granted => {
                     if (granted) console.log("Storage persistence granted.");
                 });
             }
-            
+
             window.initPhotoDB = () => {
                 return new Promise((resolve, reject) => {
                     const request = indexedDB.open(dbName, 1);
@@ -1641,21 +1911,21 @@
             window.uploadInvoiceScan = async (customData = null, txId = null) => {
                 const dataArray = customData || currentScanData;
                 if (!dataArray || (Array.isArray(dataArray) && dataArray.length === 0)) return null;
-                
+
                 const items = Array.isArray(dataArray) ? dataArray : [dataArray];
                 const uploadedIds = [];
-                
+
                 for (let i = 0; i < items.length; i++) {
                     const data = items[i];
                     // Professional Naming: YYYY-MM-DD_ID_Desc_PageX.jpg
                     const tx = txs.find(x => x.id === txId) || {};
                     const dateStr = tx.subDate || new Date().toISOString().split('T')[0];
                     const descStr = (tx.desc || tx.desc_text || "Invoice").substring(0, 15).replace(/[^a-z0-9]/gi, '_');
-                    
-                    const localId = txId ? `local-${txId}-page${i}` : "local-" + Date.now() + "-" + Math.floor(Math.random()*10000);
+
+                    const localId = txId ? `local-${txId}-page${i}` : "local-" + Date.now() + "-" + Math.floor(Math.random() * 10000);
                     const fileName = `${dateStr}_${descStr}_${localId.replace('local-', '')}.jpg`;
                     const compressedData = await window.compressImage(data);
-                    
+
                     // 1. Save to OneDrive Folder if active
                     if (!onedriveFolderHandle && sessionStorage.getItem('onedrive_prompted') !== 'true') {
                         if (confirm("Your OneDrive folder is not linked for this session. Link it now for direct-to-disk backup?")) {
@@ -1678,7 +1948,7 @@
                     await window.savePhotoLocal(localId, compressedData);
                     uploadedIds.push(localId);
                 }
-                
+
                 return uploadedIds.length === 1 ? uploadedIds[0] : uploadedIds;
             };
 
@@ -1727,7 +1997,7 @@
             };
 
             window.updateOneDriveUI = (active) => {
-                const btn  = document.getElementById('btn-link-onedrive');
+                const btn = document.getElementById('btn-link-onedrive');
                 const text = document.getElementById('link-status-text');
                 const sync = document.getElementById('btn-sync-to-onedrive');
                 const badge = document.getElementById('onedrive-status-badge');
@@ -1790,20 +2060,20 @@
 
             window.verifyAllSyncStatus = async () => {
                 if (!onedriveFolderHandle) return;
-                
+
                 let updated = false;
                 for (const t of txs) {
                     if (t.invoiceUrl || t.invoice_url) {
-                        const localId = Array.isArray(t.invoiceUrl || t.invoice_url) 
-                            ? (t.invoiceUrl || t.invoice_url)[0] 
+                        const localId = Array.isArray(t.invoiceUrl || t.invoice_url)
+                            ? (t.invoiceUrl || t.invoice_url)[0]
                             : (t.invoiceUrl || t.invoice_url);
-                        
+
                         if (typeof localId === 'string' && localId.startsWith('local-')) {
                             // Professional Naming: YYYY-MM-DD_ID_Desc_PageX.jpg
                             const dateStr = t.subDate || new Date().toISOString().split('T')[0];
                             const descStr = (t.desc || t.desc_text || "Invoice").substring(0, 15).replace(/[^a-z0-9]/gi, '_');
                             const fileName = `${dateStr}_${descStr}_${localId.replace('local-', '')}.jpg`;
-                            
+
                             try {
                                 await onedriveFolderHandle.getFileHandle(fileName);
                                 if (!t.isSynced) { t.isSynced = true; updated = true; }
@@ -1813,14 +2083,14 @@
                                     const legacyName = `${localId.replace('local-', '')}.jpg`;
                                     await onedriveFolderHandle.getFileHandle(legacyName);
                                     if (!t.isSynced) { t.isSynced = true; updated = true; }
-                                } catch(e2) {
+                                } catch (e2) {
                                     if (t.isSynced) { t.isSynced = false; updated = true; }
                                 }
                             }
                         }
                     }
                 }
-                
+
                 // Force UI update
                 window.renderAll();
                 if (window.lucide) lucide.createIcons();
@@ -1849,7 +2119,7 @@
                     for (let i = 0; i < keys.length; i++) {
                         const localId = keys[i];
                         const data = photos[i];
-                        
+
                         // Use existing naming logic
                         const txId = localId.split('-')[1]; // Try to get txId
                         const tx = txs.find(x => x.id === txId) || {};
@@ -1884,7 +2154,7 @@
             window.clearAllLocalPhotos = async () => {
                 const confirmed = confirm("⚠️ DANGER ZONE: This will permanently delete ALL invoice photos from your browser's local memory.\n\nOnly do this if you have ALREADY synced them to OneDrive or have a backup.\n\nProceed with cleanup?");
                 if (!confirmed) return;
-                
+
                 const secondConfirm = confirm("Are you 100% sure? This cannot be undone.");
                 if (!secondConfirm) return;
 
@@ -1894,7 +2164,7 @@
                     const transaction = db.transaction([storeName], "readwrite");
                     const store = transaction.objectStore(storeName);
                     const request = store.clear();
-                    
+
                     request.onsuccess = () => {
                         window.showStatus("Browser memory cleared!");
                         alert("Cleanup Successful. All local browser photos have been removed. Your OneDrive files are safe.");
@@ -1915,13 +2185,13 @@
 
                 try {
                     window.showStatus("Resetting all system links...", false);
-                    
+
                     // Use existing global Firebase tools
                     const { doc, updateDoc, deleteField } = window.FirebaseFirestore || {};
                     if (!updateDoc || !deleteField || !window.db) {
                         throw new Error("Database connection not ready. Please wait 5 seconds and try again.");
                     }
-                    
+
                     let count = 0;
                     for (const t of txs) {
                         if (t.invoiceUrl || t.invoice_url) {
@@ -1980,12 +2250,12 @@
                     const store = transaction.objectStore(storeName);
                     const request = store.getAll();
                     const keysRequest = store.getAllKeys();
-                    
+
                     const [photos, keys] = await Promise.all([
                         new Promise((resolve) => request.onsuccess = () => resolve(request.result)),
                         new Promise((resolve) => keysRequest.onsuccess = () => resolve(keysRequest.result))
                     ]);
-                    
+
                     if (keys.length === 0) {
                         window.showStatus("No photos found to backup.", true);
                         return;
@@ -1993,7 +2263,7 @@
 
                     const backupData = {};
                     keys.forEach((key, i) => { backupData[key] = photos[i]; });
-                    
+
                     const blob = new Blob([JSON.stringify(backupData)], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -2017,7 +2287,7 @@
                         transactions: txs,
                         config: { staff, sources, categories, last_cash_count_date: lastCashCountDate }
                     };
-                    
+
                     const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -2043,12 +2313,12 @@
                     window.showStatus("Importing Ledger Data...", false);
                     const text = await file.text();
                     const data = JSON.parse(text);
-                    
+
                     if (!data.transactions) throw new Error("Invalid backup file format.");
 
                     // Batch update Firestore
                     const batch = writeBatch(db);
-                    
+
                     // 1. Update Config
                     if (data.config) {
                         const configRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings');
@@ -2067,7 +2337,7 @@
                         cleanTx.invoice_date = t.invDate || t.invoice_date;
                         cleanTx.advance_amount_used = t.advanceAmountUsed || t.advance_amount_used;
                         cleanTx.staff_owed = t.staffOwed || t.staff_owed;
-                        
+
                         batch.set(txRef, cleanTx, { merge: true });
                     }
 
@@ -2084,26 +2354,26 @@
             window.restorePhotos = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                
+
                 try {
                     window.showStatus("Unpacking Photo Warehouse...", false);
                     const text = await file.text();
                     const backupData = JSON.parse(text);
                     const db = await window.initPhotoDB();
-                    
+
                     const transaction = db.transaction([storeName], "readwrite");
                     const store = transaction.objectStore(storeName);
-                    
+
                     let count = 0;
                     for (const key in backupData) {
                         store.put(backupData[key], key);
                         count++;
                     }
-                    
+
                     transaction.oncomplete = () => {
                         window.showStatus(`Successfully Restored ${count} Photos!`);
                         window.analyzePhotos(); // Update health dashboard
-                        e.target.value = ''; 
+                        e.target.value = '';
                     };
                 } catch (err) {
                     console.error("Restore Error", err);
@@ -2164,7 +2434,7 @@
                 if (!currentUser) return;
                 const expected = getTotals().balance;
                 const actual = parseFloat(document.getElementById('cc-actual').value);
-                
+
                 if (isNaN(actual)) {
                     alert("Please enter the actual physical cash amount.");
                     return;
@@ -2299,7 +2569,7 @@
                 if (body) document.getElementById('confirm-modal-body').innerText = body;
                 if (okText) document.getElementById('btn-confirm-ok').innerText = okText;
                 if (cancelText) document.getElementById('btn-confirm-cancel').innerText = cancelText;
-                
+
                 const iconEl = document.getElementById('confirm-modal-icon');
                 const iconBgEl = document.getElementById('confirm-modal-icon-bg');
                 if (icon) iconEl.setAttribute('data-lucide', icon);
@@ -2364,13 +2634,13 @@
 
                 txs.forEach(t => {
                     if (t.status === 'Voided') return;
-                    
+
                     const amt = parseFloat(t.amount) || 0;
                     const boxPart = parseFloat(t.paidFromBox) || 0;
                     const ttype = (t.type || '').toLowerCase();
 
                     if (ttype === 'receive') {
-                        res.balance = add(res.balance, amt); 
+                        res.balance = add(res.balance, amt);
                     }
                     else if (ttype === 'return_advance') {
                         res.balance = add(res.balance, amt);
@@ -2460,7 +2730,7 @@
                             <p class="mt-4">ACTIVE ADVANCE: <strong class="text-indigo-600">${data.balance.toFixed(2)} AED</strong></p>
                             <p class="mt-4 text-[8px] text-slate-400">Please provide receipts soon.</p>
                         `;
-                    } 
+                    }
                     else if (type === 'debt_summary') {
                         msg = `${header} ${String.fromCodePoint(0x1F4CB)}\n`;
                         msg += `DATE: ${new Date().toLocaleDateString('en-GB')}\n`;
@@ -2514,10 +2784,10 @@
                         if (data.invDate) msg += `INV DATE: *${new Date(data.invDate).toLocaleDateString('en-GB')}*\n`;
                         msg += `\n${divider}\n`;
                         msg += `*TOTAL: ${data.amount.toFixed(2)} AED*\n\n`;
-                        
+
                         if (data.paidFromAdv) msg += `${String.fromCodePoint(0x1F4A1)} _Deducted from Advance: ${data.paidFromAdv.toFixed(2)} AED_\n`;
                         if (data.addedToDebt) msg += `${String.fromCodePoint(0x26A0)}${String.fromCodePoint(0xFE0F)} _Added to Balance Owed: ${data.addedToDebt.toFixed(2)} AED_\n`;
-                        
+
                         msg += `\n${String.fromCodePoint(0x1F3E6)} *ACTIVE ADVANCE:* ${currentAdv.toFixed(2)} AED\n`;
                         msg += `${String.fromCodePoint(0x1F91D)} *BALANCE OWED TO YOU:* *${currentDebt.toFixed(2)} AED*\n\n`;
                         msg += `*** THANK YOU ***`;
@@ -2550,7 +2820,7 @@
                         msg += `*ACCOUNT STATEMENT*\n\n`;
                         msg += `PERSON: *${person}*\n`;
                         msg += `PERIOD: *${data.period}*\n\n`;
-                        
+
                         let rowsHtml = "";
                         data.rows.forEach(r => {
                             msg += `• *${r.date}*: ${r.desc}\n   *${r.flow} AED*\n\n`;
@@ -2564,7 +2834,7 @@
                                 </div>
                             `;
                         });
-                        
+
                         msg += `${divider}\n`;
                         msg += `*OPENING: ${data.opening.toFixed(2)} AED*\n`;
                         msg += `*CLOSING: ${data.closing.toFixed(2)} AED*\n`;
@@ -2609,10 +2879,10 @@
                     } else if (option === 'image') {
                         const btn = document.getElementById('btn-wa-image');
                         const progress = document.getElementById('copy-progress-bar');
-                        
+
                         // Hardcode default HTML to prevent capturing "Processing..." if clicked multiple times
                         const defaultHtml = `<i data-lucide="copy" class="w-5 h-5"></i> <span>Copy Receipt Image</span><div id="copy-progress-bar" class="absolute bottom-0 left-0 h-1 bg-indigo-600 transition-all duration-300 w-0 hidden"></div>`;
-                        
+
                         progress.classList.remove('hidden');
                         btn.querySelector('span').innerText = "Processing...";
                         setTimeout(() => { progress.style.width = '60%'; }, 10);
@@ -2622,19 +2892,19 @@
                             try {
                                 const blob = await window.captureDraftBlob();
                                 progress.style.width = '100%';
-                                
+
                                 if (blob) {
                                     const item = new ClipboardItem({ "image/png": blob });
                                     await navigator.clipboard.write([item]);
                                     window.showStatus("Receipt Image Copied!");
-                                    
+
                                     btn.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i> <span>Copy Done!</span>`;
                                     btn.classList.add('bg-emerald-100', 'text-emerald-700', 'border-emerald-200');
-                                    
-                                    setTimeout(() => { 
-                                        btn.innerHTML = defaultHtml; 
+
+                                    setTimeout(() => {
+                                        btn.innerHTML = defaultHtml;
                                         btn.classList.remove('bg-emerald-100', 'text-emerald-700', 'border-emerald-200');
-                                        lucide.createIcons(); 
+                                        lucide.createIcons();
                                     }, 4000);
                                 }
                                 pendingWhatsAppPayload = null;
@@ -2685,7 +2955,7 @@
             window.copyReceiptAsImage = async () => {
                 const receipt = document.getElementById('mini-receipt');
                 if (!receipt) return;
-                
+
                 const btn = document.getElementById('btn-copy-receipt-img');
                 const orig = btn.innerHTML;
                 btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Processing...`;
@@ -2731,7 +3001,7 @@
                 const end = document.getElementById('stmt-end').value;
 
                 if (!personName) return window.showStatus("Select a person first", true);
-                
+
                 const staffObj = staff.find(s => getStaffName(s) === personName);
                 let phone = getStaffPhone(staffObj);
 
@@ -2769,7 +3039,7 @@
 
                     let currentBal = openingBal;
                     const periodStr = `${start ? new Date(start).toLocaleDateString('en-GB') : 'All'} to ${end ? new Date(end).toLocaleDateString('en-GB') : 'Today'}`;
-                    
+
                     const statementRows = [];
                     periodTxs.forEach(t => {
                         const amt = parseFloat(t.amount) || 0;
@@ -2795,15 +3065,15 @@
                         }
                     });
 
-                    pendingWhatsAppPayload = { 
-                        person: personName, 
-                        type: 'statement', 
-                        data: { 
+                    pendingWhatsAppPayload = {
+                        person: personName,
+                        type: 'statement',
+                        data: {
                             period: periodStr,
                             rows: statementRows,
                             opening: openingBal,
                             closing: currentBal
-                        } 
+                        }
                     };
                     window.executeWhatsAppSend();
                     // ONLY close the statement selector, not the draft modal
@@ -2826,7 +3096,7 @@
 
                 const sortedAll = [...txs].sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
                 let openingBalance = 0;
-                
+
                 if (start) {
                     sortedAll.forEach(t => {
                         if (t.person === name && t.subDate < start && t.status !== 'Voided') {
@@ -2849,18 +3119,18 @@
                     const ttype = (t.type || '').toLowerCase();
                     const isVoided = t.status === 'Voided';
                     const amt = parseFloat(t.amount) || 0;
-                    
+
                     let flowIn = 0;
                     let flowOut = 0;
-                    
+
                     if (!isVoided) {
                         if (ttype === 'advance') flowIn = amt;
                         else if (ttype === 'return_advance') flowOut = amt;
                         else if (ttype === 'expense' && t.isDeductedFromAdvance) flowOut = (parseFloat(t.advanceAmountUsed) || 0);
                     }
-                    
+
                     currentBal += (flowIn - flowOut);
-                    
+
                     return `
                         <tr style="border-bottom: 1px solid #eee;">
                             <td style="padding: 8px; font-size: 10px;">${new Date(t.subDate).toLocaleDateString()}</td>
@@ -3044,30 +3314,30 @@
             window.openStaffModal = (name) => {
                 const modal = document.getElementById('staff-modal');
                 document.getElementById('staff-modal-name').innerText = name;
-                
+
                 let totalSpent = 0;
                 let thisMonthSpent = 0;
                 let lastMonthSpent = 0;
-                
+
                 const now = new Date();
                 const currentMonth = now.getMonth();
                 const currentYear = now.getFullYear();
-                
+
                 const lastMonthDate = new Date(currentYear, currentMonth - 1, 1);
                 const lastMonth = lastMonthDate.getMonth();
                 const lastMonthYear = lastMonthDate.getFullYear();
 
                 let firstExpenseDate = null;
-                
+
                 const personalTxs = txs.filter(t => t.person === name).sort((a, b) => (b.subDate || '').localeCompare(a.subDate || ''));
 
                 personalTxs.forEach(t => {
                     const ttype = (t.type || '').toLowerCase();
                     const amt = parseFloat(t.amount) || 0;
-                    
+
                     if (ttype === 'expense') {
                         totalSpent += amt;
-                        
+
                         const tDate = new Date(t.subDate);
                         if (!firstExpenseDate || tDate < firstExpenseDate) firstExpenseDate = tDate;
 
@@ -3093,17 +3363,17 @@
                 document.getElementById('sm-debt').innerText = debt.toFixed(2);
                 document.getElementById('sm-avg').innerText = avgSpent.toFixed(2);
                 document.getElementById('sm-balance').innerText = balance.toFixed(2);
-                
+
                 let runBal = 0;
                 const tbody = document.getElementById('staff-modal-body');
-                
+
                 const chronoTxs = [...personalTxs].reverse();
-                
+
                 tbody.innerHTML = chronoTxs.length === 0 ? `<tr><td colspan="6" class="text-center py-8 text-xs font-bold text-slate-400 uppercase">No transactions</td></tr>` : chronoTxs.map(t => {
                     const amt = parseFloat(t.amount) || 0;
                     const pfb = parseFloat(t.paidFromBox) || 0;
                     const ttype = (t.type || '').toLowerCase();
-                    
+
                     let flowIn = 0;
                     let flowOut = 0;
                     let runFlow = 0;
@@ -3115,9 +3385,9 @@
                         flowOut = used;
                         runFlow = -used;
                     }
-                    
+
                     runBal += runFlow;
-                    
+
                     return `
                         <tr class="hover:bg-slate-50">
                             <td class="px-4 py-3 font-mono text-[10px] text-slate-500">${new Date(t.subDate).toLocaleDateString()}</td>
@@ -3128,7 +3398,7 @@
                             <td class="px-4 py-3 font-mono text-xs text-right text-slate-800 font-bold">${runBal.toFixed(2)}</td>
                         </tr>
                     `;
-                }).reverse().join(''); 
+                }).reverse().join('');
 
                 const btnWa = document.getElementById('btn-staff-whatsapp');
                 btnWa.onclick = () => {
@@ -3254,13 +3524,13 @@
 
             window.getTypeStyles = (type) => {
                 switch ((type || '').toLowerCase()) {
-                    case 'expense':        return 'bg-rose-100 text-rose-700 border border-rose-200';
-                    case 'advance':        return 'bg-amber-100 text-amber-700 border border-amber-200';
-                    case 'receive':        return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
+                    case 'expense': return 'bg-rose-100 text-rose-700 border border-rose-200';
+                    case 'advance': return 'bg-amber-100 text-amber-700 border border-amber-200';
+                    case 'receive': return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
                     case 'return_advance': return 'bg-teal-100 text-teal-700 border border-teal-200';
-                    case 'settle_debt':    return 'bg-indigo-100 text-indigo-700 border border-indigo-200';
-                    case 'repayment':      return 'bg-blue-100 text-blue-700 border border-blue-200';
-                    default:               return 'bg-slate-100 text-slate-700 border border-slate-200';
+                    case 'settle_debt': return 'bg-indigo-100 text-indigo-700 border border-indigo-200';
+                    case 'repayment': return 'bg-blue-100 text-blue-700 border border-blue-200';
+                    default: return 'bg-slate-100 text-slate-700 border border-slate-200';
                 }
             };
 
@@ -3317,15 +3587,15 @@
 
                         const pfb = parseFloat(t.paidFromBox) || 0;
                         const amt = parseFloat(t.amount) || 0;
-                        const ttype = (t.type || '').toLowerCase(); 
+                        const ttype = (t.type || '').toLowerCase();
                         let flow = 0;
 
                         if (ttype === 'receive' || ttype === 'return_advance') {
-                            flow = amt; 
+                            flow = amt;
                         } else if (ttype === 'settle_debt') {
-                            flow = -amt; 
+                            flow = -amt;
                         } else {
-                            flow = -pfb; 
+                            flow = -pfb;
                         }
 
                         curr += flow;
@@ -3354,7 +3624,7 @@
                     if (body) {
                         body.innerHTML = displayData.length ? displayData.map(t => {
                             const isVoided = t.status === 'Voided';
-                            
+
                             const rem = (t.managerOwed || t.staffOwed) ? ((t.managerOwed || t.staffOwed) - (t.repaidAmount || 0)) : 0;
                             const debtTag = rem > 0.01 ? `<div class="mt-1 inline-flex items-center gap-1 bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase">Pending: ${rem.toFixed(2)}</div>` : '';
 
@@ -3371,7 +3641,7 @@
                             const typeLabel = (t.type || '').toLowerCase().replace('_', ' ');
                             const voidStyle = isVoided ? 'opacity-50 grayscale bg-slate-50' : '';
                             const voidStrikethrough = isVoided ? 'line-through text-slate-400' : 'text-slate-900';
-                            
+
                             const voidTag = isVoided ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest"><i data-lucide="ban" class="w-2.5 h-2.5"></i> VOIDED: ${t.voidReason || 'No reason'}</div>` : '';
                             const editTag = (!isVoided && t.editReason) ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-0.5 border border-indigo-100 rounded text-[9px] font-black uppercase tracking-widest" title="Edit Reason: ${t.editReason}"><i data-lucide="pencil" class="w-2.5 h-2.5"></i> EDITED</div>` : '';
                             const hasPhoto = (t.invoiceUrl || t.invoice_url);
@@ -3399,7 +3669,7 @@
                             <td class="px-6 py-4 font-bold text-slate-700 text-xs ${isVoided ? 'line-through' : ''}">${t.person || '-'}</td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md ${window.getTypeStyles((t.type||'').toLowerCase())}">${typeLabel}</span>
+                                    <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md ${window.getTypeStyles((t.type || '').toLowerCase())}">${typeLabel}</span>
                                     <span class="font-bold text-slate-700 ${isVoided ? 'line-through' : ''}">${t.desc || 'No Desc'}</span>
                                 </div>
                                 <div class="mt-1.5 flex flex-wrap gap-1">${allocs}${advTag}${scanTag}${editTag}</div>
@@ -3458,7 +3728,7 @@
                     });
 
                     window.globalBatchMap = batchMap;
-                    const pendingBatches = Object.values(batchMap).filter(b => !b.received && b.total > 0).sort((a,b) => b.id.localeCompare(a.id));
+                    const pendingBatches = Object.values(batchMap).filter(b => !b.received && b.total > 0).sort((a, b) => b.id.localeCompare(a.id));
 
                     const batchContainer = document.getElementById('reimbursement-batches');
                     if (batchContainer) {
@@ -3499,7 +3769,7 @@
                         stagedMap[cat].txs.push(t);
                     });
 
-                    const stagedFolders = Object.values(stagedMap).sort((a,b) => a.cat.localeCompare(b.cat));
+                    const stagedFolders = Object.values(stagedMap).sort((a, b) => a.cat.localeCompare(b.cat));
                     window.currentStagedFolders = stagedFolders;
 
                     const stagedContainer = document.getElementById('reimbursement-staged-folders');
@@ -3513,9 +3783,12 @@
                                 const isExpanded = window.expandedFolders && window.expandedFolders.has(f.cat);
                                 const txRows = f.txs.map(tx => `
                                     <div class="flex items-center justify-between py-2 px-3 bg-white/50 rounded-lg border border-amber-100 mb-1 group/item">
-                                        <div class="flex flex-col">
-                                            <span class="text-[10px] font-bold text-slate-700">${tx.desc || 'No Desc'}</span>
-                                            <span class="text-[9px] text-slate-400 font-mono">${window.formatSafeDate(tx.invoiceDate || tx.subDate)} • ${(tx.amount || 0).toFixed(2)} AED</span>
+                                        <div class="flex items-center gap-3">
+                                            ${tx.audited ? '<i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-500"></i>' : '<i data-lucide="circle" class="w-3.5 h-3.5 text-slate-300"></i>'}
+                                            <div class="flex flex-col">
+                                                <span class="text-[10px] font-bold ${tx.audited ? 'text-slate-400' : 'text-slate-700'}">${tx.desc || 'No Desc'}</span>
+                                                <span class="text-[9px] text-slate-400 font-mono">${window.formatSafeDate(tx.invoiceDate || tx.subDate)} • ${(tx.amount || 0).toFixed(2)} AED</span>
+                                            </div>
                                         </div>
                                         <button onclick="event.stopPropagation(); window.unstageInvoice('${tx.id}')" class="opacity-0 group-hover/item:opacity-100 p-1 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all">
                                             <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
@@ -3525,12 +3798,15 @@
 
                                 return `
                                 <div class="bg-amber-50/50 border border-amber-200 p-5 rounded-2xl relative overflow-hidden group cursor-pointer transition-all hover:bg-amber-100/80" onclick="window.toggleFolderExpansion('${f.cat}')">
-                                    <div class="absolute top-4 right-4">
+                                    <div class="absolute top-4 right-4 flex items-center gap-2">
+                                        <button onclick="event.stopPropagation(); window.openMakerChecker('${escapeQuotes(f.cat)}')" class="bg-amber-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-amber-600 transition-all flex items-center gap-1 shadow-sm">
+                                            <i data-lucide="check-square" class="w-3 h-3"></i> Audit
+                                        </button>
                                         <input type="checkbox" id="staged-chk-${i}" value="${f.cat}" class="w-5 h-5 rounded text-amber-600 focus:ring-amber-500 border-amber-300 folder-checkbox" onclick="event.stopPropagation(); window.checkFolderSelection()">
                                     </div>
                                     <div class="flex items-center gap-3 mb-3">
                                         <div class="p-2.5 bg-amber-100 rounded-xl text-amber-600"><i data-lucide="${isExpanded ? 'folder-open' : 'folder'}" class="w-5 h-5"></i></div>
-                                        <h4 class="font-black text-slate-800 text-sm uppercase tracking-wide truncate pr-8">${f.cat}</h4>
+                                        <h4 class="font-black text-slate-800 text-sm uppercase tracking-wide truncate pr-24">${f.cat}</h4>
                                     </div>
                                     <div class="text-xl font-black text-amber-900 mb-0.5 tracking-tight">${f.total.toFixed(2)} <span class="text-[10px] text-amber-600 font-bold uppercase">AED</span></div>
                                     <div class="text-[10px] font-bold text-amber-700 uppercase tracking-wide bg-amber-100/50 inline-block px-2 py-0.5 rounded-md mb-3">${f.count} Invoices</div>
@@ -3605,7 +3881,7 @@
             window.handleScanPreview = (e, isAppend = false) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                
+
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     if (isAppend) {
@@ -3614,7 +3890,7 @@
                         currentScanData = [event.target.result];
                     }
                     window.renderScanPreviews();
-                    
+
                     // Hide main tap area if we have scans
                     if (currentScanData.length > 0) {
                         const label = document.getElementById('scan-label');
@@ -3629,7 +3905,7 @@
                 const addBtn = document.getElementById('add-page-btn');
                 if (!list || !addBtn) return;
                 list.innerHTML = "";
-                
+
                 currentScanData.forEach((data, index) => {
                     const div = document.createElement('div');
                     div.className = "relative w-12 h-12 rounded-lg overflow-hidden border border-slate-200 shadow-sm animate-in zoom-in duration-200";
@@ -3641,7 +3917,7 @@
                     `;
                     list.appendChild(div);
                 });
-                
+
                 if (currentScanData.length > 0) {
                     addBtn.classList.remove('hidden');
                 } else {
@@ -3716,7 +3992,7 @@
                     const personSelect = document.getElementById('form-person');
                     const person = personSelect ? personSelect.value : '';
                     const useAdv = document.getElementById('use-advance-wallet')?.checked;
-                    const reimburseNow = document.getElementById('reimburse-now')?.checked; 
+                    const reimburseNow = document.getElementById('reimburse-now')?.checked;
 
                     let deductionUsed = 0;
                     if (activeTab === 'expense' && useAdv) deductionUsed = Math.min(amount, getAdvanceWalletFor(person));
@@ -3747,7 +4023,7 @@
                             }
                         }
                     } else if (activeTab === 'receive') {
-                        paidFromBox = -amount; 
+                        paidFromBox = -amount;
                         settled = true;
                     } else {
                         paidFromBox = amount;
@@ -3809,10 +4085,10 @@
 
                     await setDoc(newTxRef, tx);
                     window.showStatus("Transaction Saved!");
-                    
+
                     // Automatically show receipt modal
                     window.openReceiptModal(tx.type, tx.amount, tx.person, tx.desc_text, tx.advance_amount_used || 0, tx.staff_owed || 0);
-                    
+
                     document.getElementById('entry-form').reset();
                     window.clearScan();
                     document.getElementById('form-sub-date').value = window.getLocalDate();
@@ -3835,7 +4111,7 @@
             window.filterReimburseModal = () => {
                 const catSelect = document.getElementById('reimburse-category-filter');
                 const selectedCat = catSelect ? catSelect.value : '';
-                
+
                 let filtered = window.currentUnbatchedExpenses || [];
                 if (selectedCat) {
                     filtered = filtered.filter(t => {
@@ -3869,7 +4145,7 @@
             window.handleReimburseCheckboxChange = (cb) => {
                 if (cb.checked) window.selectedReimbursementIds.add(cb.value);
                 else window.selectedReimbursementIds.delete(cb.value);
-                
+
                 const allVisibleCheckboxes = document.querySelectorAll('.reimburse-checkbox');
                 const allChecked = allVisibleCheckboxes.length > 0 && Array.from(allVisibleCheckboxes).every(cb => cb.checked);
                 document.getElementById('reimburse-select-all').checked = allChecked;
@@ -3879,17 +4155,17 @@
             window.submitToAccounts = async () => {
                 if (!currentUser) return;
                 let currentUnbatchedExpenses = txs.filter(t => (t.type || '').toLowerCase() === 'expense' && !t.batchId && t.status !== 'Voided');
-                
+
                 if (currentUnbatchedExpenses.length === 0) {
                     alert("No pending expenses to stage.");
                     return;
                 }
 
                 currentUnbatchedExpenses.sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
-                
+
                 window.currentUnbatchedExpenses = currentUnbatchedExpenses;
                 window.selectedReimbursementIds = new Set();
-                
+
                 const catSelect = document.getElementById('reimburse-category-filter');
                 if (catSelect) {
                     let uniqueCats = new Set();
@@ -3905,7 +4181,7 @@
                 }
 
                 window.filterReimburseModal();
-                
+
                 document.getElementById('reimburse-select-modal').classList.remove('hidden');
                 lucide.createIcons();
             };
@@ -3939,7 +4215,7 @@
                     alert("Please select at least one expense to mark as legacy.");
                     return;
                 }
-                
+
                 if (!confirm(`Are you sure you want to mark ${ids.length} expenses as Legacy Processed?`)) return;
 
                 try {
@@ -3969,19 +4245,19 @@
             window.renderLegacyList = () => {
                 const body = document.getElementById('legacy-archive-body');
                 const search = (document.getElementById('legacy-search')?.value || '').toLowerCase();
-                
+
                 let legacyTxs = txs.filter(t => t.batchId === 'legacy');
-                
+
                 if (search) {
-                    legacyTxs = legacyTxs.filter(t => 
+                    legacyTxs = legacyTxs.filter(t =>
                         (t.desc || '').toLowerCase().includes(search) ||
                         (t.person || '').toLowerCase().includes(search) ||
                         (t.subDate || '').toLowerCase().includes(search)
                     );
                 }
-                
-                legacyTxs.sort((a,b) => (b.subDate || '').localeCompare(a.subDate || ''));
-                
+
+                legacyTxs.sort((a, b) => (b.subDate || '').localeCompare(a.subDate || ''));
+
                 body.innerHTML = legacyTxs.map(t => `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-8 py-4"><input type="checkbox" class="legacy-cb w-4 h-4 rounded cursor-pointer" value="${t.id}" ${window.selectedLegacyIds.has(t.id) ? 'checked' : ''} onchange="window.toggleLegacyItem('${t.id}', this.checked)"></td>
@@ -3991,11 +4267,11 @@
                         <td class="px-4 py-4 text-right font-black text-slate-700">${(t.amount || 0).toFixed(2)}</td>
                     </tr>
                 `).join('');
-                
+
                 if (legacyTxs.length === 0) {
                     body.innerHTML = `<tr><td colspan="5" class="py-20 text-center text-slate-400 uppercase font-black tracking-widest text-[10px]">No legacy invoices found</td></tr>`;
                 }
-                
+
                 window.updateLegacyUI();
                 lucide.createIcons();
             };
@@ -4046,14 +4322,14 @@
                 const addBtn = document.getElementById('edit-add-page-btn');
                 const label = document.getElementById('edit-scan-label');
                 if (!list || !addBtn || !label) return;
-                
+
                 list.innerHTML = "";
                 currentEditScanData.forEach((item, index) => {
                     const div = document.createElement('div');
                     div.className = "relative w-12 h-12 rounded-lg overflow-hidden border border-slate-200 shadow-sm animate-in zoom-in duration-200";
-                    
+
                     const src = item.preview ? item.preview : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="%23cbd5e1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>';
-                    
+
                     div.innerHTML = `
                         <img src="${src}" class="w-full h-full object-cover cursor-pointer" onclick="window.viewFullPhoto('${src}')">
                         <button type="button" onclick="window.removeEditScanPage(${index})" class="absolute top-0 right-0 w-5 h-5 bg-slate-900/70 backdrop-blur-sm text-white rounded-bl-lg flex items-center justify-center hover:bg-rose-600 transition-all">
@@ -4062,7 +4338,7 @@
                     `;
                     list.appendChild(div);
                 });
-                
+
                 if (currentEditScanData.length > 0) {
                     addBtn.classList.remove('hidden');
                     label.parentElement.parentElement.classList.add('hidden');
@@ -4132,7 +4408,7 @@
                 const hasVatCheckbox = document.getElementById('form-has-vat');
                 const vatInput = document.getElementById('form-tax-amount');
                 if (!amountInput || !hasVatCheckbox || !vatInput) return;
-                
+
                 const amount = parseFloat(amountInput.value) || 0;
                 if (hasVatCheckbox.checked && amount > 0) {
                     const vat = amount - (amount / 1.05);
@@ -4145,9 +4421,9 @@
             window.restoreFromLegacy = async () => {
                 const ids = Array.from(window.selectedLegacyIds);
                 if (ids.length === 0) return;
-                
+
                 if (!confirm(`Restore ${ids.length} selected invoices to Pending Reimbursement?`)) return;
-                
+
                 try {
                     window.showStatus("Restoring...", true);
                     const batch = writeBatch(db);
@@ -4173,7 +4449,7 @@
                 try {
                     window.showStatus("Staging for processing...", true);
                     const batch = writeBatch(db);
-                    
+
                     const chunkSize = 100;
                     for (let i = 0; i < ids.length; i += chunkSize) {
                         const chunk = ids.slice(i, i + chunkSize);
@@ -4182,13 +4458,13 @@
                             batch.update(docRef, { batch_id: 'staged' });
                         });
                     }
-                    
+
                     await batch.commit();
                     window.showStatus("Invoices Staged! Check Currently Processing.");
                     window.currentUnbatchedExpenses = window.currentUnbatchedExpenses.filter(t => !ids.includes(t.id));
                     window.selectedReimbursementIds.clear();
                     window.filterReimburseModal();
-                    
+
                     window.closeModal(); // Close modal so user can see the folders immediately
                 } catch (err) {
                     console.error("Submit Error", err);
@@ -4229,10 +4505,10 @@
                             const batchTxs = txs.filter(t => t.batch_id === batchId);
                             batchTxs.forEach(t => {
                                 const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
-                                batch.update(docRef, { 
+                                batch.update(docRef, {
                                     status: 'Settled',
                                     received_date: new Date().toISOString(),
-                                    settled: true 
+                                    settled: true
                                 });
                             });
                             await batch.commit();
@@ -4261,9 +4537,9 @@
             window.finalizeStagedBatch = async () => {
                 const boxes = document.querySelectorAll('.folder-checkbox:checked');
                 if (boxes.length === 0) return;
-                
+
                 const selectedCats = Array.from(boxes).map(b => b.value);
-                
+
                 window.customConfirm({
                     title: "Finalize Batch?",
                     body: `Finalize batch for ${selectedCats.length} category folder(s)?`,
@@ -4282,7 +4558,7 @@
                                 if (folderData && folderData.txs) {
                                     folderData.txs.forEach(t => {
                                         const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
-                                        batch.update(docRef, { 
+                                        batch.update(docRef, {
                                             batch_id: batchId,
                                             staged_date: today,
                                             status: 'Batching'
@@ -4303,7 +4579,7 @@
 
             window.exportBatchExcel = async (batchId) => {
                 if (!window.globalBatchMap || !window.globalBatchMap[batchId]) return;
-                
+
                 const batch = window.globalBatchMap[batchId];
                 if (!batch.txs || batch.txs.length === 0) return;
 
@@ -4315,8 +4591,8 @@
                 });
 
                 const today = new Date();
-                const dd = today.getDate().toString().padStart(2,'0');
-                const mm = (today.getMonth()+1).toString().padStart(2,'0');
+                const dd = today.getDate().toString().padStart(2, '0');
+                const mm = (today.getMonth() + 1).toString().padStart(2, '0');
                 const yyyy = today.getFullYear();
                 const dateStr = `${dd}.${mm}.${yyyy}`;
                 const invPrefix = `B${dd}${mm}${yyyy}`;
@@ -4367,9 +4643,9 @@
                     // Auto-fit column widths based on content
                     const colWidths = isNoVat ? [6, 12, 10, 12, 10] : [6, 12, 10, 12, 10, 8, 10];
                     // Measure description max length
-                    const maxDesc = txsList.reduce((m, t) => Math.max(m, (t.desc||'').length), 30);
+                    const maxDesc = txsList.reduce((m, t) => Math.max(m, (t.desc || '').length), 30);
                     const descWidth = Math.min(Math.max(maxDesc + 2, 35), 65);
-                    const maxBill = txsList.reduce((m, t) => Math.max(m, (t.invoiceNo||'').length), 8);
+                    const maxBill = txsList.reduce((m, t) => Math.max(m, (t.invoiceNo || '').length), 8);
                     const billWidth = Math.max(maxBill + 2, 12);
                     if (isNoVat) {
                         ws.columns = [
@@ -4405,9 +4681,9 @@
                         const knownWidths = isNoVat
                             ? [7, 13, descWidth, billWidth, 12]
                             : [7, 13, descWidth, billWidth, 12, 10, 12];
-                        const totalCharW   = knownWidths.reduce((s, w) => s + w, 0);
-                        const logoCharW    = 110 / 7.5; // 110px logo ÷ ~7.5px per char unit
-                        const logoStartCh  = (totalCharW - logoCharW) / 2 + 20.16; // +20.16 chars ≈ +4cm shift right
+                        const totalCharW = knownWidths.reduce((s, w) => s + w, 0);
+                        const logoCharW = 110 / 7.5; // 110px logo ÷ ~7.5px per char unit
+                        const logoStartCh = (totalCharW - logoCharW) / 2 + 20.16; // +20.16 chars ≈ +4cm shift right
                         // Walk columns to find which col+fraction logoStartCh falls at
                         let cumW = 0, logoTlCol = 0;
                         for (let ci = 0; ci < knownWidths.length; ci++) {
@@ -4580,26 +4856,26 @@
                             cell.value = 'TOTAL';
                             cell.alignment = { horizontal: 'right', vertical: 'middle' };
                         } else if (isNoVat && c === 5) {
-                            cell.value = { formula: `SUM(E${dataStartRow}:E${dataEndRow})`, result: txsList.reduce((s,t)=>s+parseFloat(t.amount||0),0) };
+                            cell.value = { formula: `SUM(E${dataStartRow}:E${dataEndRow})`, result: txsList.reduce((s, t) => s + parseFloat(t.amount || 0), 0) };
                             cell.numFmt = '#,##0.00';
                         } else if (!isNoVat && c === 5) {
-                            const sumAmt = txsList.reduce((s,t)=>{ 
-                                const tot=parseFloat(t.amount||0); 
-                                const v = t.tax_amount !== undefined ? parseFloat(t.tax_amount||0) : parseFloat((tot*0.04762).toFixed(2));
-                                return s+(tot-v); 
-                            },0);
+                            const sumAmt = txsList.reduce((s, t) => {
+                                const tot = parseFloat(t.amount || 0);
+                                const v = t.tax_amount !== undefined ? parseFloat(t.tax_amount || 0) : parseFloat((tot * 0.04762).toFixed(2));
+                                return s + (tot - v);
+                            }, 0);
                             cell.value = { formula: `SUM(E${dataStartRow}:E${dataEndRow})`, result: parseFloat(sumAmt.toFixed(2)) };
                             cell.numFmt = '#,##0.00';
                         } else if (!isNoVat && c === 6) {
-                            const sumVat = txsList.reduce((s,t)=> {
-                                const tot=parseFloat(t.amount||0);
-                                const v = t.tax_amount !== undefined ? parseFloat(t.tax_amount||0) : parseFloat((tot*0.04762).toFixed(2));
+                            const sumVat = txsList.reduce((s, t) => {
+                                const tot = parseFloat(t.amount || 0);
+                                const v = t.tax_amount !== undefined ? parseFloat(t.tax_amount || 0) : parseFloat((tot * 0.04762).toFixed(2));
                                 return s + v;
-                            },0);
+                            }, 0);
                             cell.value = { formula: `SUM(F${dataStartRow}:F${dataEndRow})`, result: parseFloat(sumVat.toFixed(2)) };
                             cell.numFmt = '#,##0.00';
                         } else if (!isNoVat && c === 7) {
-                            cell.value = { formula: `SUM(G${dataStartRow}:G${dataEndRow})`, result: txsList.reduce((s,t)=>s+parseFloat(t.amount||0),0) };
+                            cell.value = { formula: `SUM(G${dataStartRow}:G${dataEndRow})`, result: txsList.reduce((s, t) => s + parseFloat(t.amount || 0), 0) };
                             cell.numFmt = '#,##0.00';
                         }
                     }
@@ -4662,7 +4938,7 @@
                 batchData.txs.forEach(t => {
                     const urls = getAnyUrl(t);
                     if (urls.length === 0) return; // Skip transactions with no images
-                    
+
                     let cat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category)
                         ? t.allocations[0].category : (t.category || 'Uncategorized');
                     cat = String(cat).trim();
@@ -4704,7 +4980,8 @@
                             🖨 Print PDF
                         </button>
                     </div>
-                `;}).join('');
+                `;
+                }).join('');
 
                 inner.innerHTML = `
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -4781,7 +5058,7 @@
                         } else {
                             result = url;
                         }
-                        
+
                         const pct = Math.round(((index + 1) / allUrls.length) * 100);
                         window.showStatus(`Loading ${allUrls.length} image(s)... ${pct}%`, false);
                         return result;
@@ -4879,7 +5156,7 @@
             window.receiveBatchCash = async (batchId, amount) => {
                 if (!currentUser) return;
                 if (!confirm(`Mark ${amount.toFixed(2)} AED as received from Accounts for this batch?`)) return;
-                
+
                 try {
                     window.showStatus("Receiving Funds...", true);
                     const data = {
@@ -4897,7 +5174,7 @@
                     };
                     await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), data);
                     window.showStatus("Funds Received!");
-                } catch(err) {
+                } catch (err) {
                     window.showStatus("Error: " + err.message, true);
                 }
             };
@@ -4906,17 +5183,17 @@
                 if (!currentUser) return;
                 const tx = txs.find(t => t.id === id);
                 if (!tx) return;
-                
+
                 const reason = prompt(`Why are you voiding this transaction (${tx.amount} AED)? Reason:`);
-                if (!reason) return; 
-                
+                if (!reason) return;
+
                 try {
                     window.showStatus("Voiding...", true);
                     await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', id), {
                         status: 'Voided',
                         void_reason: reason
                     });
-                    
+
                     window.showStatus("Transaction Voided.");
                 } catch (error) { window.showStatus("Error: " + error.message, true); return; }
             };
@@ -4944,12 +5221,12 @@
                             person: pName,
                             desc_text: `Cash Return`,
                             sub_date: window.getLocalDate(),
-                            paid_from_box: -val, 
+                            paid_from_box: -val,
                             timestamp: new Date().toISOString(),
                             user_id: currentUser.uid,
                             settled_tx_id: target ? target.id : null
                         });
-                        
+
                         const mockTx = {
                             type: 'return_advance',
                             amount: val,
@@ -4981,12 +5258,12 @@
                             person: receiverName,
                             desc_text: `Pay: ${target.desc || target.desc_text}`,
                             sub_date: window.getLocalDate(),
-                            paid_from_box: val, 
+                            paid_from_box: val,
                             timestamp: new Date().toISOString(),
                             user_id: currentUser.uid,
                             settled_tx_id: target.id
                         });
-                        
+
                         const mockTx = {
                             type: 'settle_debt',
                             amount: val,
@@ -5032,7 +5309,7 @@
                     await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { staff, sources, categories });
                 } catch (error) {
                     window.showStatus("Error: " + error.message, true);
-                    if (type === 'staff') staff.pop(); else if (type === 'source') sources.pop(); else categories.pop(); 
+                    if (type === 'staff') staff.pop(); else if (type === 'source') sources.pop(); else categories.pop();
                 }
             };
 
@@ -5046,15 +5323,15 @@
 
             window.revertDiagnosticsPhotos = async () => {
                 if (!confirm("This will find any legacy photos that were linked incorrectly (time difference > 1 hour) and remove them. Continue?")) return;
-                
+
                 let unlinkedCount = 0;
                 const batch = writeBatch(db);
-                
+
                 for (const t of txs) {
                     let urls = t.invoiceUrl || t.invoice_url;
                     if (!urls) continue;
                     if (!Array.isArray(urls)) urls = [urls];
-                    
+
                     let newUrls = urls.filter(url => {
                         if (url.startsWith('local-') && !url.includes(t.id)) {
                             const parts = url.split('-');
@@ -5072,14 +5349,14 @@
                         }
                         return true;
                     });
-                    
+
                     if (newUrls.length !== urls.length) {
                         const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
                         batch.update(docRef, { invoice_url: newUrls.length > 0 ? newUrls : deleteField() });
                         unlinkedCount++;
                     }
                 }
-                
+
                 if (unlinkedCount > 0) {
                     try {
                         await batch.commit();
@@ -5099,7 +5376,7 @@
                 document.getElementById('edit-amount').value = t.amount;
                 document.getElementById('edit-date').value = t.subDate;
                 document.getElementById('edit-desc').value = t.desc || t.desc_text || '';
-                document.getElementById('edit-reason').value = ''; 
+                document.getElementById('edit-reason').value = '';
 
                 const rFields = document.getElementById('edit-reimburse-fields');
                 const scanSection = document.getElementById('edit-scan-section');
@@ -5112,16 +5389,16 @@
                     scanSection.classList.remove('hidden');
                     currentEditScanData = [];
                     let urls = t.invoiceUrl || t.invoice_url;
-                    
+
                     if (urls) {
                         if (!Array.isArray(urls)) urls = [urls];
-                        
+
                         Promise.all(urls.map(async (u) => {
                             if (u.startsWith('local-')) {
                                 const base64 = await window.getPhotoLocal(u);
                                 return { isExisting: true, url: u, preview: base64 || '' };
                             } else {
-                                return { isExisting: true, url: u, preview: u }; 
+                                return { isExisting: true, url: u, preview: u };
                             }
                         })).then(results => {
                             currentEditScanData = results;
@@ -5135,8 +5412,8 @@
                     scanSection.classList.add('hidden');
                 }
 
-                currentEditAllocations = t.allocations && t.allocations.length > 0 
-                    ? JSON.parse(JSON.stringify(t.allocations)) 
+                currentEditAllocations = t.allocations && t.allocations.length > 0
+                    ? JSON.parse(JSON.stringify(t.allocations))
                     : [{ category: t.category || categories[0], propertyNo: t.propertyNo || '' }];
                 window.renderEditAllocationRows();
             };
@@ -5154,7 +5431,7 @@
                 const reasonInput = document.getElementById('edit-reason');
 
                 if (!amountInput || !dateInput || !descInput || !reasonInput) return;
-                
+
                 if (!reasonInput.value.trim()) {
                     alert("A Reason for Edit is required.");
                     reasonInput.focus();
@@ -5202,7 +5479,7 @@
 
                             const allUrls = [...existingUrls, ...newUrls];
                             updateData.invoice_url = allUrls.length === 1 ? allUrls[0] : allUrls;
-                        } catch (err) { 
+                        } catch (err) {
                             console.error("Edit Scan Error", err);
                             if (!confirm("Invoice photo save failed. Save changes WITHOUT updating the photo?")) {
                                 btn.disabled = false;
@@ -5282,11 +5559,11 @@
                 let t = txs.find(x => x.id === id);
                 let name = personName || (t ? t.person : '');
                 if (!name && !t) return;
-                
-                settlingId = id || ''; 
+
+                settlingId = id || '';
                 settlementTargetName = name; // Use a global to store the name for confirmSettle
 
-                
+
                 let rem = 0;
                 if (intentionalType === 'return_advance') {
                     rem = getAdvanceWalletFor(name);
@@ -5444,18 +5721,18 @@
                     const store = transaction.objectStore(storeName);
                     const request = store.getAll();
                     const keysRequest = store.getAllKeys();
-                    
+
                     const [photos, keys] = await Promise.all([
                         new Promise((resolve) => request.onsuccess = () => resolve(request.result)),
                         new Promise((resolve) => keysRequest.onsuccess = () => resolve(keysRequest.result))
                     ]);
 
-                    const backupData = { 
+                    const backupData = {
                         txs, staff, sources, categories,
                         photos: {}
                     };
                     keys.forEach((key, i) => { backupData.photos[key] = photos[i]; });
-                    
+
                     const blob = new Blob([JSON.stringify(backupData)], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -5538,7 +5815,7 @@
                                 store.put(d.photos[key], key);
                                 count++;
                             }
-                            
+
                             await new Promise((resolve, reject) => {
                                 transaction.oncomplete = () => resolve();
                                 transaction.onerror = () => reject(transaction.error);
@@ -5564,7 +5841,7 @@
                 const t = getTotals();
                 document.getElementById('diag-tx-count').innerText = txs.length;
                 document.getElementById('diag-balance').innerText = t.balance.toFixed(2);
-                
+
                 const photoCount = txs.filter(x => x.invoiceUrl || x.invoice_url).length;
                 document.getElementById('diag-photo-count').innerText = photoCount;
 
@@ -5811,9 +6088,9 @@
                     allocations: dbTx.allocations || [],
                     isDeductedFromAdvance: !!dbTx.is_deducted_from_advance,
                     advanceAmountUsed: parseFloat(dbTx.advance_amount_used || 0),
-                    settled: ((dbTx.manager_owed || 0) + (dbTx.staff_owed || 0) > 0) 
-                             ? ((dbTx.repaid_amount || 0) >= ((dbTx.manager_owed || 0) + (dbTx.staff_owed || 0) - 0.01)) 
-                             : !!dbTx.settled,
+                    settled: ((dbTx.manager_owed || 0) + (dbTx.staff_owed || 0) > 0)
+                        ? ((dbTx.repaid_amount || 0) >= ((dbTx.manager_owed || 0) + (dbTx.staff_owed || 0) - 0.01))
+                        : !!dbTx.settled,
                     taxAmount: parseFloat(dbTx.tax_amount || 0),
                     netAmount: parseFloat(dbTx.net_amount || 0),
                     paymentMethod: dbTx.payment_method || 'Cash',
@@ -5855,7 +6132,7 @@
                     txs = snapshot.docs.map(doc => mapTxFromDB(doc.id, doc.data()));
                     txs.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''));
                     window.renderAll();
-                    
+
                     if (!cashCountChecked && txs.length > 0) {
                         cashCountChecked = true;
                         if (!lastCashCountDate) {
@@ -5894,7 +6171,7 @@
                         const url = t.invoiceUrl || t.invoice_url;
                         if (url && url.startsWith('local-')) linkedKeys.add(url);
                     });
-                    
+
                     const orphanedPhotos = keys.filter(k => !linkedKeys.has(k));
                     if (orphanedPhotos.length === 0) {
                         alert("No orphaned photos found to link!");
@@ -5928,7 +6205,7 @@
 
                         if (match) {
                             const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', match.id);
-                            
+
                             // If it already has an invoice_url, append it if it's an array, or convert to array
                             let newUrl = photoKey;
                             const currentUrl = match.invoiceUrl || match.invoice_url;
@@ -5941,10 +6218,10 @@
                                     newUrl = currentUrl; // no change
                                 }
                             }
-                            
+
                             batch.update(docRef, { invoice_url: newUrl });
                             matchCount++;
-                            match.invoiceUrl = newUrl; 
+                            match.invoiceUrl = newUrl;
                         }
                     }
 
@@ -5970,10 +6247,10 @@
                     const photoDB = await window.initPhotoDB();
                     const transaction = photoDB.transaction([storeName], "readwrite");
                     const store = transaction.objectStore(storeName);
-                    
+
                     const keysRequest = store.getAllKeys();
                     const photosRequest = store.getAll();
-                    
+
                     const [keys, photos] = await Promise.all([
                         new Promise((resolve) => keysRequest.onsuccess = () => resolve(keysRequest.result)),
                         new Promise((resolve) => photosRequest.onsuccess = () => resolve(photosRequest.result))
@@ -5982,7 +6259,7 @@
                     const contentMap = new Map(); // Content -> MainKey
                     const duplicates = []; // Keys to delete
                     const replacements = new Map(); // OldKey -> NewKey
-                    
+
                     photos.forEach((data, i) => {
                         const key = keys[i];
                         if (contentMap.has(data)) {
@@ -6004,10 +6281,10 @@
 
                     // Delete duplicates
                     duplicates.forEach(k => store.delete(k));
-                    
+
                     // Update transactions in Firestore (Wait, this is slow if many, but we should do it)
                     // We only update if the old key was being used
-                    const batch = writeBatch(db); 
+                    const batch = writeBatch(db);
                     let updateCount = 0;
                     txs.forEach(t => {
                         const url = t.invoiceUrl || t.invoice_url;
@@ -6036,9 +6313,9 @@
                     const transaction = photoDB.transaction([storeName], "readonly");
                     const store = transaction.objectStore(storeName);
                     const keysRequest = store.getAllKeys();
-                    
+
                     const keys = await new Promise((resolve) => keysRequest.onsuccess = () => resolve(keysRequest.result));
-                    
+
                     if (keys.length === 0) {
                         alert("No photos found in local storage (IndexedDB).");
                         return;
@@ -6052,7 +6329,7 @@
                             else if (typeof url === 'string' && url.startsWith('local-')) linkedKeys.add(url);
                         }
                     });
-                    
+
                     const orphanedPhotos = keys.filter(k => !linkedKeys.has(k));
                     const brokenLinks = Array.from(linkedKeys).filter(k => !keys.includes(k));
 
@@ -6063,7 +6340,7 @@
                         document.getElementById('health-stored').innerText = keys.length;
                         document.getElementById('health-linked').innerText = linkedKeys.size - brokenLinks.length;
                         document.getElementById('health-missing').innerText = brokenLinks.length;
-                        
+
                         const badge = document.getElementById('health-status-badge');
                         if (brokenLinks.length > 0) {
                             badge.innerText = "Action Required";
@@ -6084,7 +6361,7 @@
                     } else if (!healthCard) {
                         alert(msg + "All links are healthy!");
                     }
-                    
+
                     window.showStatus("Analysis Complete");
                 } catch (err) {
                     console.error(err);
@@ -6136,11 +6413,11 @@
             window.sendAlertWhatsApp = (txId) => {
                 const t = txs.find(tx => tx.id === txId);
                 if (!t) return;
-                
-                pendingWhatsAppPayload = { 
-                    person: t.person, 
-                    type: 'receipt', 
-                    data: { 
+
+                pendingWhatsAppPayload = {
+                    person: t.person,
+                    type: 'receipt',
+                    data: {
                         type: t.type || 'expense',
                         amount: parseFloat(t.amount) || 0,
                         desc: t.desc || t.desc_text || '-',
@@ -6148,7 +6425,7 @@
                         invDate: t.invDate || t.invoice_date || '',
                         paidFromAdv: parseFloat(t.advance_amount_used || t.advanceAmountUsed) || 0,
                         addedToDebt: parseFloat(t.staff_owed || t.addedToDebt) || 0
-                    } 
+                    }
                 };
                 window.executeWhatsAppSend();
             };
@@ -6156,7 +6433,7 @@
             window.viewInvoice = async (txId) => {
                 const t = txs.find(x => x.id === txId);
                 if (!t) return;
-                
+
                 // Use the same Deep Discovery logic as the printer
                 const getAnyUrl = (tx) => {
                     const candidates = new Set();
@@ -6182,9 +6459,9 @@
                     window.showStatus("No invoice attached", true);
                     return;
                 }
-                
+
                 window.showStatus(`Loading ${urls.length} Page(s)...`, false);
-                
+
                 const imageSrcs = [];
                 for (const url of urls) {
                     let src = url;
@@ -6202,7 +6479,7 @@
                     }
                     if (src) imageSrcs.push(src);
                 }
-                
+
                 if (imageSrcs.length === 0) {
                     window.showStatus("Invoice image files are missing from storage!", true);
                     return;
@@ -6232,9 +6509,159 @@
                 win.document.close();
             };
 
+            // --- MAKER/CHECKER QUEUE LOGIC ---
+            let makerQueue = [];
+            let currentMakerIndex = 0;
+            let currentRotation = 0;
+            let currentPanzoom = null;
+            let activeMakerTx = null;
+
+            window.openMakerChecker = (catFilter = 'all') => {
+                // Populate queue from real data (expenses that are in 'staged' batch and NOT yet audited)
+                makerQueue = txs.filter(t => {
+                    const isStaged = (t.type || '').toLowerCase() === 'expense' && t.batchId === 'staged' && t.status !== 'Voided' && !t.audited;
+                    if (!isStaged) return false;
+                    if (catFilter === 'all') return true;
+                    const tCat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized');
+                    return tCat === catFilter;
+                });
+
+                if (makerQueue.length === 0) {
+                    window.showStatus("No staged expenses in this category to audit!", true);
+                    return;
+                }
+
+                currentMakerIndex = 0;
+                document.getElementById('maker-checker-view').classList.remove('hidden');
+                window.loadNextExpense();
+            };
+
+            window.closeMakerChecker = () => {
+                document.getElementById('maker-checker-view').classList.add('hidden');
+            };
+
+            window.rotateMakerImage = () => {
+                currentRotation += 90;
+                document.getElementById('maker-image').style.transform = `rotate(${currentRotation}deg)`;
+            };
+
+            window.updateMakerTotal = () => {
+                const sub = parseFloat(document.getElementById('maker-subtotal').value) || 0;
+                const vat = parseFloat(document.getElementById('maker-vat').value) || 0;
+                const total = sub + vat;
+                document.getElementById('maker-total').innerText = `${total.toFixed(2)} AED`;
+            };
+
+            window.loadNextExpense = async () => {
+                if (makerQueue.length === 0 || currentMakerIndex >= makerQueue.length) {
+                    document.getElementById('maker-expense-id').innerText = "Queue Empty / Finished";
+                    document.getElementById('maker-subtotal').value = "0.00";
+                    document.getElementById('maker-vat').value = "0.00";
+                    document.getElementById('maker-total').innerText = "0.00 AED";
+                    document.getElementById('maker-image').src = "";
+                    document.getElementById('maker-queue-status').innerText = "All caught up! No pending expenses left.";
+                    activeMakerTx = null;
+                    return;
+                }
+
+                activeMakerTx = makerQueue[currentMakerIndex];
+                document.getElementById('maker-expense-id').innerText = `ID: ${activeMakerTx.invNo || activeMakerTx.id} - ${activeMakerTx.desc}`;
+
+                // Set amounts
+                const vatAmt = activeMakerTx.taxAmount || 0;
+                const totalAmt = activeMakerTx.amount || 0;
+                const subAmt = totalAmt - vatAmt;
+
+                document.getElementById('maker-subtotal').value = subAmt.toFixed(2);
+                document.getElementById('maker-vat').value = vatAmt.toFixed(2);
+                window.updateMakerTotal();
+
+                document.getElementById('maker-queue-status').innerText = `Auditing ${currentMakerIndex + 1} of ${makerQueue.length} items`;
+
+                // Reset rotation
+                currentRotation = 0;
+                document.getElementById('maker-image').style.transform = `rotate(0deg)`;
+
+                // Setup Image
+                document.getElementById('maker-image').src = `https://via.placeholder.com/600x800.png?text=Loading+Receipt...`;
+
+                const urls = activeMakerTx.invoiceUrl || activeMakerTx.invoice_url;
+                if (urls) {
+                    // Try fetching actual blob if exists
+                    try {
+                        const urlArray = Array.isArray(urls) ? urls : [urls];
+                        const photoKey = urlArray[0]; // Just show the first page for audit
+                        const localData = await window.getPhotoLocal(photoKey);
+                        if (localData) {
+                            if (localData instanceof Blob) {
+                                document.getElementById('maker-image').src = URL.createObjectURL(localData);
+                            } else if (typeof localData === 'string' && !localData.startsWith('data:')) {
+                                document.getElementById('maker-image').src = `data:image/jpeg;base64,${localData}`;
+                            } else {
+                                document.getElementById('maker-image').src = localData;
+                            }
+                        } else {
+                            document.getElementById('maker-image').src = `https://via.placeholder.com/600x800.png?text=Photo+Missing`;
+                        }
+                    } catch (e) {
+                        document.getElementById('maker-image').src = `https://via.placeholder.com/600x800.png?text=Error+Loading+Photo`;
+                    }
+                } else {
+                    document.getElementById('maker-image').src = `https://via.placeholder.com/600x800.png?text=No+Photo+Attached`;
+                }
+
+                // Re-initialize Panzoom
+                const imgElement = document.getElementById('maker-image');
+                if (currentPanzoom) {
+                    currentPanzoom.destroy();
+                }
+                if (window.Panzoom) {
+                    currentPanzoom = Panzoom(imgElement, {
+                        maxScale: 5,
+                        contain: 'outside'
+                    });
+                    const container = imgElement.parentElement;
+                    container.addEventListener('wheel', currentPanzoom.zoomWithWheel);
+                }
+            };
+
+            window.approveMakerExpense = async () => {
+                if (!activeMakerTx) return;
+
+                const newSub = parseFloat(document.getElementById('maker-subtotal').value) || 0;
+                const newVat = parseFloat(document.getElementById('maker-vat').value) || 0;
+                const newTotal = newSub + newVat;
+
+                // Update Firestore
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', activeMakerTx.id);
+                    await updateDoc(docRef, {
+                        amount: newTotal,
+                        tax_amount: newVat,
+                        net_amount: newSub,
+                        audited: true, // Mark it as audited
+                    });
+
+                    window.showStatus(`Saved & Audited ${activeMakerTx.invNo || activeMakerTx.id}`);
+                } catch (e) {
+                    window.showStatus(`Error saving: ${e.message}`, true);
+                    return;
+                }
+
+                makerQueue.splice(currentMakerIndex, 1);
+                // Don't increment currentMakerIndex because the next item falls into the current index
+                window.loadNextExpense();
+            };
+
+            window.skipMakerExpense = () => {
+                if (!activeMakerTx) return;
+                currentMakerIndex++;
+                window.loadNextExpense();
+            };
+
             window.onload = () => {
                 lucide.createIcons();
-                
+
                 // Device detection logic
                 const currentDeviceId = localStorage.getItem('petty_cash_device_id');
                 if (!currentDeviceId) {
@@ -6250,7 +6677,7 @@
                         }, 5000);
                     }
                 }
-                
+
                 // Request Storage Persistence again to be safe
                 if (navigator.storage && navigator.storage.persist) {
                     navigator.storage.persist().then(granted => {
