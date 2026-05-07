@@ -287,8 +287,8 @@
                                 data-lucide="shield-check" class="text-white w-5 h-5"></i></div>
                         <div>
                             <h1 class="font-extrabold text-xl tracking-tight text-slate-900">PettyCash<span
-                                    class="text-indigo-600">Pro</span> <span class="text-xs text-rose-500"
-                                    id="version-tag">v5.5</span></h1>
+                                    class="text-indigo-600">Pro</span> <span class="text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full"
+                                    id="version-tag">v5.5-Stable</span></h1>
                             <p
                                 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">
                                 Enterprise Finance</p>
@@ -337,7 +337,7 @@
                 <div>
                     <p id="status-text" class="font-bold text-sm"></p>
                 </div>
-            </div>
+                </div>
 
             <!-- View: Dashboard -->
             <div id="view-dashboard" class="space-y-8 animate-in fade-in duration-500">
@@ -864,12 +864,12 @@
                             </div>
                         </div>
                         <div class="mt-8 flex flex-col md:flex-row gap-4">
-                            <button onclick="window.renderAll()"
+                            <button onclick="window.ledgerCurrentPage=1; window.renderAll()"
                                 class="flex-1 bg-white text-indigo-900 py-3.5 rounded-xl font-black text-xs hover:bg-indigo-50 transition-all shadow-lg flex justify-center items-center gap-2"><i
                                     data-lucide="filter"></i> Apply Filters</button>
-                            <button onclick="window.generateReportPDF()"
+                            <button onclick="window.openProcessedModal()"
                                 class="flex-1 bg-indigo-600 text-white py-3.5 rounded-xl font-black text-xs hover:bg-indigo-500 border border-indigo-500 transition-all shadow-lg flex justify-center items-center gap-2"><i
-                                    data-lucide="download"></i> Export PDF</button>
+                                    data-lucide="archive"></i> Processed Batches</button>
                             <button onclick="window.generateReportExcel()"
                                 class="flex-1 bg-emerald-600 text-white py-3.5 rounded-xl font-black text-xs hover:bg-emerald-500 border border-emerald-500 transition-all shadow-lg flex justify-center items-center gap-2"><i
                                     data-lucide="file-spreadsheet"></i> Export Excel</button>
@@ -891,18 +891,18 @@
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="relative md:col-span-2">
-                                <input type="text" id="filter-general" oninput="window.renderAll()"
+                                <input type="text" id="filter-general" oninput="window.ledgerCurrentPage=1; window.renderAll()"
                                     placeholder="Search transactions (Date, Person, Memo...)"
                                     class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all">
                                 <div class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                                     <i data-lucide="search" class="w-4 h-4"></i>
                                 </div>
                             </div>
-                            <select id="filter-category" onchange="window.renderAll()"
+                            <select id="filter-category" onchange="window.ledgerCurrentPage=1; window.renderAll()"
                                 class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all">
                                 <option value="">All Categories</option>
                             </select>
-                            <select id="filter-person-history" onchange="window.renderAll()"
+                            <select id="filter-person-history" onchange="window.ledgerCurrentPage=1; window.renderAll()"
                                 class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all">
                                 <option value="">All Personnel</option>
                             </select>
@@ -925,24 +925,23 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Load More Button Container -->
+                <div id="history-load-more-container" class="p-4 border-t border-slate-100 flex justify-center">
+                    <button onclick="window.loadOlderTransactions()"
+                        class="flex items-center gap-2 px-6 py-2.5 bg-slate-50 text-slate-500 border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-100 transition-all">
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i> Load Older Transactions
+                    </button>
+                </div>
             </div>
 
             <!-- View: Setup -->
-            <div id="view-settings" class="hidden space-y-8 animate-in fade-in duration-500">
+            <div id="view-settings" class="hidden space-y-8 animate-in fade-in duration-500 !mt-0">
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Storage & Integration -->
                     <div class="space-y-6">
                         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                            <div class="flex items-center gap-3 mb-6">
-                                <div class="p-2 bg-slate-100 text-slate-600 rounded-lg"><i data-lucide="cloud"
-                                        class="w-5 h-5"></i></div>
-                                <div>
-                                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">OneDrive
-                                        Integration</h4>
-                                    <p class="text-[10px] text-slate-500 font-medium">Automatic Folder Sync</p>
-                                </div>
-                            </div>
-
                             <div class="relative z-10">
                                 <div class="flex justify-between items-start mb-6">
                                     <div>
@@ -3679,7 +3678,7 @@
                     const filtered = txs.filter(t => {
                         const dateMatch = (!start || t.subDate >= start) && (!end || t.subDate <= end);
                         const hasAllocations = t.allocations && Array.isArray(t.allocations);
-                        const catMatch = (!filterCat || (hasAllocations && t.allocations.some(a => a.category === filterCat)));
+                        const catMatch = (!filterCat || (hasAllocations && t.allocations.some(a => a.category === filterCat)) || (t.category === filterCat));
 
                         const searchMatch = !filterGeneral ||
                             (t.desc && t.desc.toLowerCase().includes(filterGeneral)) ||
@@ -3690,9 +3689,15 @@
 
                         return dateMatch && catMatch && searchMatch && personMatch;
                     });
+                    
+                    window.lastFilteredCount = filtered.length;
 
-                    const maxDisplay = 1000;
-                    const displayData = filtered.slice(0, maxDisplay);
+                    const pageSize = 50;
+                    const currentPage = window.ledgerCurrentPage || 1;
+                    const displayData = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+                    
+                    window.hasMoreLedgerData = filtered.length > (currentPage * pageSize);
+                    window.hasPrevLedgerData = currentPage > 1;
 
                     const body = document.getElementById('audit-body');
                     if (body) {
@@ -3738,6 +3743,10 @@
                                 }
                             }
 
+                            const processedTag = (t.batchId === 'received' || t.receivedDate)
+                                ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-teal-50 text-teal-700 border border-teal-100 px-1.5 py-0.5 rounded text-[9px] font-black uppercase"><i data-lucide="check-circle-2" class="w-2.5 h-2.5"></i> PROCESSED</div>`
+                                : '';
+
                             return `<tr class="hover:bg-slate-50 transition-colors group ${voidStyle}">
                             <td class="px-6 py-4 font-bold text-slate-500 font-mono text-xs ${isVoided ? 'line-through' : ''}">${window.formatSafeDate(t.invoiceDate || t.subDate)}</td>
                             <td class="px-6 py-4 font-bold text-slate-700 text-xs ${isVoided ? 'line-through' : ''}">${t.person || '-'}</td>
@@ -3746,7 +3755,7 @@
                                     <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md ${window.getTypeStyles((t.type || '').toLowerCase())}">${typeLabel}</span>
                                     <span class="font-bold text-slate-700 ${isVoided ? 'line-through' : ''}">${t.desc || 'No Desc'}</span>
                                 </div>
-                                <div class="mt-1.5 flex flex-wrap gap-1">${allocs}${advTag}${scanTag}${editTag}</div>
+                                <div class="mt-1.5 flex flex-wrap gap-1">${allocs}${advTag}${scanTag}${processedTag}${editTag}</div>
                                 ${voidTag}
                             </td>
                             <td class="px-6 py-4">
@@ -3762,11 +3771,30 @@
                                 </div>
                             </td>
                         </tr>`;
-                        }).join('') + (filtered.length > maxDisplay ? `<tr><td colspan="7" class="py-6 text-center text-slate-500 font-bold text-xs uppercase bg-slate-50 border-t border-slate-200 tracking-widest rounded-xl">Showing 150 of ${filtered.length} entries. Export Report for full dataset.</td></tr>` : '') : `<tr><td colspan="7" class="py-12 text-center text-slate-400 uppercase font-bold tracking-widest text-xs">No matching records found</td></tr>`;
+                        }).join('') : `<tr><td colspan="7" class="py-12 text-center text-slate-400 uppercase font-bold tracking-widest text-xs">No matching records found</td></tr>`;
                     }
 
                     const lc = document.getElementById('log-count');
                     if (lc) lc.innerText = filtered.length;
+
+                    // Update Pagination UI
+                    const btnCont = document.getElementById('history-load-more-container');
+                    if (btnCont) {
+                        btnCont.innerHTML = `
+                            <div class="flex items-center justify-center gap-4 mt-8">
+                                <button onclick="window.prevLedgerPage()" class="px-6 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 hover:text-indigo-600 transition-all disabled:opacity-20 flex items-center gap-2" ${!window.hasPrevLedgerData ? 'disabled' : ''}>
+                                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Prev
+                                </button>
+                                <div class="px-6 py-3 bg-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                    Page ${window.ledgerCurrentPage || 1}
+                                </div>
+                                <button onclick="window.loadOlderTransactions()" class="px-6 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 hover:text-indigo-600 transition-all disabled:opacity-20 flex items-center gap-2" ${!window.hasMoreLedgerData ? 'disabled' : ''}>
+                                    Next <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        `;
+                        lucide.createIcons();
+                    }
 
                     // Photo Backup Reminder Logic
                     const lastBackup = localStorage.getItem('last_photo_backup_date');
@@ -3788,7 +3816,7 @@
                     const batchMap = {};
                     txs.forEach(t => {
                         const ttype = (t.type || '').toLowerCase();
-                        if (ttype === 'expense' && t.batchId && t.batchId !== 'staged' && t.batchId !== 'legacy') {
+                        if (ttype === 'expense' && t.batchId && t.batchId !== 'staged' && t.batchId !== 'legacy' && t.batchId !== 'received') {
                             if (!batchMap[t.batchId]) batchMap[t.batchId] = { id: t.batchId, count: 0, total: 0, received: false, date: t.subDate, txs: [] };
                             batchMap[t.batchId].count++;
                             batchMap[t.batchId].total += (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0);
@@ -3812,7 +3840,7 @@
                             batchContainer.innerHTML = pendingBatches.map(b => `
                                 <div class="bg-blue-50/50 border border-blue-100 p-5 rounded-2xl relative overflow-hidden group flex flex-col h-full">
                                     <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] font-black px-3 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">Processing</div>
-                                    <div class="text-[10px] text-blue-400 font-bold mb-1 uppercase tracking-wider">${new Date(parseInt(b.id.split('-')[1])).toLocaleDateString()}</div>
+                                    <div class="text-[10px] text-blue-400 font-bold mb-1 uppercase tracking-wider">${window.formatSafeDate(b.date) || b.id}</div>
                                     <div class="text-2xl font-black text-blue-900 mb-0.5 tracking-tight">${b.total.toFixed(2)} <span class="text-xs text-blue-500 font-bold">AED</span></div>
                                     <div class="text-[10px] font-bold text-blue-600 uppercase tracking-wide mb-5 bg-blue-100/50 inline-block px-2 py-0.5 rounded-md">${b.count} Expenses</div>
                                     
@@ -3820,11 +3848,11 @@
                                         <button onclick="window.exportBatchExcel('${b.id}')" class="w-full bg-emerald-50 border-2 border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
                                             <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel Report
                                         </button>
-                                        <button onclick="window.printBatchInvoices('${b.id}')" class="w-full bg-slate-50 border-2 border-slate-200 text-slate-700 hover:bg-slate-600 hover:text-white hover:border-slate-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
-                                            <i data-lucide="printer" class="w-4 h-4"></i> Print Invoices
+                                        <button onclick="window.printBatchPDFReport('${b.id}')" class="w-full bg-slate-50 border-2 border-slate-200 text-slate-700 hover:bg-slate-600 hover:text-white hover:border-slate-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+                                            <i data-lucide="file-text" class="w-4 h-4"></i> PDF Report
                                         </button>
-                                        <button onclick="window.receiveBatchCash('${b.id}', ${b.total})" class="w-full bg-white border-2 border-blue-200 text-blue-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
-                                            <i data-lucide="download" class="w-4 h-4"></i> Cash Received
+                                        <button onclick="window.receiveBatchCash('${b.id}', ${b.total})" class="w-full bg-white border-2 border-teal-200 text-teal-700 hover:bg-teal-600 hover:text-white hover:border-teal-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+                                            <i data-lucide="check-circle-2" class="w-4 h-4"></i> Workflow Completed
                                         </button>
                                     </div>
                                 </div>
@@ -3919,6 +3947,14 @@
                         }
                     }
                 });
+                // Default to last 3 months when opening Reports tab for the first time
+                if (v === 'history') {
+                    const startInput = document.getElementById('filter-start');
+                    if (startInput && !startInput.value) {
+                        // By default, don't restrict the start date for history, let pagination handle it
+                        startInput.value = ""; 
+                    }
+                }
                 window.renderAll();
             };
 
@@ -4309,6 +4345,471 @@
                 }
             };
 
+            window.getAnyUrl = async (tx) => {
+                const candidates = new Set();
+                const search = (val) => {
+                    if (!val) return;
+                    if (typeof val === 'string') {
+                        if (val.startsWith('local-') || val.startsWith('data:') || val.startsWith('http')) candidates.add(val);
+                    } else if (val instanceof Blob) {
+                        candidates.add(val);
+                    } else if (Array.isArray(val)) {
+                        val.forEach(search);
+                    } else if (typeof val === 'object') {
+                        Object.values(val).forEach(search);
+                    }
+                };
+                search(tx.invoiceUrl); search(tx.invoice_url);
+                if (candidates.size === 0) search(tx);
+                return Array.from(candidates);
+            };
+
+            window.printBatchPDFReport = async (batchId) => {
+                const batchTxs = txs.filter(t => t.receivedBatchId === batchId || t.batchId === batchId);
+                if (batchTxs.length === 0) {
+                    window.showStatus("No data found for this batch", true);
+                    return;
+                }
+
+                window.showStatus("Preparing Official Reconciliation Report...", false);
+
+                // Excel Logic Mappings
+                const headingMap = {
+                    "warehouses": "Site maintenece-warehouse",
+                    "adnoc": "Petrol Chip Payment for EIC Cars",
+                    "hilux": "TOYOTA PickUp-Shj 72588",
+                    "crv": "CRV- SHJ 87318",
+                    "tucson": "Tucson- SHJ 57586",
+                    "admin building": "Admin & Showroom -Services",
+                    "open yard": "site maintenece-Openyards"
+                };
+                const noVatCats = ['adnoc', 'hilux', 'crv', 'tucson', 'pickup', 'vehicles', 'admin drainage'];
+                
+                const d = new Date();
+                const dd = d.getDate().toString().padStart(2, '0');
+                const mm = (d.getMonth() + 1).toString().padStart(2, '0');
+                const yyyy = d.getFullYear();
+                const dateStr = `${dd}.${mm}.${yyyy}`;
+
+                // Group by Category and Sort
+                const getCat = (t) => (t.allocations && t.allocations.length > 0) ? t.allocations[0].category : (t.category || 'Uncategorized');
+                const catGroups = {};
+                batchTxs.forEach(t => {
+                    const c = getCat(t);
+                    if (!catGroups[c]) catGroups[c] = { name: c, items: [], total: 0 };
+                    catGroups[c].items.push(t);
+                    catGroups[c].total += (parseFloat(t.amount) || 0);
+                });
+
+                const sortedCatNames = Object.keys(catGroups).sort();
+                const grandTotal = batchTxs.reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+
+                const win = window.open('', '_blank');
+                let html = `
+                    <html>
+                    <head>
+                        <title>Batch Report - ${batchId}</title>
+                        <style>
+                            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+                            @media print { .no-print { display: none; } }
+                            body { font-family: 'Inter', sans-serif; color: #0f172a; padding: 20px; background: white; }
+                            
+                            /* Excel Mimicry Styles */
+                            .excel-sheet { width: 100%; max-width: 900px; margin: 0 auto; background: white; }
+                            .excel-logo-row { text-align: center; padding: 20px 0; }
+                            .excel-logo { height: 60px; object-fit: contain; }
+                            .excel-title { font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 22px; font-weight: bold; text-align: center; padding: 10px 0; }
+                            .excel-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-family: 'Comic Sans MS', cursive, sans-serif; }
+                            .excel-date { font-weight: bold; font-size: 16px; }
+                            .excel-ref { color: #ff0000; font-weight: bold; font-size: 13px; }
+                            
+                            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+                            th { background: #f2f2f2; border: 1px solid #000; padding: 10px; font-family: 'Comic Sans MS', cursive, sans-serif; }
+                            td { border: 1px solid #000; padding: 8px; vertical-align: middle; }
+                            .amt { text-align: center; font-weight: bold; font-family: 'Courier New', monospace; }
+                            
+                            .footer-approval { margin-top: 30px; font-family: Arial, sans-serif; }
+                            .signature-block { margin-top: 40px; }
+                            .ceo-name { font-size: 16px; font-weight: bold; margin-bottom: 2px; }
+                            .ceo-title { font-size: 14px; font-weight: bold; margin-bottom: 2px; }
+                            
+                            @page { size: A4; margin: 10mm; }
+                            .page-break { page-break-before: always; }
+                            .photo-page { page-break-before: always; page-break-inside: avoid; width: 100%; }
+                            .invoice-container { text-align: center; padding: 10px 0; }
+                            .invoice-img { max-width: 100%; max-height: 24cm; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: block; margin: 0 auto; }
+                            
+                            .stamp { border: 4px solid #10b981; color: #10b981; text-transform: uppercase; font-size: 24px; font-weight: 900; padding: 10px 20px; display: inline-block; transform: rotate(-15deg); border-radius: 12px; opacity: 0.8; }
+                        </style>
+                    </head>
+                    <body>
+                        <!-- GLOBAL COVER PAGE -->
+                        <div class="excel-sheet">
+                            <div class="excel-logo-row">
+                                ${window.EIC_LOGO_B64 ? `<img src="${window.EIC_LOGO_B64}" class="excel-logo">` : `<h1 style="color:#c00000">Emirates For Ind. Cities Co.</h1>`}
+                            </div>
+                            <h2 style="text-align:center; font-weight:900; margin-bottom:40px;">BATCH RECONCILIATION SUMMARY</h2>
+                            
+                            <table style="max-width:500px; margin: 0 auto 40px;">
+                                <tr style="background:#f8fafc">
+                                    <td style="padding:15px; font-weight:800; border:none;">Batch ID</td>
+                                    <td style="padding:15px; text-align:right; border:none;">${batchId}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:15px; font-weight:800; border:none;">Total Amount</td>
+                                    <td style="padding:15px; text-align:right; font-weight:900; color:#4f46e5; border:none;">${grandTotal.toFixed(2)} AED</td>
+                                </tr>
+                            </table>
+
+                            <h3>Departmental Breakdown</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="text-align:left;">Category / Account</th>
+                                        <th>Invoices</th>
+                                        <th style="text-align:right;">Sub-Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${sortedCatNames.map(c => `
+                                        <tr>
+                                            <td style="font-weight:700;">${headingMap[c.toLowerCase()] || c}</td>
+                                            <td style="text-align:center;">${catGroups[c].items.length}</td>
+                                            <td style="text-align:right; font-weight:900;">${catGroups[c].total.toFixed(2)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                            <div style="text-align:right; margin-top:40px;"><div class="stamp">Verified</div></div>
+                        </div>
+
+                        <!-- CATEGORY SECTIONS -->
+                        ${sortedCatNames.map(catName => {
+                            const group = catGroups[catName];
+                            const isNoVat = noVatCats.includes(catName.toLowerCase());
+                            const displayCat = headingMap[catName.toLowerCase()] || catName;
+                            
+                            // Generate Initials
+                            const catWords = catName.split(' ').filter(w => w);
+                            let catInitials = catWords.length >= 2 ? (catWords[0][0] + catWords[1][0]).toUpperCase() : catName[0].toUpperCase();
+                            const refNo = `${catInitials}${dd}${mm}${yyyy}`;
+
+                            let sectionHtml = `
+                                <div class="page-break"></div>
+                                <div class="excel-sheet">
+                                    <div class="excel-logo-row">
+                                        ${window.EIC_LOGO_B64 ? `<img src="${window.EIC_LOGO_B64}" class="excel-logo">` : `<h1 style="color:#c00000">Emirates For Ind. Cities Co.</h1>`}
+                                    </div>
+                                    <div class="excel-title">${displayCat}</div>
+                                    <div class="excel-meta">
+                                        <div class="excel-date">${dateStr}</div>
+                                        <div class="excel-ref">Invoice Ref No - ${refNo}</div>
+                                    </div>
+
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Sl No</th>
+                                                <th>Date</th>
+                                                <th>Description of bill</th>
+                                                <th>Bill number</th>
+                                                ${isNoVat ? '' : '<th>Amount</th><th>Vat</th>'}
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${group.items.map((t, i) => {
+                                                const total = parseFloat(t.amount || 0);
+                                                const vat = parseFloat(t.taxAmount || 0);
+                                                const amt = total - vat;
+                                                const date = window.formatSafeDate(t.invoiceDate || t.subDate).replace(/\//g, '.');
+                                                
+                                                return `
+                                                    <tr>
+                                                        <td style="text-align:center;">${i + 1}</td>
+                                                        <td style="text-align:center;">${date}</td>
+                                                        <td>${t.desc || t.desc_text || '-'}</td>
+                                                        <td style="text-align:center;">${t.invoiceNo || '-'}</td>
+                                                        ${isNoVat ? '' : `<td class="amt">${amt.toFixed(2)}</td><td class="amt">${vat.toFixed(2)}</td>`}
+                                                        <td class="amt">${total.toFixed(2)}</td>
+                                                    </tr>
+                                                `;
+                                            }).join('')}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr style="background:#f2f2f2; font-weight:bold;">
+                                                <td colspan="4" style="text-align:right;">TOTAL</td>
+                                                ${isNoVat ? '' : `<td class="amt">${group.items.reduce((s,t)=>s+(parseFloat(t.amount||0)-parseFloat(t.taxAmount||0)),0).toFixed(2)}</td><td class="amt">${group.items.reduce((s,t)=>s+parseFloat(t.taxAmount||0),0).toFixed(2)}</td>`}
+                                                <td class="amt">${group.total.toFixed(2)}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+
+                                    <div class="footer-approval">
+                                        <div style="font-weight:bold; font-size:14px; text-transform:uppercase;">for approval</div>
+                                        <div class="signature-block">
+                                            <div class="ceo-name">Mohammed Al Hazzaa</div>
+                                            <div class="ceo-title">C.E.O</div>
+                                            <div style="font-size:12px;">Emirates Industrial City, Sharjah</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+
+                            // Add Photo Placeholders
+                            group.items.forEach(t => {
+                                sectionHtml += `<!-- TX_PLACEHOLDER_${t.id} -->`;
+                            });
+
+                            return sectionHtml;
+                        }).join('')}
+                    </body>
+                    </html>
+                `;
+
+                // Second pass to inject images and handle loading
+                for (const catName of sortedCatNames) {
+                    for (const t of catGroups[catName].items) {
+                        const urls = await window.getAnyUrl(t);
+                        let txImagesHtml = "";
+                        if (urls && urls.length > 0) {
+                            for (const url of urls) {
+                                let src = url;
+                                if (typeof src === 'string' && src.startsWith('local-')) {
+                                    const data = await window.getPhotoLocal(src);
+                                    if (data) src = (data instanceof Blob) ? URL.createObjectURL(data) : data;
+                                }
+                                
+                                txImagesHtml += `
+                                    <div class="photo-page">
+                                        <div class="excel-meta" style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                                            <div style="font-weight:bold;">${catName} / ${t.desc || '-'}</div>
+                                            <div style="color:#ff0000; font-weight:bold;">${(parseFloat(t.amount)||0).toFixed(2)} AED</div>
+                                        </div>
+                                        <div class="invoice-container">
+                                            <img src="${src}" class="invoice-img" onload="this.setAttribute('data-loaded', 'true')" onerror="this.src='https://via.placeholder.com/800x400?text=Invoice+Image+Not+Available'">
+                                        </div>
+                                    </div>`;
+                            }
+                        }
+                        html = html.replace(`<!-- TX_PLACEHOLDER_${t.id} -->`, txImagesHtml);
+                    }
+                }
+
+                win.document.write(html);
+                win.document.close();
+                win.focus();
+
+                // Professional Loading Wait
+                const checkImages = setInterval(() => {
+                    const imgs = win.document.querySelectorAll('.invoice-img');
+                    const allLoaded = Array.from(imgs).every(img => img.complete || img.getAttribute('data-loaded') === 'true');
+                    if (allLoaded) {
+                        clearInterval(checkImages);
+                        setTimeout(() => {
+                            win.print();
+                            window.showStatus("Official Report Generated Successfully");
+                        }, 1000);
+                    }
+                }, 500);
+
+                // Fallback timeout in case some images fail to report load
+                setTimeout(() => {
+                    clearInterval(checkImages);
+                    if (!win.closed) win.print();
+                }, 10000);
+            };
+
+            window.loadProcessedBatches = () => {
+                const container = document.getElementById('processed-modal-content');
+                if (!container) return;
+
+                container.innerHTML = '<div class="flex items-center justify-center h-full py-12"><p class="text-slate-400 text-sm font-bold animate-pulse"><i data-lucide="loader-2" class="w-4 h-4 inline animate-spin mr-2"></i> Accessing Archives...</p></div>';
+
+                const processedTxs = txs.filter(t => t.batchId === 'received' && t.receivedBatchId);
+
+                if (processedTxs.length === 0) {
+                    container.innerHTML = '<p class="text-slate-400 text-sm font-bold text-center py-12 bg-white rounded-2xl border border-slate-200">No processed batches found.</p>';
+                    lucide.createIcons();
+                    return;
+                }
+
+                const batchGroups = {};
+                processedTxs.forEach(t => {
+                    const bid = t.receivedBatchId;
+                    if (!batchGroups[bid]) {
+                        batchGroups[bid] = { id: bid, txs: [], total: 0, receivedDate: t.receivedDate || t.subDate, cats: {} };
+                    }
+                    batchGroups[bid].txs.push(t);
+                    batchGroups[bid].total += parseFloat(t.amount || 0);
+                    const cat = (t.allocations && t.allocations.length > 0) ? t.allocations[0].category : (t.category || 'Uncategorized');
+                    batchGroups[bid].cats[cat] = (batchGroups[bid].cats[cat] || 0) + (parseFloat(t.amount) || 0);
+                });
+
+                const sortedBatches = Object.values(batchGroups).sort((a, b) => new Date(b.receivedDate) - new Date(a.receivedDate));
+
+                if (window.currentArchiveMonth) {
+                    const monthBatches = sortedBatches.filter(b => {
+                        const d = new Date(b.receivedDate);
+                        return d.toLocaleString('default', { month: 'long', year: 'numeric' }) === window.currentArchiveMonth;
+                    });
+
+                    container.innerHTML = `
+                        <div class="mb-10 flex items-center justify-between">
+                            <button onclick="window.currentArchiveMonth = null; window.loadProcessedBatches();" class="flex items-center gap-3 text-slate-500 font-bold hover:text-indigo-600 transition-all bg-white px-5 py-2.5 rounded-2xl border border-slate-200 shadow-sm group">
+                                <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i> Back to Months
+                            </button>
+                            <h3 class="text-xl font-black text-slate-800 tracking-tight">${window.currentArchiveMonth} Archive</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                            ${monthBatches.map(b => {
+                                const d = new Date(b.receivedDate);
+                                const batchNum = `BATCH-${d.getDate().toString().padStart(2, '0')}${(d.getMonth() + 1).toString().padStart(2, '0')}${d.getFullYear()}`;
+                                const topCats = Object.entries(b.cats).sort((x,y) => y[1]-x[1]);
+                                
+                                return `
+                                <div class="bg-white border border-slate-200 shadow-sm rounded-[2.5rem] p-8 flex flex-col group relative overflow-hidden h-[280px] transition-all hover:shadow-2xl hover:border-indigo-500/30">
+                                    <!-- Header Background -->
+                                    <div class="absolute top-0 left-0 right-0 h-2 bg-slate-50 group-hover:bg-indigo-600 transition-colors"></div>
+                                    
+                                    <!-- Main View -->
+                                    <div class="relative z-10 flex flex-col h-full transition-all duration-500 group-hover:translate-y-[-10px] group-hover:opacity-0 group-hover:blur-md">
+                                        <div class="flex justify-between items-start mb-6">
+                                            <div class="bg-slate-900 text-white text-[9px] font-black px-3 py-1.5 rounded-lg tracking-widest uppercase">
+                                                ${batchNum}
+                                            </div>
+                                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                ${window.formatSafeDate(b.receivedDate)}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-2">
+                                            <div class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Reconciled</div>
+                                            <div class="text-4xl font-black text-slate-900 tracking-tight">${b.total.toFixed(2)} <span class="text-sm text-slate-400 font-bold uppercase">AED</span></div>
+                                        </div>
+
+                                        <div class="mt-auto flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                                                </div>
+                                                <span class="text-xs font-black text-slate-600">${b.txs.length} Documents</span>
+                                            </div>
+                                            <div class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-widest">
+                                                View Breakdown
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Professional Breakdown View (On Hover) -->
+                                    <div class="absolute inset-0 z-20 p-8 bg-white/95 backdrop-blur-md flex flex-col opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-8 group-hover:translate-y-0">
+                                        <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+                                            <div>
+                                                <div class="text-[9px] font-black text-indigo-600 uppercase tracking-widest mb-0.5">${batchNum}</div>
+                                                <div class="text-xs font-black text-slate-900 uppercase">Category Analysis</div>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="text-[10px] font-bold text-slate-400 uppercase">Total</div>
+                                                <div class="text-sm font-black text-slate-900">${b.total.toFixed(0)} AED</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex-1 overflow-y-auto space-y-3 pr-2 mb-6 scrollbar-thin scrollbar-thumb-slate-200">
+                                            ${topCats.map(([cat, amt]) => `
+                                                <div class="flex justify-between items-center group/item">
+                                                    <div class="flex items-center gap-2">
+                                                        <div class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+                                                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-tight truncate max-w-[120px]">${cat}</span>
+                                                    </div>
+                                                    <span class="text-[11px] font-black text-slate-900 font-mono">${amt.toFixed(2)}</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <button onclick="window.printBatchPDFReport('${b.id}')" class="bg-indigo-600 text-white hover:bg-indigo-700 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl shadow-indigo-100">
+                                                <i data-lucide="printer" class="w-3.5 h-3.5"></i> PDF Report
+                                            </button>
+                                            <button onclick="window.exportBatchExcel('${b.id}', true)" class="bg-slate-50 border border-slate-200 text-slate-600 hover:bg-white hover:border-indigo-600 hover:text-indigo-600 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2">
+                                                <i data-lucide="download-cloud" class="w-3.5 h-3.5"></i> Excel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                } else {
+                    const groups = {};
+                    sortedBatches.forEach(b => {
+                        const d = new Date(b.receivedDate);
+                        const monthKey = isNaN(d.getTime()) ? "Other Batches" : d.toLocaleString('default', { month: 'long', year: 'numeric' });
+                        if (!groups[monthKey]) groups[monthKey] = { count: 0, total: 0 };
+                        groups[monthKey].count++;
+                        groups[monthKey].total += b.total;
+                    });
+
+                    const sortedMonths = Object.keys(groups).sort((a, b) => {
+                        if (a === "Other Batches") return 1;
+                        if (b === "Other Batches") return -1;
+                        return new Date(b) - new Date(a);
+                    });
+
+                    container.innerHTML = `
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                            ${sortedMonths.map(month => `
+                                <button onclick="window.currentArchiveMonth = '${month}'; window.loadProcessedBatches();" 
+                                    class="group flex flex-col items-center p-10 bg-white border border-slate-200/60 rounded-[3rem] hover:border-indigo-500 hover:shadow-2xl transition-all relative overflow-hidden">
+                                    <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-50/30 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500"></div>
+                                    <div class="p-6 bg-indigo-50 rounded-[2rem] mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-all text-indigo-600 shadow-inner">
+                                        <i data-lucide="folder" class="w-10 h-10"></i>
+                                    </div>
+                                    <p class="text-sm font-black text-slate-900 uppercase tracking-tight mb-1">${month}</p>
+                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">${groups[month].count} Batches</p>
+                                    <div class="text-xs font-bold text-indigo-600 bg-indigo-50 px-4 py-1.5 rounded-full">${groups[month].total.toFixed(0)} AED Total</div>
+                                </button>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                lucide.createIcons();
+            };
+
+            window.receiveBatchCash = async (batchId, amount) => {
+                if (!currentUser) return;
+                if (!confirm(`Mark this batch (${amount.toFixed(2)} AED) as received and complete the workflow?\n\nNote: No historical data will be lost, this simply archives the batch.`)) return;
+
+                try {
+                    window.showStatus("Archiving batch workflow...", false);
+
+                    const batchTxs = txs.filter(t => t.batchId === batchId);
+                    if (batchTxs.length === 0) {
+                        console.error("Batch Archive Error: No transactions found for ID", batchId, "All Txs:", txs);
+                        window.showStatus("Error: No transactions found for this batch ID.", true);
+                        return;
+                    }
+
+                    const updatePromises = batchTxs.map(t => {
+                        const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
+                        return updateDoc(ref, {
+                            batch_id: 'received',
+                            receivedBatchId: batchId,
+                            receivedDate: window.getLocalDate()
+                        });
+                    });
+                    await Promise.all(updatePromises);
+
+                    window.showStatus(`Successfully Archived! ✅`);
+                    // Force immediate local update in case snapshot is slow
+                    batchTxs.forEach(t => t.batchId = 'received');
+                    window.renderAll();
+                } catch (err) {
+                    window.showStatus("Error: " + err.message, true);
+                }
+            };
+
             window.selectedLegacyIds = new Set();
             window.openLegacyArchive = () => {
                 window.selectedLegacyIds.clear();
@@ -4651,10 +5152,20 @@
                 });
             };
 
-            window.exportBatchExcel = async (batchId) => {
-                if (!window.globalBatchMap || !window.globalBatchMap[batchId]) return;
+            window.exportBatchExcel = async (batchId, isProcessed = false) => {
+                let batch;
+                if (isProcessed) {
+                    const batchTxs = txs.filter(t => t.batchId === 'received' && t.receivedBatchId === batchId);
+                    if (batchTxs.length === 0) {
+                        window.showStatus("Error: Batch data not found.", true);
+                        return;
+                    }
+                    batch = { txs: batchTxs };
+                } else {
+                    if (!window.globalBatchMap || !window.globalBatchMap[batchId]) return;
+                    batch = window.globalBatchMap[batchId];
+                }
 
-                const batch = window.globalBatchMap[batchId];
                 if (!batch.txs || batch.txs.length === 0) return;
 
                 const catGroups = {};
@@ -4709,13 +5220,13 @@
                         return da - db;
                     });
                     const isNoVat = noVatCats.includes(cat.toLowerCase());
-                    const lastColIndex = isNoVat ? 5 : 7; // 1-based column count
+                    const lastColIndex = isNoVat ? 6 : 8; // 1-based column count
 
                     let safeSheetName = cat.replace(/[\\/\*\?:\[\]]/g, '').substring(0, 31);
                     const ws = wb.addWorksheet(safeSheetName);
 
                     // Auto-fit column widths based on content
-                    const colWidths = isNoVat ? [6, 12, 10, 12, 10] : [6, 12, 10, 12, 10, 8, 10];
+                    const colWidths = isNoVat ? [6, 12, 10, 12, 10, 30] : [6, 12, 10, 12, 10, 8, 10, 30];
                     // Measure description max length
                     const maxDesc = txsList.reduce((m, t) => Math.max(m, (t.desc || '').length), 30);
                     const descWidth = Math.min(Math.max(maxDesc + 2, 35), 65);
@@ -4727,7 +5238,8 @@
                             { width: 13 },        // B: Date
                             { width: descWidth }, // C: Description
                             { width: billWidth }, // D: Bill number
-                            { width: 12 }         // E: Total
+                            { width: 12 },        // E: Total
+                            { width: 30 }         // F: Invoice File
                         ];
                     } else {
                         ws.columns = [
@@ -4737,7 +5249,8 @@
                             { width: billWidth }, // D: Bill number
                             { width: 12 },        // E: Amount
                             { width: 10 },        // F: Vat
-                            { width: 12 }         // G: Total
+                            { width: 12 },        // G: Total
+                            { width: 30 }         // H: Invoice File
                         ];
                     }
 
@@ -4753,8 +5266,8 @@
                         const imgId = wb.addImage({ base64: logoBase64, extension: logoExtension });
                         // Use known column widths to calculate true center
                         const knownWidths = isNoVat
-                            ? [7, 13, descWidth, billWidth, 12]
-                            : [7, 13, descWidth, billWidth, 12, 10, 12];
+                            ? [7, 13, descWidth, billWidth, 12, 30]
+                            : [7, 13, descWidth, billWidth, 12, 10, 12, 30];
                         const totalCharW = knownWidths.reduce((s, w) => s + w, 0);
                         const logoCharW = 110 / 7.5; // 110px logo ÷ ~7.5px per char unit
                         const logoStartCh = (totalCharW - logoCharW) / 2 + 20.16; // +20.16 chars ≈ +4cm shift right
@@ -4822,9 +5335,9 @@
 
                     let headers;
                     if (isNoVat) {
-                        headers = ['Sl No', 'Date', 'Description of bill', 'Bill number', 'Total'];
+                        headers = ['Sl No', 'Date', 'Description of bill', 'Bill number', 'Total', 'Invoice File'];
                     } else {
-                        headers = ['Sl No', 'Date', 'Description of bill', 'Bill number', 'Amount', 'Vat', 'Total'];
+                        headers = ['Sl No', 'Date', 'Description of bill', 'Bill number', 'Amount', 'Vat', 'Total', 'Invoice File'];
                     }
                     const hdrRow = ws.addRow(headers);
                     hdrRow.height = 25;
@@ -4860,9 +5373,16 @@
                         const amount = parseFloat((total - vat).toFixed(2));
                         const rowNum = dataStartRow + i;
 
+                        let invoiceFile = '';
+                        const urls = t.invoiceUrl || t.invoice_url;
+                        if (urls) {
+                            const urlArray = Array.isArray(urls) ? urls : [urls];
+                            if (urlArray.length > 0) invoiceFile = urlArray.join(', ');
+                        }
+
                         let rowData;
                         if (isNoVat) {
-                            rowData = [i + 1, dateFormatted, desc, billNo, total];
+                            rowData = [i + 1, dateFormatted, desc, billNo, total, invoiceFile];
                         } else {
                             rowData = [
                                 i + 1,
@@ -4871,7 +5391,8 @@
                                 billNo,
                                 { formula: `G${rowNum}-F${rowNum}`, result: amount },  // Amount = Total - VAT
                                 { formula: `G${rowNum}*4.762%`, result: vat },           // VAT = Total * 4.762%
-                                total
+                                total,
+                                invoiceFile
                             ];
                         }
                         const dataRow = ws.addRow(rowData);
@@ -4904,6 +5425,10 @@
                                 cell.font = { size: 9, name: 'Arial' };
                                 cell.alignment = { horizontal: 'center', vertical: 'middle' };
                                 cell.numFmt = '#,##0.00';
+                            } else if (colNumber === lastColIndex) {
+                                // Invoice File: left, small, grey
+                                cell.font = { size: 8, name: 'Arial Unicode MS', color: { argb: 'FF555555' } };
+                                cell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
                             } else {
                                 // Total (or noVat Total): Bold, Comic Sans MS, centered
                                 cell.font = { bold: true, size: 9, name: 'Comic Sans MS' };
@@ -4951,6 +5476,8 @@
                         } else if (!isNoVat && c === 7) {
                             cell.value = { formula: `SUM(G${dataStartRow}:G${dataEndRow})`, result: txsList.reduce((s, t) => s + parseFloat(t.amount || 0), 0) };
                             cell.numFmt = '#,##0.00';
+                        } else if (c === lastColIndex) {
+                            cell.value = '';
                         }
                     }
 
@@ -5238,31 +5765,7 @@
                 }
             };
 
-            window.receiveBatchCash = async (batchId, amount) => {
-                if (!currentUser) return;
-                if (!confirm(`Mark ${amount.toFixed(2)} AED as received from Accounts for this batch?`)) return;
 
-                try {
-                    window.showStatus("Receiving Funds...", true);
-                    const data = {
-                        type: 'receive',
-                        amount: amount,
-                        person: 'Accounts Dept',
-                        desc_text: 'Reimbursement for ' + batchId,
-                        sub_date: window.getLocalDate(),
-                        timestamp: new Date().toISOString(),
-                        batch_id: batchId,
-                        paid_from_box: -amount,
-                        status: 'Active',
-                        user_id: currentUser.uid,
-                        is_deducted_from_advance: false
-                    };
-                    await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), data);
-                    window.showStatus("Funds Received!");
-                } catch (err) {
-                    window.showStatus("Error: " + err.message, true);
-                }
-            };
 
             window.voidTransaction = async (id) => {
                 if (!currentUser) return;
@@ -6191,7 +6694,9 @@
                     repaidAmount: parseFloat(dbTx.repaid_amount || 0),
                     invoiceNo: dbTx.invoice_no || '',
                     invoiceDate: dbTx.invoice_date || '',
-                    batchId: dbTx.batch_id || null,
+                    batchId: dbTx.batch_id || dbTx.batchId || null,
+                    receivedBatchId: dbTx.receivedBatchId || dbTx.received_batch_id || null,
+                    receivedDate: dbTx.receivedDate || dbTx.received_date || null,
                     voidReason: dbTx.void_reason || '',
                     editReason: dbTx.edit_reason || '',
                     invoiceUrl: dbTx.invoice_url || '',
@@ -6528,26 +7033,7 @@
                 if (!t) return;
 
                 // Use the same Deep Discovery logic as the printer
-                const getAnyUrl = (tx) => {
-                    const candidates = new Set();
-                    const search = (val) => {
-                        if (!val) return;
-                        if (typeof val === 'string') {
-                            if (val.startsWith('local-') || val.startsWith('data:') || val.startsWith('http')) candidates.add(val);
-                        } else if (val instanceof Blob) {
-                            candidates.add(val);
-                        } else if (Array.isArray(val)) {
-                            val.forEach(search);
-                        } else if (typeof val === 'object') {
-                            Object.values(val).forEach(search);
-                        }
-                    };
-                    search(tx.invoiceUrl); search(tx.invoice_url);
-                    if (candidates.size === 0) search(tx);
-                    return Array.from(candidates);
-                };
-
-                const urls = getAnyUrl(t);
+                const urls = await window.getAnyUrl(t);
                 if (urls.length === 0) {
                     window.showStatus("No invoice attached", true);
                     return;
@@ -6819,8 +7305,70 @@
                         if (granted) console.log("Storage persistence secured.");
                     });
                 }
+                
+                // FINAL VERSION CONFIRMATION
+                console.log("PettyCashPro v5.5 Build-06-May-22:50 LOADED");
+                window.showStatus("System Update v5.5 Applied Successfully ✅", false);
             };
         }
+    </script>
+    <!-- Processed Batches Modal (Full Screen) -->
+    <div id="processed-batches-modal" class="fixed inset-0 bg-white z-[9999] hidden flex-col animate-in slide-in-from-bottom-12 duration-500">
+        <div class="w-full flex flex-col h-full overflow-hidden">
+            <div class="p-10 border-b border-slate-100 flex justify-between items-center bg-white">
+                <div>
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-4">
+                        <div class="bg-indigo-600 text-white p-3 rounded-2xl shadow-xl">
+                            <i data-lucide="archive" class="w-8 h-8"></i>
+                        </div>
+                        Processed Batches Archive
+                    </h2>
+                    <p class="text-slate-400 font-bold text-xs uppercase tracking-widest mt-2 ml-16">Historical financial records and reports</p>
+                </div>
+                <button onclick="window.closeProcessedModal()" class="group flex items-center gap-3 px-8 py-4 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-2xl font-black text-sm uppercase tracking-widest transition-all">
+                    <i data-lucide="x" class="w-5 h-5 group-hover:rotate-90 transition-transform"></i> Close Archive
+                </button>
+            </div>
+            
+            <div id="processed-modal-content" class="flex-1 overflow-y-auto p-12 bg-slate-50/30">
+                <div class="flex items-center justify-center h-full">
+                    <p class="text-slate-400 text-sm font-bold animate-pulse"><i data-lucide="loader-2" class="w-4 h-4 inline animate-spin mr-2"></i> Accessing Archives...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.openProcessedModal = () => {
+            const m = document.getElementById('processed-batches-modal');
+            if(m) {
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+                window.loadProcessedBatches();
+            }
+        };
+
+        window.closeProcessedModal = () => {
+            const m = document.getElementById('processed-batches-modal');
+            if(m) {
+                m.classList.add('hidden');
+                m.classList.remove('flex');
+            }
+        };
+
+        window.loadOlderTransactions = () => {
+            window.ledgerCurrentPage = (window.ledgerCurrentPage || 1) + 1;
+            window.renderAll();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.prevLedgerPage = () => {
+            if (window.ledgerCurrentPage > 1) {
+                window.ledgerCurrentPage--;
+                window.renderAll();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
     </script>
 </body>
 
