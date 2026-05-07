@@ -4942,18 +4942,29 @@
                     return;
                 }
 
-                // Resolve local ID to actual data for the preview window
+                window.showStatus("Preparing high-res preview...", false);
+
+                // Helper to convert blob to data url if needed for the new window
+                const toDataUrl = (blob) => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+
+                // Resolve local ID or handle Blob
                 if (typeof src === 'string' && src.startsWith('local-')) {
-                    window.showStatus("Resolving local image...", false);
                     const data = await window.getPhotoLocal(src);
                     if (data) {
-                        if (data instanceof Blob) src = URL.createObjectURL(data);
+                        if (data instanceof Blob) src = await toDataUrl(data);
                         else if (typeof data === 'string' && !data.startsWith('data:')) src = `data:image/jpeg;base64,${data}`;
                         else src = data;
                     } else {
                         window.showStatus("Local image file missing!", true);
                         return;
                     }
+                } else if (src instanceof Blob) {
+                    src = await toDataUrl(src);
                 }
 
                 const win = window.open('', '_blank');
@@ -4963,41 +4974,117 @@
                         <title>Invoice View - PettyCash Pro</title>
                         <style>
                             @page { size: A4 portrait; margin: 0; }
-                            body { margin: 0; background: #0f172a; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; font-family: 'Segoe UI', system-ui, sans-serif; }
-                            .header { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); padding: 12px 24px; border-radius: 16px; color: white; margin-bottom: 32px; font-weight: 800; position: sticky; top: 20px; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 12px; }
-                            .invoice-container { max-width: 900px; width: 100%; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-                            img { max-width: 100%; display: block; border-radius: 8px; margin: 0 auto; }
-                            .actions { position: fixed; bottom: 30px; display: flex; gap: 12px; }
-                            button { padding: 14px 32px; border-radius: 14px; border: none; color: white; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-                            .btn-print { background: #4f46e5; }
-                            .btn-print:hover { background: #4338ca; transform: translateY(-2px); }
+                            * { box-sizing: border-box; }
+                            body { 
+                                margin: 0; 
+                                background: #0f172a; 
+                                display: flex; 
+                                flex-direction: column; 
+                                align-items: center; 
+                                padding: 40px 20px; 
+                                font-family: 'Segoe UI', system-ui, sans-serif; 
+                                min-height: 100vh;
+                            }
+                            .header { 
+                                background: rgba(30, 41, 59, 0.9); 
+                                backdrop-filter: blur(12px); 
+                                padding: 14px 28px; 
+                                border-radius: 20px; 
+                                color: white; 
+                                margin-bottom: 32px; 
+                                font-weight: 800; 
+                                position: sticky; 
+                                top: 20px; 
+                                z-index: 100; 
+                                box-shadow: 0 15px 35px rgba(0,0,0,0.4); 
+                                border: 1px solid rgba(255,255,255,0.1); 
+                                display: flex; 
+                                align-items: center; 
+                                gap: 12px;
+                                text-transform: uppercase;
+                                letter-spacing: 0.1em;
+                                font-size: 13px;
+                            }
+                            .invoice-container { 
+                                max-width: 850px; 
+                                width: 100%; 
+                                background: white; 
+                                padding: 0; 
+                                border-radius: 16px; 
+                                box-shadow: 0 30px 60px rgba(0,0,0,0.6); 
+                                overflow: hidden;
+                                display: flex;
+                                justify-content: center;
+                            }
+                            img { 
+                                width: 100%; 
+                                height: auto; 
+                                display: block; 
+                                object-fit: contain;
+                            }
+                            .actions { 
+                                position: fixed; 
+                                bottom: 30px; 
+                                display: flex; 
+                                gap: 16px; 
+                                z-index: 1000;
+                            }
+                            button { 
+                                padding: 16px 36px; 
+                                border-radius: 18px; 
+                                border: none; 
+                                color: white; 
+                                font-weight: 800; 
+                                font-size: 14px; 
+                                cursor: pointer; 
+                                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+                                box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
+                            }
+                            .btn-print { background: linear-gradient(135deg, #4f46e5, #6366f1); }
+                            .btn-print:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(79, 70, 229, 0.4); filter: brightness(1.1); }
                             .btn-close { background: #334155; }
-                            .btn-close:hover { background: #1e293b; }
+                            .btn-close:hover { background: #1e293b; transform: translateY(-3px); }
+                            
                             @media print {
-                                body { background: white; padding: 0; }
+                                body { background: white; padding: 0; display: block; }
                                 .header, .actions { display: none !important; }
-                                .invoice-container { box-shadow: none; border: none; padding: 0; max-width: 100%; width: 100%; }
-                                img { width: 100%; max-height: 100vh; object-fit: contain; }
+                                .invoice-container { 
+                                    box-shadow: none; 
+                                    border: none; 
+                                    padding: 0; 
+                                    max-width: 100%; 
+                                    width: 100%; 
+                                    border-radius: 0;
+                                }
+                                img { 
+                                    width: 100%; 
+                                    max-height: 297mm; /* Full A4 height */
+                                    object-fit: contain; 
+                                }
                             }
                         </style>
                     </head>
                     <body>
                         <div class="header">
-                            <div style="width: 8px; height: 8px; background: #4f46e5; border-radius: 50%;"></div>
+                            <div style="width: 10px; height: 10px; background: #4f46e5; border-radius: 50%; box-shadow: 0 0 10px #4f46e5;"></div>
                             REIMBURSEMENT DOCUMENT - PAGE ${index + 1}
                         </div>
                         <div class="invoice-container">
-                            <img src="${src}">
+                            <img src="${src}" onerror="this.parentElement.innerHTML='<div style=\'padding:100px;text-align:center;color:#64748b;font-weight:bold;\'>FAILED TO LOAD IMAGE DATA</div>'">
                         </div>
                         <div class="actions">
-                            <button class="btn-print" onclick="window.print()">🖨 PRINT INVOICE</button>
+                            <button class="btn-print" onclick="window.print()">🖨 PRINT INVOICE (A4)</button>
                             <button class="btn-close" onclick="window.close()">CLOSE VIEWER</button>
                         </div>
                     </body>
                     </html>
                 `);
                 win.document.close();
+                window.showStatus("Preview Ready");
             };
+
 
             window.removeEditScanPage = (index) => {
                 currentEditScanData.splice(index, 1);
@@ -5579,7 +5666,7 @@
                 catMap[cat] = [];
                 
                 folder.txs.forEach(t => {
-                    const urls = window.getAnyUrlSync(t);
+                    const urls = window.getAnyUrl(t);
                     if (urls.length > 0) {
                         catMap[cat].push({ tx: t, urls });
                     }
@@ -5595,22 +5682,6 @@
                 window.printCategoryInvoices('staged_cat', cat);
             };
 
-            window.getAnyUrlSync = (t) => {
-                const candidates = [];
-                const search = (val) => {
-                    if (!val) return;
-                    if (typeof val === 'string') {
-                        if (val.startsWith('local-') || val.startsWith('data:') || val.startsWith('http')) candidates.push(val);
-                    } else if (Array.isArray(val)) {
-                        val.forEach(search);
-                    } else if (typeof val === 'object') {
-                        Object.values(val).forEach(search);
-                    }
-                };
-                search(t.invoiceUrl); search(t.invoice_url);
-                if (candidates.length === 0) search(t);
-                return candidates;
-            };
 
             window.printBatchInvoices = async (batchId, isProcessed = false) => {
                 let batchData;
@@ -5628,7 +5699,7 @@
                 if (!batchData || !batchData.txs) return;
 
                 // Helper to find ANY image URL in a transaction (deep search)
-                const getAnyUrl = window.getAnyUrlSync;
+                const getAnyUrl = window.getAnyUrl;
 
                 // Group invoices by category
                 const catMap = {};
@@ -5696,31 +5767,29 @@
                 document.body.appendChild(modal);
             };
 
-            window.printCategoryInvoices = async (batchId, category) => {
-                const batchData = window.globalBatchMap[batchId];
-                if (!batchData || !batchData.txs) {
-                    console.error("No batch data found for", batchId);
-                    return;
-                }
-
-                const getAnyUrl = (t) => {
-                    const candidates = new Set();
-                    const search = (val) => {
-                        if (!val) return;
-                        if (typeof val === 'string') {
-                            if (val.startsWith('local-') || val.startsWith('data:') || val.startsWith('http')) candidates.add(val);
-                        } else if (val instanceof Blob) {
-                            candidates.add(val);
-                        } else if (Array.isArray(val)) {
-                            val.forEach(search);
-                        } else if (typeof val === 'object') {
+            window.getAnyUrl = (t) => {
+                const candidates = new Set();
+                const search = (val) => {
+                    if (!val) return;
+                    if (typeof val === 'string') {
+                        if (val.startsWith('local-') || val.startsWith('data:') || val.startsWith('http')) candidates.add(val);
+                    } else if (val instanceof Blob) {
+                        candidates.add(val);
+                    } else if (Array.isArray(val)) {
+                        val.forEach(search);
+                    } else if (typeof val === 'object') {
+                        // Avoid deep recursion into circular structures if any
+                        try {
                             Object.values(val).forEach(search);
-                        }
-                    };
-                    search(t.invoiceUrl); search(t.invoice_url);
-                    if (candidates.size === 0) search(t);
-                    return Array.from(candidates);
+                        } catch(e){}
+                    }
                 };
+                search(t.invoiceUrl); search(t.invoice_url);
+                if (candidates.size === 0) search(t);
+                return Array.from(candidates);
+            };
+
+            window.printCategoryInvoices = async (batchId, category) => {
 
                 // Use the cached catMap if available for this category
                 const catData = window.lastCatMap ? window.lastCatMap[category] : null;
@@ -5813,24 +5882,43 @@
                     #invoice-print-overlay { display: none; }
                     @media print {
                         @page { size: A4 portrait; margin: 0; }
+                        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
                         body > *:not(#invoice-print-overlay) { display: none !important; }
-                        #invoice-print-overlay { display: block !important; margin: 0; padding: 0; background: white; }
+                        #invoice-print-overlay { 
+                            display: block !important; 
+                            margin: 0; 
+                            padding: 0; 
+                            background: white; 
+                            width: 100%;
+                        }
                         .inv-print-page {
                             width: 100%;
-                            height: 100vh;
-                            display: flex; align-items: center; justify-content: center;
-                            overflow: hidden; margin: 0; padding: 0;
+                            height: 100vh; /* Using vh to force page separation in browser */
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center;
+                            overflow: hidden; 
+                            margin: 0; 
+                            padding: 0;
                             page-break-inside: avoid;
+                            page-break-after: always;
                             background: white;
                         }
-                        .inv-print-break { page-break-after: always; }
+                        .inv-print-page:last-child {
+                            page-break-after: auto;
+                        }
                         .inv-print-page img {
-                            max-width: 100%; max-height: 100%;
-                            width: auto; height: auto;
-                            object-fit: contain; display: block;
+                            width: auto;
+                            height: auto;
+                            max-width: 100%; 
+                            max-height: 100%;
+                            object-fit: contain; 
+                            display: block;
+                            margin: 0 auto;
                         }
                     }
                 `;
+
                 document.head.appendChild(style);
 
                 const images = overlay.querySelectorAll('img');
@@ -7131,8 +7219,7 @@
                 const t = txs.find(x => x.id === txId);
                 if (!t) return;
 
-                // Use the same Deep Discovery logic as the printer
-                const urls = await window.getAnyUrl(t);
+                const urls = window.getAnyUrl(t);
                 if (urls.length === 0) {
                     window.showStatus("No invoice attached", true);
                     return;
@@ -7140,51 +7227,82 @@
 
                 window.showStatus(`Loading ${urls.length} Page(s)...`, false);
 
+                const toDataUrl = (blob) => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+
                 const imageSrcs = [];
                 for (const url of urls) {
                     let src = url;
                     if (typeof src === 'string' && src.startsWith('local-')) {
                         const localData = await window.getPhotoLocal(src);
                         if (localData) {
-                            if (localData instanceof Blob) src = URL.createObjectURL(localData);
+                            if (localData instanceof Blob) src = await toDataUrl(localData);
                             else if (typeof localData === 'string' && !localData.startsWith('data:')) src = `data:image/jpeg;base64,${localData}`;
                             else src = localData;
                         } else {
-                            src = null; // Mark as failed
+                            src = null; 
                         }
                     } else if (src instanceof Blob) {
-                        src = URL.createObjectURL(src);
+                        src = await toDataUrl(src);
                     }
                     if (src) imageSrcs.push(src);
                 }
 
                 if (imageSrcs.length === 0) {
-                    window.showStatus("Invoice image files are missing from storage!", true);
+                    window.showStatus("Invoice images missing from storage!", true);
                     return;
                 }
 
-                window.showStatus("Loaded");
                 const win = window.open('', '_blank');
-                const imagesHtml = imageSrcs.map(src => `<img src="${src}" alt="Invoice page" style="max-width:100%;margin-bottom:20px;box-shadow:0 10px 30px rgba(0,0,0,0.5);border-radius:8px;">`).join('');
+                const imagesHtml = imageSrcs.map((src, i) => `
+                    <div class="page-container">
+                        <div class="page-label">PAGE ${i+1} / ${imageSrcs.length}</div>
+                        <img src="${src}" onerror="this.parentElement.innerHTML='FAILED TO LOAD PAGE'">
+                    </div>
+                `).join('');
+
                 win.document.write(`
                     <html>
-                    <head><title>Invoice Preview - PettyCash Pro</title></head>
-                    <body style="margin:0;background:#0f172a;display:flex;flex-direction:column;align-items:center;padding:40px 20px;font-family:system-ui,-apple-system,sans-serif;">
-                        <div style="background:rgba(30,41,59,0.8);backdrop-filter:blur(10px);padding:12px 24px;border-radius:16px;color:white;margin-bottom:32px;font-weight:800;position:sticky;top:20px;z-index:100;box-shadow:0 10px 25px rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:12px;">
-                            <span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;"></span>
-                            ${imageSrcs.length} Page(s) Resolved
+                    <head>
+                        <title>Invoice View - PettyCash Pro</title>
+                        <style>
+                            @page { size: A4 portrait; margin: 0; }
+                            body { margin: 0; background: #0f172a; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; font-family: system-ui, sans-serif; }
+                            .header { background: rgba(30,41,59,0.9); backdrop-filter: blur(10px); padding: 12px 24px; border-radius: 16px; color: white; margin-bottom: 32px; font-weight: 800; position: sticky; top: 20px; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 12px; }
+                            .page-container { max-width: 850px; width: 100%; background: white; padding: 0; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); margin-bottom: 40px; overflow: hidden; position: relative; }
+                            .page-label { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: bold; z-index: 5; }
+                            img { width: 100%; display: block; object-fit: contain; }
+                            .actions { position: fixed; bottom: 30px; display: flex; gap: 12px; z-index: 1000; }
+                            button { padding: 14px 32px; border-radius: 14px; border: none; color: white; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+                            .btn-print { background: #4f46e5; }
+                            .btn-close { background: #334155; }
+                            @media print {
+                                body { background: white; padding: 0; display: block; }
+                                .header, .actions, .page-label { display: none !important; }
+                                .page-container { box-shadow: none; border: none; padding: 0; max-width: 100%; width: 100%; margin: 0; border-radius: 0; page-break-after: always; }
+                                img { width: 100%; max-height: 297mm; object-fit: contain; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
+                            RESOLVED INVOICE PREVIEW
                         </div>
-                        <div style="max-width:900px;width:100%;display:flex;flex-direction:column;align-items:center;">
-                            ${imagesHtml}
-                        </div>
-                        <div style="position:fixed;bottom:30px;display:flex;gap:12px;">
-                            <button onclick="window.print()" style="padding:14px 32px;border-radius:14px;border:none;background:#4f46e5;color:white;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 10px 20px rgba(79,70,229,0.3);transition:all 0.2s;">🖨 Print Invoice</button>
-                            <button onclick="window.close()" style="padding:14px 32px;border-radius:14px;border:none;background:#334155;color:white;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;">Close</button>
+                        ${imagesHtml}
+                        <div class="actions">
+                            <button class="btn-print" onclick="window.print()">🖨 PRINT DOCUMENT</button>
+                            <button class="btn-close" onclick="window.close()">CLOSE</button>
                         </div>
                     </body>
                     </html>
                 `);
                 win.document.close();
+                window.showStatus("Loaded");
             };
 
             // --- MAKER/CHECKER QUEUE LOGIC ---
