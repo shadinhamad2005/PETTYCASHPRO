@@ -3851,6 +3851,9 @@
                                         <button onclick="window.printBatchPDFReport('${b.id}')" class="w-full bg-slate-50 border-2 border-slate-200 text-slate-700 hover:bg-slate-600 hover:text-white hover:border-slate-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
                                             <i data-lucide="file-text" class="w-4 h-4"></i> PDF Report
                                         </button>
+                                        <button onclick="window.printBatchInvoices('${b.id}')" class="w-full bg-slate-50 border-2 border-slate-200 text-slate-500 hover:bg-slate-100 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+                                            <i data-lucide="printer" class="w-4 h-4"></i> Print Invoices
+                                        </button>
                                         <button onclick="window.receiveBatchCash('${b.id}', ${b.total})" class="w-full bg-white border-2 border-teal-200 text-teal-700 hover:bg-teal-600 hover:text-white hover:border-teal-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
                                             <i data-lucide="check-circle-2" class="w-4 h-4"></i> Workflow Completed
                                         </button>
