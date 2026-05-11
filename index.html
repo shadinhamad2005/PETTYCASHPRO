@@ -4040,7 +4040,7 @@
                                         <div class="flex items-center gap-2 shrink-0">
                                             ${f.txs.length > 0 && f.txs.every(tx => tx.audited) ? `
                                             <button onclick="event.stopPropagation(); window.reAuditConfirm('${escapeQuotes(f.cat)}')" class="bg-emerald-100 text-emerald-700 px-3 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-emerald-200 transition-all flex items-center gap-1.5 shadow-sm border border-emerald-200">
-                                                <i data-lucide="check-circle-2" class="w-3 h-3"></i> Audited
+                                                <i data-lucide="check-circle-2" class="w-3 h-3"></i> Audit Done
                                             </button>
                                             ` : `
                                             <button onclick="event.stopPropagation(); window.openMakerChecker('${escapeQuotes(f.cat)}')" class="bg-amber-500 text-white px-3 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-amber-600 transition-all flex items-center gap-1.5 shadow-sm border border-amber-500">
@@ -4591,7 +4591,7 @@
                 let html = `
                     <html>
                     <head>
-                        <title>Batch Report - ${batchId}</title>
+                        <title>PETTYCASH SUMMARY-${dd}-${mm}-${yyyy}</title>
                         <style>
                             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
                             @media print { .no-print { display: none; } }
@@ -5573,8 +5573,6 @@
 
                 if (!batch.txs || batch.txs.length === 0) return;
 
-                window.showProgressModal("Preparing Excel Workbook...", 20);
-
                 const catGroups = {};
                 batch.txs.forEach(t => {
                     const cat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized');
@@ -5582,14 +5580,77 @@
                     catGroups[cat].push(t);
                 });
 
+                window.lastExcelCatGroups = catGroups;
+                window.showExcelExportModal(batchId, catGroups);
+            };
+
+            window.showExcelExportModal = (batchId, catGroups) => {
+                const categories = Object.keys(catGroups).sort();
+                const existing = document.getElementById('excel-cat-export-modal');
+                if (existing) existing.remove();
+
+                const modal = document.createElement('div');
+                modal.id = 'excel-cat-export-modal';
+                modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,0.75);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px;';
+
+                const rows = categories.map(cat => {
+                    const count = catGroups[cat].length;
+                    const total = catGroups[cat].reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0).toFixed(2);
+                    return `
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#f0fdf4;border-radius:14px;margin-bottom:10px;border:1px solid #dcfce7;">
+                        <div>
+                            <div style="font-weight:800;color:#166534;font-size:13px;text-transform:uppercase;letter-spacing:0.03em;">${cat}</div>
+                            <div style="color:#15803d;font-size:11px;font-weight:600;margin-top:2px;">${count} Invoices • ${total} AED</div>
+                        </div>
+                        <button onclick="window.downloadCategoryExcel('${cat.replace(/'/g, "\\'")}')"
+                            style="background:#10b981;color:white;border:none;border-radius:10px;padding:9px 18px;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                            📊 Download Excel
+                        </button>
+                    </div>
+                `;
+                }).join('');
+
+                const inner = document.createElement('div');
+                inner.style.cssText = 'background:white;border-radius:24px;padding:32px;min-width:400px;max-width:520px;width:100%;box-shadow:0 25px 50px rgba(0,0,0,0.3);max-height:80vh;overflow-y:auto;';
+                inner.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <h2 style="font-size:18px;font-weight:900;color:#1e293b;margin:0;">Export Excel Sheets</h2>
+                        <button onclick="document.getElementById('excel-cat-export-modal').remove()"
+                            style="background:#f1f5f9;border:none;border-radius:10px;width:32px;height:32px;cursor:pointer;color:#64748b;font-size:16px;display:flex;align-items:center;justify-content:center;">✕</button>
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <p style="color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin:0;">Select a category to download its dedicated Excel report</p>
+                    </div>
+                    <div style="max-height:400px;overflow-y:auto;padding-right:4px;">${rows}</div>
+                `;
+
+                modal.appendChild(inner);
+                modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+                document.body.appendChild(modal);
+            };
+
+            window.downloadCategoryExcel = async (cat) => {
+                const catGroups = window.lastExcelCatGroups;
+                if (!catGroups || !catGroups[cat]) return;
+
+                const ExcelJS = window.ExcelJS;
+                if (!ExcelJS) {
+                    window.showStatus('ExcelJS library not loaded', true);
+                    return;
+                }
+
+                window.showStatus(`Generating Excel for ${cat}...`, true);
+                
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet(cat.substring(0, 31));
+
                 const today = new Date();
                 const dd = today.getDate().toString().padStart(2, '0');
                 const mm = (today.getMonth() + 1).toString().padStart(2, '0');
                 const yyyy = today.getFullYear();
                 const dateStr = `${dd}.${mm}.${yyyy}`;
-                const invPrefix = `B${dd}${mm}${yyyy}`;
-                const fileName = `Pettycash - ${dd}${mm}${yyyy}.xlsx`;
 
+                // Hardcoded heading map (from previous request)
                 const headingMap = {
                     "warehouses": "Site maintenece-warehouse",
                     "adnoc": "Petrol Chip Payment for EIC Cars",
@@ -5597,93 +5658,78 @@
                     "crv": "CRV- SHJ 87318",
                     "tucson": "Tucson- SHJ 57586",
                     "admin building": "Admin & Showroom -Services",
-                    "open yard": "site maintenece-Openyards"
+                    "open yard": "site maintenece-Openyards",
+                    "openyard": "site maintenece-Openyards"
                 };
-                // No-VAT categories: admin drainage, vehicles (Tucson, CRV, Pickup), adnoc, hilux
+
+                const getDisplayTitle = (c) => {
+                    const lc = c.toLowerCase().trim();
+                    if (headingMap[lc]) return headingMap[lc];
+                    // Title Case fallback
+                    return c.split(/[\s-]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+                };
+
+                const displayTitle = getDisplayTitle(cat);
+
+                // First letter of two words logic for Invoice Ref
+                const getPrefix = (c) => {
+                    const words = c.trim().split(/[\s-]+/).filter(w => w.length > 0);
+                    if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+                    if (words.length === 1) return words[0][0].toUpperCase();
+                    return 'B';
+                };
+                const catPrefix = getPrefix(cat);
+                const invRefNo = `${catPrefix}${dd}${mm}${yyyy}`;
+
                 const noVatCats = ['adnoc', 'hilux', 'crv', 'tucson', 'pickup', 'vehicles', 'admin drainage'];
+                const isNoVat = noVatCats.includes(cat.toLowerCase());
+                const txsList = catGroups[cat].slice().sort((a, b) => {
+                    const da = new Date(a.invoiceDate || a.subDate || 0);
+                    const db = new Date(b.invoiceDate || b.subDate || 0);
+                    return da - db;
+                });
 
-                // --- Logo from embedded JS constant (works with file:// protocol) ---
-                const logoBase64 = window.EIC_LOGO_B64 || null;
-                const logoExtension = 'jpeg';
+                // Auto-fit column widths
+                const maxDesc = txsList.reduce((m, t) => Math.max(m, (t.desc || '').length), 30);
+                const descWidth = Math.min(Math.max(maxDesc + 2, 35), 65);
+                const maxBill = txsList.reduce((m, t) => Math.max(m, (t.invoiceNo || '').length), 8);
+                const billWidth = Math.max(maxBill + 2, 12);
 
-                const ExcelJSWorkbook = window.ExcelJS ? window.ExcelJS.Workbook : null;
-                if (!ExcelJSWorkbook) {
-                    window.showStatus('ExcelJS not loaded, using fallback', true);
-                    return;
+                const knownWidths = isNoVat ? [7, 13, descWidth, billWidth, 12] : [7, 13, descWidth, billWidth, 12, 10, 12];
+                if (isNoVat) {
+                    worksheet.columns = [
+                        { width: 7 }, { width: 13 }, { width: descWidth }, { width: billWidth }, { width: 12 }
+                    ];
+                } else {
+                    worksheet.columns = [
+                        { width: 7 }, { width: 13 }, { width: descWidth }, { width: billWidth }, { width: 12 }, { width: 10 }, { width: 12 }
+                    ];
                 }
 
-                const wb = new ExcelJSWorkbook();
-
-                // Helper: apply thin border to a cell
+                const lastColIndex = isNoVat ? 5 : 7;
                 const thinBorder = {
                     top: { style: 'thin' }, bottom: { style: 'thin' },
                     left: { style: 'thin' }, right: { style: 'thin' }
                 };
 
-                const catKeys = Object.keys(catGroups);
-                const totalCats = catKeys.length;
-                let processedCats = 0;
+                // ROW 1: Logo
+                const logoRow = worksheet.addRow([]);
+                logoRow.height = 75;
+                worksheet.mergeCells(1, 1, 1, lastColIndex);
+                const logoCell = worksheet.getCell(1, 1);
+                logoCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-                for (const cat of catKeys) {
-                    processedCats++;
-                    const progress = 20 + Math.round((processedCats / totalCats) * 70);
-                    window.showProgressModal(`Generating Sheet: ${cat}...`, progress);
-                    const txsList = catGroups[cat].slice().sort((a, b) => {
-                        const da = new Date(a.invoiceDate || 0);
-                        const db = new Date(b.invoiceDate || 0);
-                        return da - db;
-                    });
-                    const isNoVat = noVatCats.includes(cat.toLowerCase());
-                    const lastColIndex = isNoVat ? 5 : 7; // 1-based column count
-
-                    let safeSheetName = cat.replace(/[\\/\*\?:\[\]]/g, '').substring(0, 31);
-                    const ws = wb.addWorksheet(safeSheetName);
-
-                    // Auto-fit column widths based on content
-                    const colWidths = isNoVat ? [6, 12, 10, 12, 10] : [6, 12, 10, 12, 10, 8, 10];
-                    // Measure description max length
-                    const maxDesc = txsList.reduce((m, t) => Math.max(m, (t.desc || '').length), 30);
-                    const descWidth = Math.min(Math.max(maxDesc + 2, 35), 65);
-                    const maxBill = txsList.reduce((m, t) => Math.max(m, (t.invoiceNo || '').length), 8);
-                    const billWidth = Math.max(maxBill + 2, 12);
-                    if (isNoVat) {
-                        ws.columns = [
-                            { width: 7 },         // A: Sl No
-                            { width: 13 },        // B: Date
-                            { width: descWidth }, // C: Description
-                            { width: billWidth }, // D: Bill number
-                            { width: 12 }         // E: Total
-                        ];
-                    } else {
-                        ws.columns = [
-                            { width: 7 },         // A: Sl No
-                            { width: 13 },        // B: Date
-                            { width: descWidth }, // C: Description
-                            { width: billWidth }, // D: Bill number
-                            { width: 12 },        // E: Amount
-                            { width: 10 },        // F: Vat
-                            { width: 12 }         // G: Total
-                        ];
-                    }
-
-                    // --- ROW 1: Logo row (tall, matching template) ---
-                    const logoRow = ws.addRow([]);
-                    logoRow.height = 75;
-                    // Merge entire logo row
-                    ws.mergeCells(1, 1, 1, lastColIndex);
-                    const logoCell = ws.getCell(1, 1);
-                    logoCell.alignment = { horizontal: 'center', vertical: 'middle' };
-
-                    if (logoBase64) {
-                        const imgId = wb.addImage({ base64: logoBase64, extension: logoExtension });
-                        // Use known column widths to calculate true center
-                        const knownWidths = isNoVat
-                            ? [7, 13, descWidth, billWidth, 12, 30]
-                            : [7, 13, descWidth, billWidth, 12, 10, 12, 30];
+                const logoB64 = window.EIC_LOGO_B64;
+                if (logoB64) {
+                    try {
+                        const imgId = workbook.addImage({ 
+                            base64: logoB64.startsWith('data:') ? logoB64.split(',')[1] : logoB64, 
+                            extension: 'jpeg' 
+                        });
                         const totalCharW = knownWidths.reduce((s, w) => s + w, 0);
-                        const logoCharW = 110 / 7.5; // 110px logo ÷ ~7.5px per char unit
-                        const logoStartCh = (totalCharW - logoCharW) / 2 + 20.16; // +20.16 chars ≈ +4cm shift right
-                        // Walk columns to find which col+fraction logoStartCh falls at
+                        const logoCharW = 110 / 7.5;
+                        const logoStartCh = (totalCharW - logoCharW) / 2 + 20.16;
+                        
                         let cumW = 0, logoTlCol = 0;
                         for (let ci = 0; ci < knownWidths.length; ci++) {
                             if (cumW + knownWidths[ci] >= logoStartCh) {
@@ -5692,245 +5738,180 @@
                             }
                             cumW += knownWidths[ci];
                         }
-                        ws.addImage(imgId, {
+
+                        worksheet.addImage(imgId, {
                             tl: { col: logoTlCol, row: 0.08 },
                             ext: { width: 110, height: 58 },
                             editAs: 'oneCell'
                         });
-                    } else {
-                        logoCell.value = 'Emirates For Ind. Cities Co.';
+                    } catch (e) {
+                        console.error("Logo error:", e);
+                        logoCell.value = "Emirates For Ind. Cities Co.";
                         logoCell.font = { bold: true, size: 14, color: { argb: 'FFC00000' }, name: 'Arial' };
                     }
-
-                    // --- ROW 2: Category Title (category name only) ---
-                    const titleRow = ws.addRow([]);
-                    titleRow.height = 25;
-                    ws.mergeCells(2, 1, 2, lastColIndex);
-                    const titleCell = ws.getCell(2, 1);
-                    const lowerCat = cat.toLowerCase();
-                    const displayCat = headingMap[lowerCat] || cat.split(' ').map(w => w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : '').join(' ');
-                    titleCell.value = displayCat;
-                    titleCell.font = { bold: true, size: 13, name: 'Comic Sans MS' };
-                    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-
-                    // lastColIndex already defined above
-                    const refRow = ws.addRow([]);
-                    refRow.height = 25;
-                    if (isNoVat) {
-                        ws.mergeCells(3, 1, 3, 3);
-                        ws.mergeCells(3, 4, 3, lastColIndex);
-                    } else {
-                        ws.mergeCells(3, 1, 3, 4);
-                        ws.mergeCells(3, 5, 3, lastColIndex);
-                    }
-                    const dateCell = ws.getCell(3, 1);
-                    dateCell.value = dateStr;
-                    dateCell.font = { bold: true, size: 12, name: 'Comic Sans MS' };
-                    dateCell.alignment = { horizontal: 'left', vertical: 'middle' };
-
-                    const invRefCell = ws.getCell(3, isNoVat ? 4 : 5);
-                    const catWords = cat.split(' ').filter(w => w);
-                    let catInitials = '';
-                    if (catWords.length >= 2) {
-                        catInitials = catWords[0].charAt(0).toUpperCase() + catWords[1].charAt(0).toUpperCase();
-                    } else if (catWords.length === 1) {
-                        catInitials = catWords[0].charAt(0).toUpperCase();
-                    }
-                    invRefCell.value = `Invoice Ref No - ${catInitials}${dd}${mm}${yyyy}`;
-                    invRefCell.font = { bold: true, size: 9, color: { argb: 'FFFF0000' }, name: 'Comic Sans MS' };
-                    invRefCell.alignment = { horizontal: 'right', vertical: 'middle' };
-
-                    // --- ROW 4: Column Headers (Bold, Comic Sans MS) ---
-                    const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
-                    const headerFont = { bold: true, size: 10, name: 'Comic Sans MS' };
-                    const centerAlign = { horizontal: 'center', vertical: 'middle', wrapText: false };
-
-                    let headers;
-                    if (isNoVat) {
-                        headers = ['Sl No', 'Date', 'Description of bill', 'Bill number', 'Total'];
-                    } else {
-                        headers = ['Sl No', 'Date', 'Description of bill', 'Bill number', 'Amount', 'Vat', 'Total'];
-                    }
-                    const hdrRow = ws.addRow(headers);
-                    hdrRow.height = 25;
-                    hdrRow.eachCell((cell, colNumber) => {
-                        cell.fill = headerFill;
-                        cell.font = headerFont;
-                        cell.alignment = centerAlign;
-                        cell.border = thinBorder;
-                    });
-
-                    // --- DATA ROWS ---
-                    const dataStartRow = 5;
-                    txsList.forEach((t, i) => {
-                        const invDate = t.invoiceDate || t.subDate || '';
-                        let dateFormatted = '';
-                        if (invDate) {
-                            if (invDate.includes('-')) {
-                                const p = invDate.split('T')[0].split('-');
-                                if (p.length === 3) dateFormatted = `${p[2]}.${p[1]}.${p[0]}`;
-                            } else {
-                                dateFormatted = new Date(invDate).toLocaleDateString('en-GB').replace(/\//g, '.');
-                            }
-                        }
-                        const desc = t.desc || '';
-                        const billNo = t.invoiceNo || t.id.split('-').pop();
-                        const total = parseFloat(t.amount || 0);
-                        let vat = 0;
-                        if (t.taxAmount !== undefined) {
-                            vat = parseFloat(t.taxAmount || 0);
-                        } else if (t.tax_amount !== undefined) {
-                            vat = parseFloat(t.tax_amount || 0);
-                        } else {
-                            vat = parseFloat((total * 0.04762).toFixed(2));
-                        }
-                        const amount = parseFloat((total - vat).toFixed(2));
-                        const rowNum = dataStartRow + i;
-
-                        let rowData;
-                        if (isNoVat) {
-                            rowData = [i + 1, dateFormatted, desc, billNo, total];
-                        } else {
-                            const defaultVat = parseFloat((total * 0.04762).toFixed(2));
-                            const defaultAmt = parseFloat((total - defaultVat).toFixed(2));
-                            const isEditedVat = t.taxAmount && t.taxAmount > 0 && Math.abs(t.taxAmount - defaultVat) > 0.02;
-
-                            if (isEditedVat) {
-                                rowData = [
-                                    i + 1,
-                                    dateFormatted,
-                                    desc,
-                                    billNo,
-                                    amount,
-                                    vat,
-                                    total
-                                ];
-                            } else {
-                                rowData = [
-                                    i + 1,
-                                    dateFormatted,
-                                    desc,
-                                    billNo,
-                                    { formula: `G${rowNum}-F${rowNum}`, result: defaultAmt },
-                                    { formula: `G${rowNum}*0.04762`, result: defaultVat },
-                                    total
-                                ];
-                            }
-                        }
-                        const dataRow = ws.addRow(rowData);
-                        dataRow.height = 25;
-                        dataRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-                            cell.border = thinBorder;
-                            if (colNumber === 1) {
-                                // Sl No: centered, Arial
-                                cell.font = { size: 9, name: 'Arial' };
-                                cell.alignment = { horizontal: 'center', vertical: 'middle' };
-                            } else if (colNumber === 2) {
-                                // Date: Arial Unicode MS, centered
-                                cell.font = { size: 9, name: 'Arial Unicode MS' };
-                                cell.alignment = { horizontal: 'center', vertical: 'middle' };
-                            } else if (colNumber === 3) {
-                                // Description: Arial Unicode MS, black, left
-                                cell.font = { size: 9, name: 'Arial Unicode MS', color: { argb: 'FF000000' } };
-                                cell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: false };
-                            } else if (colNumber === 4) {
-                                // Bill number: Arial Unicode MS, centered
-                                cell.font = { size: 9, name: 'Arial Unicode MS' };
-                                cell.alignment = { horizontal: 'center', vertical: 'middle' };
-                            } else if (!isNoVat && colNumber === 5) {
-                                // Amount: Bold, Arial Unicode MS, centered
-                                cell.font = { bold: true, size: 9, name: 'Arial Unicode MS' };
-                                cell.alignment = { horizontal: 'center', vertical: 'middle' };
-                                cell.numFmt = '#,##0.00';
-                            } else if (!isNoVat && colNumber === 6) {
-                                // VAT: Arial, centered
-                                cell.font = { size: 9, name: 'Arial' };
-                                cell.alignment = { horizontal: 'center', vertical: 'middle' };
-                                cell.numFmt = '#,##0.00';
-                            } else {
-                                // Total (or noVat Total): Bold, Comic Sans MS, centered
-                                cell.font = { bold: true, size: 9, name: 'Comic Sans MS' };
-                                cell.alignment = { horizontal: 'center', vertical: 'middle' };
-                                cell.numFmt = '#,##0.00';
-                            }
-                        });
-                    });
-
-                    // --- TOTALS ROW (Bold, Arial Unicode MS) ---
-                    const dataEndRow = dataStartRow + txsList.length - 1;
-                    const totalRow = ws.addRow([]);
-                    totalRow.height = 25;
-
-                    // Set cells: blank A-C, TOTAL label D, SUM formulas E (and F,G if VAT)
-                    for (let c = 1; c <= lastColIndex; c++) {
-                        const cell = totalRow.getCell(c);
-                        cell.border = thinBorder;
-                        cell.font = { bold: true, size: 11, name: 'Arial Unicode MS' };
-                        cell.alignment = { horizontal: 'right', vertical: 'middle' };
-                        if (c < 4) {
-                            cell.value = '';
-                        } else if (c === 4) {
-                            cell.value = 'TOTAL';
-                            cell.alignment = { horizontal: 'right', vertical: 'middle' };
-                        } else if (isNoVat && c === 5) {
-                            cell.value = { formula: `SUM(E${dataStartRow}:E${dataEndRow})`, result: txsList.reduce((s, t) => s + parseFloat(t.amount || 0), 0) };
-                            cell.numFmt = '#,##0.00';
-                        } else if (!isNoVat && c === 5) {
-                            const sumAmt = txsList.reduce((s, t) => {
-                                const tot = parseFloat(t.amount || 0);
-                                const defaultVat = parseFloat((tot * 0.04762).toFixed(2));
-                                const isEditedVat = t.taxAmount && t.taxAmount > 0 && Math.abs(t.taxAmount - defaultVat) > 0.02;
-                                const v = isEditedVat ? parseFloat(t.taxAmount) : defaultVat;
-                                return s + (tot - v);
-                            }, 0);
-                            cell.value = { formula: `SUM(E${dataStartRow}:E${dataEndRow})`, result: parseFloat(sumAmt.toFixed(2)) };
-                            cell.numFmt = '#,##0.00';
-                        } else if (!isNoVat && c === 6) {
-                            const sumVat = txsList.reduce((s, t) => {
-                                const tot = parseFloat(t.amount || 0);
-                                const defaultVat = parseFloat((tot * 0.04762).toFixed(2));
-                                const isEditedVat = t.taxAmount && t.taxAmount > 0 && Math.abs(t.taxAmount - defaultVat) > 0.02;
-                                const v = isEditedVat ? parseFloat(t.taxAmount) : defaultVat;
-                                return s + v;
-                            }, 0);
-                            cell.value = { formula: `SUM(F${dataStartRow}:F${dataEndRow})`, result: parseFloat(sumVat.toFixed(2)) };
-                            cell.numFmt = '#,##0.00';
-                        } else if (!isNoVat && c === 7) {
-                            cell.value = { formula: `SUM(G${dataStartRow}:G${dataEndRow})`, result: txsList.reduce((s, t) => s + parseFloat(t.amount || 0), 0) };
-                            cell.numFmt = '#,##0.00';
-                        } else if (c === lastColIndex) {
-                            cell.value = '';
-                        }
-                    }
-
-                    // --- FOOTER ---
-                    ws.addRow([]).height = 8;
-                    const approvalRow = ws.addRow(['for approval']);
-                    approvalRow.getCell(1).font = { bold: true, size: 10, name: 'Arial' };
-                    ws.addRow([]);
-                    ws.addRow([]);
-                    const ceoNameRow = ws.addRow(['Mohammed Al Hazzaa']);
-                    ceoNameRow.getCell(1).font = { bold: true, size: 12, name: 'Arial' };
-                    const ceoTitleRow = ws.addRow(['C.E.O']);
-                    ceoTitleRow.getCell(1).font = { bold: true, size: 11, name: 'Arial' };
-                    const companyRow = ws.addRow(['Emirates Industrial City, Sharjah']);
-                    companyRow.getCell(1).font = { size: 10, name: 'Arial' };
+                } else {
+                    logoCell.value = "Emirates For Ind. Cities Co.";
+                    logoCell.font = { bold: true, size: 14, color: { argb: 'FFC00000' }, name: 'Arial' };
                 }
 
-                // --- SAVE FILE ---
-                const buffer = await wb.xlsx.writeBuffer();
-                window.hideProgressModal();
-                
+                // ROW 2: Category Title (Using Display Title)
+                const titleRow = worksheet.addRow([]);
+                titleRow.height = 25;
+                worksheet.mergeCells(2, 1, 2, lastColIndex);
+                const catTitleCell = worksheet.getCell(2, 1);
+                catTitleCell.value = displayTitle;
+                catTitleCell.font = { bold: true, size: 13, name: 'Comic Sans MS' };
+                catTitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+                // ROW 3: Date + Invoice Ref No
+                const refRow = worksheet.addRow([]);
+                refRow.height = 25;
+                if (isNoVat) {
+                    worksheet.mergeCells(3, 1, 3, 3);
+                    worksheet.mergeCells(3, 4, 3, 5);
+                } else {
+                    worksheet.mergeCells(3, 1, 3, 4);
+                    worksheet.mergeCells(3, 5, 3, 7);
+                }
+                const dateCell = worksheet.getCell(3, 1);
+                dateCell.value = dateStr;
+                dateCell.font = { bold: true, size: 12, name: 'Comic Sans MS' };
+                dateCell.alignment = { horizontal: 'left', vertical: 'middle' };
+
+                const invRefCell = worksheet.getCell(3, isNoVat ? 4 : 5);
+                invRefCell.value = `Invoice Ref No - ${invRefNo}`;
+                invRefCell.font = { bold: true, size: 11, color: { argb: 'FFFF0000' }, name: 'Comic Sans MS' };
+                invRefCell.alignment = { horizontal: 'right', vertical: 'middle' };
+
+                // ROW 4: Headers
+                const headers = isNoVat ? ['Sl No', 'Date', 'Description of bill', 'Bill number', 'Total'] : ['Sl No', 'Date', 'Description of bill', 'Bill number', 'Amount', 'Vat', 'Total'];
+                const hdrRow = worksheet.addRow(headers);
+                hdrRow.height = 25;
+                hdrRow.eachCell((cell) => {
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
+                    cell.font = { bold: true, size: 10, name: 'Comic Sans MS' };
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                    cell.border = thinBorder;
+                });
+
+                // DATA ROWS
+                let currentRow = 5;
+                txsList.forEach((t, i) => {
+                    const invDate = t.invoiceDate || t.subDate || '';
+                    const dateFormatted = invDate ? new Date(invDate).toLocaleDateString('en-GB').replace(/\//g, '.') : '';
+                    const desc = t.desc || '';
+                    const billNo = t.invoiceNo || t.id.split('-').pop();
+                    const total = parseFloat(t.amount || 0);
+
+                    const row = worksheet.getRow(currentRow);
+                    row.height = 25;
+
+                    if (isNoVat) {
+                        row.values = [i + 1, dateFormatted, desc, billNo, total];
+                    } else {
+                        const savedVat = parseFloat(t.taxAmount !== undefined ? t.taxAmount : (t.tax_amount !== undefined ? t.tax_amount : 0));
+                        const expectedVat = total * 0.04762;
+                        const isManualVat = Math.abs(savedVat - expectedVat) > 0.01;
+
+                        row.getCell(1).value = i + 1;
+                        row.getCell(2).value = dateFormatted;
+                        row.getCell(3).value = desc;
+                        row.getCell(4).value = billNo;
+                        row.getCell(5).value = { formula: `G${currentRow}-F${currentRow}` };
+                        
+                        if (isManualVat) {
+                            row.getCell(6).value = savedVat;
+                        } else {
+                            row.getCell(6).value = { formula: `G${currentRow}*0.04762` };
+                        }
+                        row.getCell(7).value = total;
+                    }
+
+                    // Apply Styles to data row
+                    for (let c = 1; c <= lastColIndex; c++) {
+                        const cell = row.getCell(c);
+                        cell.border = thinBorder;
+                        if (c === 1) {
+                            cell.font = { size: 9, name: 'Arial' };
+                            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        } else if (c === 2) {
+                            cell.font = { size: 9, name: 'Arial Unicode MS' };
+                            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        } else if (c === 3) {
+                            cell.font = { size: 9, name: 'Arial Unicode MS', color: { argb: 'FF000000' } };
+                            cell.alignment = { horizontal: 'left', vertical: 'middle' };
+                        } else if (c === 4) {
+                            cell.font = { size: 9, name: 'Arial Unicode MS' };
+                            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        } else if (!isNoVat && c === 5) {
+                            cell.font = { bold: true, size: 9, name: 'Arial Unicode MS' };
+                            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                            cell.numFmt = '#,##0.00';
+                        } else if (!isNoVat && c === 6) {
+                            cell.font = { size: 9, name: 'Arial' };
+                            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                            cell.numFmt = '#,##0.00';
+                        } else {
+                            cell.font = { bold: true, size: 9, name: 'Comic Sans MS' };
+                            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                            cell.numFmt = '#,##0.00';
+                        }
+                    }
+                    currentRow++;
+                });
+
+                // TOTALS ROW
+                const totalRow = worksheet.getRow(currentRow);
+                totalRow.height = 25;
+                for (let c = 1; c <= lastColIndex; c++) {
+                    const cell = totalRow.getCell(c);
+                    cell.border = thinBorder;
+                    cell.font = { bold: true, size: 11, name: 'Arial Unicode MS' };
+                    cell.alignment = { horizontal: 'right', vertical: 'middle' };
+                    if (c === 4) {
+                        cell.value = 'TOTAL';
+                    } else if (isNoVat && c === 5) {
+                        cell.value = { formula: `SUM(E5:E${currentRow - 1})` };
+                        cell.numFmt = '#,##0.00';
+                    } else if (!isNoVat && c >= 5) {
+                        const colChar = String.fromCharCode(64 + c);
+                        cell.value = { formula: `SUM(${colChar}5:${colChar}${currentRow - 1})` };
+                        cell.numFmt = '#,##0.00';
+                    }
+                }
+
+                // FOOTER
+                currentRow += 2;
+                const approvalCell = worksheet.getCell(currentRow, 1);
+                approvalCell.value = "for approval";
+                approvalCell.font = { bold: true, size: 10, name: 'Arial' };
+
+                currentRow += 2;
+                const ceoNameCell = worksheet.getCell(currentRow, 1);
+                ceoNameCell.value = "Mohammed Al Hazzaa";
+                ceoNameCell.font = { bold: true, size: 12, name: 'Arial' };
+
+                currentRow += 1;
+                const ceoTitleCell = worksheet.getCell(currentRow, 1);
+                ceoTitleCell.value = "C.E.O";
+                ceoTitleCell.font = { bold: true, size: 11, name: 'Arial' };
+
+                currentRow += 1;
+                const companyCell = worksheet.getCell(currentRow, 1);
+                companyCell.value = "Emirates Industrial City, Sharjah";
+                companyCell.font = { size: 10, name: 'Arial' };
+
+                const buffer = await workbook.xlsx.writeBuffer();
+                const fileName = `Pettycash - ${cat} - ${dd}${mm}${yyyy}.xlsx`;
                 const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                window.showStatus(`Excel exported: ${fileName}`, false);
+                const url = window.URL.createObjectURL(blob);
+                const anchor = document.createElement('a');
+                anchor.href = url;
+                anchor.download = fileName;
+                anchor.click();
+                window.URL.revokeObjectURL(url);
+                
+                window.showStatus(`${cat} Excel Downloaded!`);
             };
 
             window.printStagedInvoices = async (cat) => {
@@ -6105,10 +6086,12 @@
                     }
                 }
 
+                const d = new Date();
+                const dateSuffix = `${d.getDate().toString().padStart(2, '0')}${(d.getMonth() + 1).toString().padStart(2, '0')}${d.getFullYear()}`;
                 win.document.write(`
                     <html>
                     <head>
-                        <title>Print ${category} - PettyCash Pro</title>
+                        <title>${category}-scanned invoices-pettycash-${dateSuffix}</title>
                         <style>
                             @page { size: A4 portrait; margin: 0; }
                             body { margin: 0; background: #f1f5f9; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; font-family: system-ui, sans-serif; }
@@ -7751,8 +7734,9 @@
                     
                     if (activeMakerTx) {
                         // We just finished the last item
-                        window.showStatus("Audit Completed Successfully!", false);
-                        setTimeout(() => window.closeMakerChecker(), 1500);
+                        window.showStatus("✅ Audit Completed Successfully!", false);
+                        alert("Great job! All expenses in this category have been verified.");
+                        setTimeout(() => window.closeMakerChecker(), 500);
                     }
                     activeMakerTx = null;
                     return;
@@ -7763,7 +7747,7 @@
 
                 // Set amounts
                 const totalAmt = activeMakerTx.amount || 0;
-                let vatAmt = activeMakerTx.taxAmount || 0;
+                let vatAmt = activeMakerTx.taxAmount !== undefined ? activeMakerTx.taxAmount : (activeMakerTx.tax_amount !== undefined ? activeMakerTx.tax_amount : 0);
                 
                 // If VAT was never saved (e.g. from older entries) and category requires VAT, auto-calculate 5%
                 if (vatAmt === 0 && totalAmt > 0) {
