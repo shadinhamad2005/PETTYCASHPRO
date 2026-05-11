@@ -712,10 +712,6 @@
                             <i data-lucide="camera" class="w-3 h-3"></i> Attach Scan
                         </button>
                         <input type="file" id="maker-scan-upload" class="hidden" accept="image/*" capture="environment" onchange="window.handleMakerScan(event)">
-                        
-                        <div class="bg-slate-800/80 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl text-slate-400 text-[10px] font-black tracking-widest uppercase">
-                            HD Preview
-                        </div>
                     </div>
 
                     <div class="flex-1 overflow-hidden flex items-center justify-center p-12">
@@ -1570,7 +1566,7 @@
         </div>
         <!-- Horizontal Professional Transaction Audit Passport -->
         <div id="transaction-details-modal" class="hidden fixed inset-0 z-[6500] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/60 backdrop-blur-sm">
-            <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in duration-300 border border-slate-100 flex flex-col">
+            <div class="bg-white rounded-[2.5rem] shadow-2xl w-[95vw] h-[95vh] overflow-hidden animate-in zoom-in duration-300 border border-slate-100 flex flex-col">
                 <!-- Top Header -->
                 <div class="p-8 pb-0 flex justify-between items-start">
                     <div id="td-sync-badge-container"></div>
@@ -1579,9 +1575,18 @@
                     </button>
                 </div>
 
-                <div class="p-10 flex flex-col md:flex-row gap-12 overflow-y-auto no-scrollbar">
-                    <!-- Column 1: Financials & Description (Wider) -->
-                    <div class="flex-1.5 space-y-8">
+                <div class="p-10 flex flex-col lg:flex-row gap-12 overflow-y-auto no-scrollbar h-full">
+                    <!-- New Column: Full Invoice Preview -->
+                    <div class="flex-1 bg-slate-900/5 rounded-3xl overflow-hidden flex items-center justify-center border border-slate-100 relative min-h-[400px]">
+                        <img id="td-invoice-image" src="" alt="Invoice Preview" class="w-full h-full object-contain p-4 transition-all duration-300 hover:scale-105">
+                        <div id="td-invoice-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 hidden bg-slate-50">
+                            <i data-lucide="image-off" class="w-16 h-16 mb-4 opacity-50"></i>
+                            <p class="text-xs font-black uppercase tracking-widest opacity-70">No Invoice Attached</p>
+                        </div>
+                    </div>
+
+                    <!-- Column 1: Financials & Description -->
+                    <div class="w-full lg:w-[400px] space-y-8 shrink-0">
                         <div>
                             <div id="td-type-pill" class="inline-block px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-3">--</div>
                             <h2 id="td-desc" class="text-3xl font-black text-slate-900 leading-tight tracking-tight">--</h2>
@@ -1610,10 +1615,7 @@
                         </div>
 
                         <div class="flex items-center gap-4 pt-4">
-                            <button id="td-view-btn" onclick="window.viewInvoice(window.activeDetailsTxId)" class="px-8 py-4 bg-indigo-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all flex items-center gap-3">
-                                <i data-lucide="image" class="w-5 h-5"></i> View Full Invoice
-                            </button>
-                            <button onclick="window.closeModal()" class="px-8 py-4 bg-slate-100 text-slate-500 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all">
+                            <button onclick="window.closeModal()" class="w-full py-4 bg-slate-100 text-slate-500 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all">
                                 Dismiss Audit
                             </button>
                         </div>
@@ -3961,7 +3963,12 @@
                         } else {
                             batchContainer.innerHTML = pendingBatches.map(b => `
                                 <div class="bg-blue-50/50 border border-blue-100 p-5 rounded-2xl relative overflow-hidden group flex flex-col h-full">
-                                    <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] font-black px-3 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">Processing</div>
+                                    <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] font-black px-3 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm flex items-center gap-1.5">
+                                        Processing
+                                        <button onclick="window.undoBatch('${b.id}')" title="Undo Batch (Return to Staged)" class="hover:text-amber-300 transition-colors ml-1 border-l border-white/20 pl-2 flex items-center">
+                                            <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                        </button>
+                                    </div>
                                     <div class="text-[10px] text-blue-400 font-bold mb-1 uppercase tracking-wider">${window.formatSafeDate(b.date) || b.id}</div>
                                     <div class="text-2xl font-black text-blue-900 mb-0.5 tracking-tight">${b.total.toFixed(2)} <span class="text-xs text-blue-500 font-bold">AED</span></div>
                                     <div class="text-[10px] font-bold text-blue-600 uppercase tracking-wide mb-5 bg-blue-100/50 inline-block px-2 py-0.5 rounded-md">${b.count} Expenses</div>
@@ -4025,18 +4032,21 @@
 
                                 return `
                                 <div class="bg-amber-50/50 border border-amber-200 p-5 rounded-2xl relative overflow-hidden group cursor-pointer transition-all hover:bg-amber-100/80" onclick="window.toggleFolderExpansion('${f.cat}')">
-                                    <div class="absolute top-4 right-4 flex items-center gap-2">
-                                        <button onclick="event.stopPropagation(); window.openMakerChecker('${escapeQuotes(f.cat)}')" class="bg-amber-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-amber-600 transition-all flex items-center gap-1 shadow-sm">
-                                            <i data-lucide="check-square" class="w-3 h-3"></i> Audit
-                                        </button>
-                                        <button onclick="event.stopPropagation(); window.printStagedInvoices('${escapeQuotes(f.cat)}')" class="bg-white text-amber-600 border border-amber-200 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-amber-50 transition-all flex items-center gap-1 shadow-sm">
-                                            <i data-lucide="printer" class="w-3 h-3"></i> Print
-                                        </button>
-                                        <input type="checkbox" id="staged-chk-${i}" value="${f.cat}" class="w-5 h-5 rounded text-amber-600 focus:ring-amber-500 border-amber-300 folder-checkbox" onclick="event.stopPropagation(); window.checkFolderSelection()">
-                                    </div>
-                                    <div class="flex items-center gap-3 mb-3">
-                                        <div class="p-2.5 bg-amber-100 rounded-xl text-amber-600"><i data-lucide="${isExpanded ? 'folder-open' : 'folder'}" class="w-5 h-5"></i></div>
-                                        <h4 class="font-black text-slate-800 text-sm uppercase tracking-wide truncate pr-24">${f.cat}</h4>
+                                    <div class="flex justify-between items-start mb-4 gap-4">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <div class="p-2.5 bg-amber-100 rounded-xl text-amber-600 shrink-0"><i data-lucide="${isExpanded ? 'folder-open' : 'folder'}" class="w-5 h-5"></i></div>
+                                            <h4 class="font-black text-slate-800 text-sm uppercase tracking-wide truncate" title="${f.cat}">${f.cat}</h4>
+                                        </div>
+                                        <div class="flex items-center gap-2 shrink-0">
+                                            <button onclick="event.stopPropagation(); window.openMakerChecker('${escapeQuotes(f.cat)}')" class="bg-amber-500 text-white px-3 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-amber-600 transition-all flex items-center gap-1.5 shadow-sm border border-amber-500">
+                                                <i data-lucide="check-square" class="w-3 h-3"></i> Audit
+                                            </button>
+                                            <button onclick="event.stopPropagation(); window.printStagedInvoices('${escapeQuotes(f.cat)}')" class="bg-white text-amber-600 border border-amber-200 px-3 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-amber-50 transition-all flex items-center gap-1.5 shadow-sm">
+                                                <i data-lucide="printer" class="w-3 h-3"></i> Print
+                                            </button>
+                                            <div class="h-6 w-px bg-amber-200/60 mx-1"></div>
+                                            <input type="checkbox" id="staged-chk-${i}" value="${f.cat}" class="w-6 h-6 rounded text-amber-600 focus:ring-amber-500 border-amber-300 folder-checkbox shadow-sm cursor-pointer" onclick="event.stopPropagation(); window.checkFolderSelection()">
+                                        </div>
                                     </div>
                                     <div class="text-xl font-black text-amber-900 mb-0.5 tracking-tight">${f.total.toFixed(2)} <span class="text-[10px] text-amber-600 font-bold uppercase">AED</span></div>
                                     <div class="text-[10px] font-bold text-amber-700 uppercase tracking-wide bg-amber-100/50 inline-block px-2 py-0.5 rounded-md mb-3">${f.count} Invoices</div>
@@ -4526,7 +4536,7 @@
             };
 
             window.printBatchPDFReport = async (batchId) => {
-                const batchTxs = txs.filter(t => t.receivedBatchId === batchId || t.batchId === batchId);
+                const batchTxs = txs.filter(t => t.receivedBatchId === batchId || t.batchId === batchId).sort((a, b) => new Date(a.invoiceDate || a.subDate || 0) - new Date(b.invoiceDate || b.subDate || 0));
                 if (batchTxs.length === 0) {
                     window.showStatus("No data found for this batch", true);
                     return;
@@ -5462,6 +5472,38 @@
                 if (btn) btn.disabled = boxes.length === 0;
             };
 
+            window.undoBatch = async (batchId) => {
+                window.customConfirm({
+                    title: "Undo Batch?",
+                    body: "This will move all transactions in this batch back to 'Currently Processing' (Staged) so you can add or remove items.",
+                    icon: "rotate-ccw",
+                    iconBg: "bg-amber-100",
+                    okText: "Undo Batch",
+                    onOk: async () => {
+                        try {
+                            window.showStatus("Undoing batch...", true);
+                            const batchObj = writeBatch(db);
+                            const batchTxs = window.globalBatchMap[batchId]?.txs || [];
+                            
+                            batchTxs.forEach(t => {
+                                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
+                                batchObj.update(docRef, {
+                                    batch_id: 'staged',
+                                    status: 'Active',
+                                    staged_date: deleteField()
+                                });
+                            });
+                            
+                            await batchObj.commit();
+                            window.showStatus("Batch Undone!");
+                            window.renderAll();
+                        } catch (err) {
+                            window.showStatus("Error: " + err.message, true);
+                        }
+                    }
+                });
+            };
+
             window.finalizeStagedBatch = async () => {
                 const boxes = document.querySelectorAll('.folder-checkbox:checked');
                 if (boxes.length === 0) return;
@@ -5739,15 +5781,31 @@
                         if (isNoVat) {
                             rowData = [i + 1, dateFormatted, desc, billNo, total];
                         } else {
-                            rowData = [
-                                i + 1,
-                                dateFormatted,
-                                desc,
-                                billNo,
-                                { formula: `G${rowNum}-F${rowNum}`, result: amount },  // Amount = Total - VAT
-                                { formula: `G${rowNum}*0.04762`, result: vat },           // VAT = Total * 4.762%
-                                total
-                            ];
+                            const defaultVat = parseFloat((total * 0.04762).toFixed(2));
+                            const defaultAmt = parseFloat((total - defaultVat).toFixed(2));
+                            const isEditedVat = t.taxAmount && t.taxAmount > 0 && Math.abs(t.taxAmount - defaultVat) > 0.02;
+
+                            if (isEditedVat) {
+                                rowData = [
+                                    i + 1,
+                                    dateFormatted,
+                                    desc,
+                                    billNo,
+                                    amount,
+                                    vat,
+                                    total
+                                ];
+                            } else {
+                                rowData = [
+                                    i + 1,
+                                    dateFormatted,
+                                    desc,
+                                    billNo,
+                                    { formula: `G${rowNum}-F${rowNum}`, result: defaultAmt },
+                                    { formula: `G${rowNum}*0.04762`, result: defaultVat },
+                                    total
+                                ];
+                            }
                         }
                         const dataRow = ws.addRow(rowData);
                         dataRow.height = 25;
@@ -5810,7 +5868,9 @@
                         } else if (!isNoVat && c === 5) {
                             const sumAmt = txsList.reduce((s, t) => {
                                 const tot = parseFloat(t.amount || 0);
-                                const v = t.taxAmount !== undefined ? parseFloat(t.taxAmount || 0) : (t.tax_amount !== undefined ? parseFloat(t.tax_amount || 0) : parseFloat((tot * 0.04762).toFixed(2)));
+                                const defaultVat = parseFloat((tot * 0.04762).toFixed(2));
+                                const isEditedVat = t.taxAmount && t.taxAmount > 0 && Math.abs(t.taxAmount - defaultVat) > 0.02;
+                                const v = isEditedVat ? parseFloat(t.taxAmount) : defaultVat;
                                 return s + (tot - v);
                             }, 0);
                             cell.value = { formula: `SUM(E${dataStartRow}:E${dataEndRow})`, result: parseFloat(sumAmt.toFixed(2)) };
@@ -5818,7 +5878,9 @@
                         } else if (!isNoVat && c === 6) {
                             const sumVat = txsList.reduce((s, t) => {
                                 const tot = parseFloat(t.amount || 0);
-                                const v = t.taxAmount !== undefined ? parseFloat(t.taxAmount || 0) : (t.tax_amount !== undefined ? parseFloat(t.tax_amount || 0) : parseFloat((tot * 0.04762).toFixed(2)));
+                                const defaultVat = parseFloat((tot * 0.04762).toFixed(2));
+                                const isEditedVat = t.taxAmount && t.taxAmount > 0 && Math.abs(t.taxAmount - defaultVat) > 0.02;
+                                const v = isEditedVat ? parseFloat(t.taxAmount) : defaultVat;
                                 return s + v;
                             }, 0);
                             cell.value = { formula: `SUM(F${dataStartRow}:F${dataEndRow})`, result: parseFloat(sumVat.toFixed(2)) };
@@ -6399,6 +6461,13 @@
                     } else {
                         updateData.invoice_url = deleteField();
                     }
+                }
+
+                if (t.managerOwed || t.staffOwed) {
+                    const remaining = newAmount - (t.advanceAmountUsed || 0);
+                    const gap = remaining - (t.paidFromBox || 0);
+                    if (t.managerOwed) updateData.manager_owed = Math.max(0, gap);
+                    else if (t.staffOwed) updateData.staff_owed = Math.max(0, gap);
                 }
 
                 try {
@@ -7540,7 +7609,7 @@
                 
                 // Content
                 document.getElementById('td-desc').innerText = t.desc || t.desc_text || 'No Description';
-                document.getElementById('td-date-sub').innerText = window.formatSafeDate(t.invoiceDate || t.subDate);
+                document.getElementById('td-date-sub').innerText = `INV: ${t.invoiceNo || 'N/A'} • DATE: ${window.formatSafeDate(t.invoiceDate || t.subDate)}`;
                 document.getElementById('td-person').innerText = t.person || '-';
                 document.getElementById('td-method').innerText = t.paymentMethod || 'Cash';
                 
@@ -7570,13 +7639,33 @@
                 const url = t.invoiceUrl || t.invoice_url;
                 if (!url) {
                     syncCont.innerHTML = `<div class="flex items-center gap-1.5 text-[9px] font-black text-slate-300 uppercase tracking-widest"><i data-lucide="image-off" class="w-3 h-3"></i> NO ATTACHMENT</div>`;
-                    document.getElementById('td-view-btn').classList.add('hidden');
                 } else {
-                    document.getElementById('td-view-btn').classList.remove('hidden');
                     const isLocal = url.toString().startsWith('local-');
                     syncCont.innerHTML = isLocal 
                         ? `<div class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-600 border border-amber-100 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest animate-pulse"><i data-lucide="cloud-off" class="w-3 h-3"></i> PENDING SYNC</div>`
                         : `<div class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest"><i data-lucide="shield-check" class="w-3 h-3"></i> CLOUD VERIFIED</div>`;
+                }
+                
+                // Set Image Preview in Modal
+                const imgEl = document.getElementById('td-invoice-image');
+                const placeholderEl = document.getElementById('td-invoice-placeholder');
+                imgEl.src = '';
+                
+                if (!url) {
+                    imgEl.classList.add('hidden');
+                    placeholderEl.classList.remove('hidden');
+                } else {
+                    imgEl.classList.remove('hidden');
+                    placeholderEl.classList.add('hidden');
+                    imgEl.src = 'https://via.placeholder.com/600x800.png?text=Loading+Receipt...';
+                    window.getAnyUrl(t).then(resolvedUrls => {
+                        if (resolvedUrls && resolvedUrls.length > 0) {
+                            imgEl.src = resolvedUrls[0];
+                        } else {
+                            imgEl.classList.add('hidden');
+                            placeholderEl.classList.remove('hidden');
+                        }
+                    });
                 }
                 
                 document.getElementById('td-id').innerText = t.id;
