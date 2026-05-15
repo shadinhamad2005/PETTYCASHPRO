@@ -2960,7 +2960,7 @@
             };
 
             window.sendDebtSummaryWhatsApp = (personName) => {
-                const debts = txs.filter(t => t.person === personName && (t.staffOwed > 0) && !t.settled);
+                const debts = txs.filter(t => t.person === personName && (t.staffOwed > 0) && !t.settled && t.status !== 'Voided');
                 if (debts.length === 0) return alert("No pending debts for " + personName);
                 pendingWhatsAppPayload = { person: personName, type: 'debt_summary', data: { debts } };
                 window.executeWhatsAppSend();
@@ -3775,7 +3775,7 @@
                     const debtList = document.getElementById('debts-container');
                     const debtSect = document.getElementById('pending-debts-section');
                     if (debtList && debtSect) {
-                        const debts = txs.filter(t => (t.managerOwed || t.staffOwed) && !t.settled).map(t => {
+                        const debts = txs.filter(t => (t.managerOwed || t.staffOwed) && !t.settled && t.status !== 'Voided').map(t => {
                             const rem = (t.managerOwed || t.staffOwed) - (t.repaidAmount || 0);
                             return { ...t, remaining: rem };
                         }).filter(t => t.remaining > 0.01);
