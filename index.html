@@ -848,7 +848,7 @@
                                                 class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black">AED</span>
                                             <input type="number" id="maker-vat"
                                                 class="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-xl text-lg font-black text-slate-800 focus:border-indigo-500 focus:bg-white outline-none transition-all"
-                                                step="0.01" oninput="window.updateMakerTotal()">
+                                                step="0.01" oninput="window.updateMakerSubtotalFromVat()">
                                         </div>
                                     </div>
                                 </div>
@@ -6136,11 +6136,18 @@
 
                 window.showProgressModal(`Preparing ${category} for Printing...`, 20);
 
+                // Sort invoices by invoice date: oldest first, latest last
+                const sortedCatData = [...catData].sort((a, b) => {
+                    const dateA = new Date(a.tx.invoiceDate || a.tx.subDate || 0).getTime();
+                    const dateB = new Date(b.tx.invoiceDate || b.tx.subDate || 0).getTime();
+                    return dateA - dateB;
+                });
+
                 const win = window.open('', '_blank');
                 let imagesHtml = '';
                 
                 let pageCount = 0;
-                for (const item of catData) {
+                for (const item of sortedCatData) {
                     for (const url of item.urls) {
                         pageCount++;
                         imagesHtml += `
@@ -7729,12 +7736,17 @@
 
             window.openMakerChecker = (catFilter = 'all') => {
                 // Populate queue from real data (expenses that are in 'staged' batch and NOT yet audited)
+                // Sort oldest invoice date first
                 makerQueue = txs.filter(t => {
                     const isStaged = (t.type || '').toLowerCase() === 'expense' && t.batchId === 'staged' && t.status !== 'Voided' && !t.audited;
                     if (!isStaged) return false;
                     if (catFilter === 'all') return true;
                     const tCat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized');
                     return tCat === catFilter;
+                }).sort((a, b) => {
+                    const dateA = new Date(a.invoiceDate || a.subDate || 0).getTime();
+                    const dateB = new Date(b.invoiceDate || b.subDate || 0).getTime();
+                    return dateA - dateB;
                 });
 
                 if (makerQueue.length === 0) {
@@ -7748,10 +7760,11 @@
             };
 
             window.reAuditConfirm = async (catFilter) => {
-                if (!confirm(`All items in "${catFilter}" have already been audited.\n\nDo you want to reset their status and audit them again?`)) {
+                if (!confirm(`All items in "${catFilter}" have already been audited.\n\nDo you want to re-audit them? Their last saved VAT, amounts, and dates will be loaded as starting values.`)) {
                     return;
                 }
                 
+                // Re-audit: only reset the "audited" flag — keep all saved amounts/VAT intact
                 const catTxs = txs.filter(t => {
                     const isStaged = (t.type || '').toLowerCase() === 'expense' && t.batchId === 'staged' && t.status !== 'Voided' && t.audited;
                     if (!isStaged) return false;
@@ -7762,10 +7775,11 @@
                 if (catTxs.length === 0) return;
 
                 try {
-                    window.showProgressModal("Resetting Audit Status...", 50);
+                    window.showProgressModal("Preparing Re-Audit (keeping saved values)...", 50);
                     const batch = writeBatch(db);
                     catTxs.forEach(t => {
                         const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
+                        // Only reset audited flag — all saved tax_amount, net_amount, amount fields preserved
                         batch.update(docRef, { audited: false });
                     });
                     
@@ -7808,6 +7822,16 @@
                 const vat = parseFloat(document.getElementById('maker-vat').value) || 0;
                 const total = sub + vat;
                 document.getElementById('maker-total').innerText = `${total.toFixed(2)} AED`;
+            };
+
+            // When VAT is edited, recalculate the subtotal as (current total - new VAT)
+            window.updateMakerSubtotalFromVat = () => {
+                const totalText = document.getElementById('maker-total').innerText.replace(' AED', '').trim();
+                const currentTotal = parseFloat(totalText) || 0;
+                const newVat = parseFloat(document.getElementById('maker-vat').value) || 0;
+                const newSub = currentTotal - newVat;
+                document.getElementById('maker-subtotal').value = newSub.toFixed(2);
+                // Do not change the total when only VAT is adjusted
             };
 
             window.activeDetailsTxId = null;
@@ -7935,18 +7959,24 @@
                 activeMakerTx = makerQueue[currentMakerIndex];
                 document.getElementById('maker-expense-id').innerText = `ID: ${activeMakerTx.invNo || activeMakerTx.id} - ${activeMakerTx.desc}`;
 
-                // Set amounts
+                // Set amounts — respect explicitly saved VAT (including zero)
                 const totalAmt = activeMakerTx.amount || 0;
-                let vatAmt = activeMakerTx.taxAmount !== undefined ? activeMakerTx.taxAmount : (activeMakerTx.tax_amount !== undefined ? activeMakerTx.tax_amount : 0);
                 
-                // If VAT was never saved (e.g. from older entries) and category requires VAT, auto-calculate 5%
-                if (vatAmt === 0 && totalAmt > 0) {
+                // Check if VAT was explicitly stored (taxAmount field exists in the transaction)
+                const hasExplicitVat = (activeMakerTx.taxAmount !== undefined && activeMakerTx.taxAmount !== null) ||
+                                       (activeMakerTx.tax_amount !== undefined && activeMakerTx.tax_amount !== null);
+                let vatAmt = hasExplicitVat
+                    ? parseFloat(activeMakerTx.taxAmount !== undefined ? activeMakerTx.taxAmount : activeMakerTx.tax_amount)
+                    : null;
+
+                // Only auto-calculate if VAT was NEVER saved (vatAmt is null = truly unknown)
+                if (vatAmt === null && totalAmt > 0) {
                     const cat = (activeMakerTx.allocations && activeMakerTx.allocations.length > 0) ? activeMakerTx.allocations[0].category : activeMakerTx.category;
                     const noVatCats = ['FEWA', 'SEWA', 'AADC'];
                     const isNoVat = noVatCats.some(c => (cat || '').toUpperCase().includes(c));
-                    if (!isNoVat) {
-                        vatAmt = parseFloat((totalAmt * 0.04762).toFixed(2));
-                    }
+                    vatAmt = isNoVat ? 0 : parseFloat((totalAmt * 0.04762).toFixed(2));
+                } else if (vatAmt === null) {
+                    vatAmt = 0;
                 }
 
                 const subAmt = totalAmt - vatAmt;
