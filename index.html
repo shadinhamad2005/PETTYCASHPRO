@@ -540,8 +540,9 @@
                                     <label
                                         class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Invoice
                                         Number</label>
-                                    <input type="text" id="form-inv-no" placeholder="INV-000"
+                                    <input type="text" id="form-inv-no" placeholder="INV-000" oninput="window.checkDuplicateInvoice()"
                                         class="modern-input w-full px-4 py-3 rounded-xl font-bold text-sm text-slate-800">
+                                    <p id="duplicate-warning" class="hidden text-rose-500 text-xs mt-1.5 font-bold px-1"></p>
                                 </div>
                                 <div class="space-y-2">
                                     <label
@@ -2769,6 +2770,30 @@
                 setTimeout(() => { if (c) c.classList.add('hidden'); }, 1000);
             };
 
+            window.checkDuplicateInvoice = function () {
+                const invNoEl = document.getElementById('form-inv-no');
+                const warnEl = document.getElementById('duplicate-warning');
+                if (!invNoEl || !warnEl) return;
+                
+                const val = invNoEl.value.trim().toLowerCase();
+                if (!val) {
+                    warnEl.classList.add('hidden');
+                    return;
+                }
+                
+                const personEl = document.getElementById('form-person');
+                const pName = personEl ? personEl.value : '';
+                
+                const dup = window.txs.find(t => (t.type || '').toLowerCase() === 'expense' && t.status !== 'Voided' && t.invNo && t.invNo.toLowerCase() === val && (!pName || t.person === pName));
+                
+                if (dup) {
+                    warnEl.innerText = `⚠️ DUPLICATE DETECTED: Submitted on ${window.formatSafeDate(dup.subDate)} for ${dup.amount} AED`;
+                    warnEl.classList.remove('hidden');
+                } else {
+                    warnEl.classList.add('hidden');
+                }
+            };
+
             window.checkAdvanceWallet = function (person) {
                 const container = document.getElementById('advance-deduction-container');
                 const reimContainer = document.getElementById('reimburse-option-container');
@@ -3004,24 +3029,25 @@
                             const rem = (d.staffOwed || 0) - (d.repaidAmount || 0);
                             total += rem;
                             msg += `• *${new Date(d.subDate).toLocaleDateString()}*: ${d.desc} → *${rem.toFixed(2)} AED*\n`;
-                            listHtml += `<div class="flex justify-between py-1 border-b border-dashed border-slate-100">
-                                <span class="truncate pr-2">${d.desc}</span>
-                                <span class="font-bold">${rem.toFixed(2)}</span>
+                            const safeDesc = d.desc && d.desc.length > 28 ? d.desc.substring(0, 28) + '...' : (d.desc || '');
+                            listHtml += `<div class="flex justify-between py-1 border-b border-dashed border-slate-200">
+                                <span class="pr-2 text-slate-800">${safeDesc}</span>
+                                <span class="font-bold text-slate-900">${rem.toFixed(2)}</span>
                             </div>`;
                         });
                         msg += `\n${divider}\n`;
-                        msg += `*TOTAL PAYABLE: ${total.toFixed(2)} AED*\n`;
+                        msg += `*COMPANY OWES YOU: ${total.toFixed(2)} AED*\n`;
                         msg += `*** THANK YOU ***`;
                         msg += cta;
 
                         htmlPreview = `
                             <p class="font-bold text-center mb-2 underline uppercase">Reimbursement Summary</p>
-                            <p class="mb-4">PERSON: <strong>${person}</strong></p>
+                            <p class="mb-4">PERSON: <strong>${window.escapeHTML(person)}</strong></p>
                             <div class="space-y-1 mb-4">
                                 ${listHtml}
                             </div>
                             <div class="flex justify-between font-black text-xs border-t-2 border-slate-200 pt-2">
-                                <span>TOTAL PAYABLE:</span>
+                                <span>COMPANY OWES YOU:</span>
                                 <span>${total.toFixed(2)} AED</span>
                             </div>
                         `;
@@ -3057,10 +3083,10 @@
                         htmlPreview = `
                             <p class="font-bold text-center mb-2 uppercase tracking-tighter underline">${title}</p>
                             <div class="space-y-1 text-slate-700">
-                                <p>PERSON: <strong class="text-slate-900">${person}</strong></p>
+                                <p>PERSON: <strong class="text-slate-900">${window.escapeHTML(person)}</strong></p>
                                 <p>TYPE: <strong class="text-slate-900">${data.type.toUpperCase().replace('_', ' ')}</strong></p>
-                                <p>MEMO: <strong class="text-slate-900">${data.desc}</strong></p>
-                                ${data.invNo ? `<p>INV NO: <strong>${data.invNo}</strong></p>` : ''}
+                                <p>MEMO: <strong class="text-slate-900">${window.escapeHTML(data.desc)}</strong></p>
+                                ${data.invNo ? `<p>INV NO: <strong>${window.escapeHTML(data.invNo)}</strong></p>` : ''}
                                 ${data.invDate ? `<p>INV DATE: <strong>${new Date(data.invDate).toLocaleDateString('en-GB')}</strong></p>` : ''}
                             </div>
                             <div class="my-4 border-t-2 border-slate-300 pt-2 font-black text-xs flex justify-between">
@@ -3089,7 +3115,7 @@
                                 <div class="flex justify-between py-1.5 border-b border-dashed border-slate-200">
                                     <div class="flex flex-col pr-2 flex-1 min-w-0">
                                         <span class="text-[9px] font-bold text-slate-500">${r.date}</span>
-                                        <span class="text-[10px] text-slate-800 font-semibold break-words">${r.desc}</span>
+                                        <span class="text-[10px] text-slate-800 font-semibold break-words">${window.escapeHTML(r.desc)}</span>
                                     </div>
                                     <span class="font-black text-[11px] self-center shrink-0 ml-2">${r.flow}</span>
                                 </div>
@@ -3099,6 +3125,8 @@
                         msg += `${divider}\n`;
                         msg += `*OPENING: ${data.opening.toFixed(2)} AED*\n`;
                         msg += `*CLOSING: ${data.closing.toFixed(2)} AED*\n`;
+                        if (data.debt > 0) msg += `*DEBT (OWED TO YOU): ${data.debt.toFixed(2)} AED*\n`;
+                        if (data.advance > 0) msg += `*ACTIVE ADVANCE: ${data.advance.toFixed(2)} AED*\n`;
                         msg += `*** THANK YOU ***`;
                         msg += cta;
 
@@ -3114,6 +3142,10 @@
                                     <span>CLOSING BALANCE:</span>
                                     <span>${data.closing.toFixed(2)} AED</span>
                                 </div>
+                                ${((data.debt > 0 || data.advance > 0) ? '<div class="border-t border-slate-300 pt-1 mt-1 space-y-0.5">' : '')}
+                                ${(data.debt > 0 ? '<div class="flex justify-between font-bold text-rose-600"><span>OWED TO YOU:</span><span>' + data.debt.toFixed(2) + ' AED</span></div>' : '')}
+                                ${(data.advance > 0 ? '<div class="flex justify-between font-bold text-indigo-600"><span>ACTIVE ADVANCE:</span><span>' + data.advance.toFixed(2) + ' AED</span></div>' : '')}
+                                ${((data.debt > 0 || data.advance > 0) ? '</div>' : '')}
                             </div>
                         `;
                     }
@@ -3333,7 +3365,9 @@
                             period: periodStr,
                             rows: statementRows,
                             opening: openingBal,
-                            closing: currentBal
+                            closing: currentBal,
+                            debt: getDebtToStaff(personName),
+                            advance: getAdvanceWalletFor(personName)
                         }
                     };
                     window.executeWhatsAppSend();
@@ -3397,7 +3431,7 @@
                             <td style="padding: 8px; font-size: 10px;">${new Date(t.subDate).toLocaleDateString()}</td>
                             <td style="padding: 8px; font-size: 10px;">
                                 <strong>${ttype.replace('_', ' ').toUpperCase()}</strong><br/>
-                                <span style="color: #666;">${t.desc || '-'}</span>
+                                <span style="color: #666;">${window.escapeHTML(t.desc || '-')}</span>
                             </td>
                             <td style="padding: 8px; font-size: 10px; text-align: right; color: #059669;">${flowIn > 0 ? flowIn.toFixed(2) : '-'}</td>
                             <td style="padding: 8px; font-size: 10px; text-align: right; color: #dc2626;">${flowOut > 0 ? flowOut.toFixed(2) : '-'}</td>
@@ -3422,7 +3456,7 @@
                         <div style="display: flex; justify-content: space-between; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 10px;">
                             <div>
                                 <p style="margin: 0 0 5px 0; font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">Beneficiary</p>
-                                <h2 style="margin: 0; font-size: 18px; font-weight: 900; color: #1e293b;">${name}</h2>
+                                <h2 style="margin: 0; font-size: 18px; font-weight: 900; color: #1e293b;">${window.escapeHTML(name)}</h2>
                             </div>
                             <div style="text-align: right;">
                                 <p style="margin: 0 0 5px 0; font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">Reporting Period</p>
@@ -3558,7 +3592,7 @@
                                 <i data-lucide="user" class="w-6 h-6"></i>
                             </div>
                             
-                            <h3 class="font-black text-xl text-slate-800 tracking-tight mb-1">${name}</h3>
+                            <h3 class="font-black text-xl text-slate-800 tracking-tight mb-1">${window.escapeHTML(name)}</h3>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Staff Member</p>
                             
                             <div class="space-y-3">
@@ -3723,7 +3757,7 @@
                         wrapper.innerHTML = `<button type="button" onclick="window.switchView('settings')" class="w-full px-5 py-4 rounded-xl border-2 border-dashed border-slate-200 text-slate-400 text-[10px] font-bold uppercase hover:border-indigo-300 hover:text-indigo-500 transition-all">Setup Registry</button>`;
                         return;
                     }
-                    wrapper.innerHTML = `<select id="form-person" onchange="window.checkAdvanceWallet(this.value)" class="modern-input w-full px-4 py-4 rounded-xl font-bold text-sm text-slate-800 uppercase outline-none focus:border-indigo-600">${list.map(i => `<option value="${i}">${i}</option>`).join('')}</select>`;
+                    wrapper.innerHTML = `<select id="form-person" onchange="window.checkAdvanceWallet(this.value); window.checkDuplicateInvoice();" class="modern-input w-full px-4 py-4 rounded-xl font-bold text-sm text-slate-800 uppercase outline-none focus:border-indigo-600">${list.map(i => `<option value="${i}">${i}</option>`).join('')}</select>`;
                     if (list[0]) window.checkAdvanceWallet(list[0]);
                 } catch (e) {
                     console.error("Render Select Error", e);
@@ -3804,6 +3838,17 @@
                 }
             };
 
+            window.escapeHTML = (str) => {
+                if (!str) return '';
+                return String(str).replace(/[&<>'"]/g, tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag]));
+            };
+
             window.formatSafeDate = (dString) => {
                 if (!dString) return '-';
                 if (dString.includes('-')) {
@@ -3813,7 +3858,17 @@
                 return new Date(dString).toLocaleDateString('en-GB');
             };
 
-            window.renderAll = function () {
+            window.txRenderLimit = 50;
+            window.addEventListener('scroll', () => {
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+                    if (window.lastFilteredCount && window.lastFilteredCount > window.txRenderLimit) {
+                        window.txRenderLimit += 50;
+                        window.renderAll(true);
+                    }
+                }
+            });
+            window.renderAll = function (isAppend = false) {
+                if (isAppend !== true) window.txRenderLimit = 50;
                 try {
                     const totals = getTotals();
                     const bEl = document.getElementById('stat-balance');
@@ -3894,16 +3949,16 @@
                     
                     window.lastFilteredCount = filtered.length;
 
-                    const displayData = filtered;
+                    const displayData = filtered.slice(0, window.txRenderLimit);
                     const body = document.getElementById('audit-body');
                     if (body) {
-                        body.innerHTML = displayData.length ? displayData.map(t => {
+                        let html = displayData.length ? displayData.map(t => {
                             const isVoided = t.status === 'Voided';
 
                             const rem = (t.managerOwed || t.staffOwed) ? ((t.managerOwed || t.staffOwed) - (t.repaidAmount || 0)) : 0;
                             const debtTag = rem > 0.01 ? `<div class="mt-1 inline-flex items-center gap-1 bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase">Pending: ${rem.toFixed(2)}</div>` : '';
 
-                            const allocs = (t.allocations && Array.isArray(t.allocations)) ? t.allocations.map(a => `<span class="bg-slate-100 text-[9px] font-bold px-1.5 py-0.5 rounded text-slate-600 border border-slate-200">${a.category} #${a.propertyNo}</span>`).join(' ') : '';
+                            const allocs = (t.allocations && Array.isArray(t.allocations)) ? t.allocations.map(a => `<span class="bg-slate-100 text-[9px] font-bold px-1.5 py-0.5 rounded text-slate-600 border border-slate-200">${window.escapeHTML(a.category)} #${window.escapeHTML(a.propertyNo)}</span>`).join(' ') : '';
 
                             const advUsed = parseFloat(t.advanceAmountUsed) || 0;
                             const advTag = (t.isDeductedFromAdvance && advUsed > 0)
@@ -3913,12 +3968,12 @@
                                    </span>`
                                 : '';
 
-                            const typeLabel = (t.type || '').toLowerCase().replace('_', ' ');
+                            const typeLabel = window.escapeHTML((t.type || '').toLowerCase().replace('_', ' '));
                             const voidStyle = isVoided ? 'opacity-50 grayscale bg-slate-50' : '';
                             const voidStrikethrough = isVoided ? 'line-through text-slate-400' : 'text-slate-900';
 
-                            const voidTag = isVoided ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest"><i data-lucide="ban" class="w-2.5 h-2.5"></i> VOIDED: ${t.voidReason || 'No reason'}</div>` : '';
-                            const editTag = (!isVoided && t.editReason) ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-0.5 border border-indigo-100 rounded text-[9px] font-black uppercase tracking-widest" title="Edit Reason: ${t.editReason}"><i data-lucide="pencil" class="w-2.5 h-2.5"></i> EDITED</div>` : '';
+                            const voidTag = isVoided ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest"><i data-lucide="ban" class="w-2.5 h-2.5"></i> VOIDED: ${window.escapeHTML(t.voidReason || 'No reason')}</div>` : '';
+                            const editTag = (!isVoided && t.editReason) ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-0.5 border border-indigo-100 rounded text-[9px] font-black uppercase tracking-widest" title="Edit Reason: ${window.escapeHTML(t.editReason)}"><i data-lucide="pencil" class="w-2.5 h-2.5"></i> EDITED</div>` : '';
                             const processedTag = (t.batchId === 'received' || t.receivedDate)
                                 ? `<div class="mt-1.5 inline-flex items-center gap-1 bg-teal-50 text-teal-700 border border-teal-100 px-1.5 py-0.5 rounded text-[9px] font-black uppercase"><i data-lucide="check-circle-2" class="w-2.5 h-2.5"></i> PROCESSED</div>`
                                 : '';
@@ -3927,11 +3982,11 @@
 
                             return `<tr onclick="window.viewTransactionDetails('${t.id}')" class="hover:bg-slate-50 transition-all group cursor-pointer ${voidStyle}">
                             <td class="px-6 py-4 font-bold text-slate-500 font-mono text-xs ${isVoided ? 'line-through' : ''}">${window.formatSafeDate(t.invoiceDate || t.subDate)}</td>
-                            <td class="px-6 py-4 font-bold text-slate-700 text-xs ${isVoided ? 'line-through' : ''}">${t.person || '-'}</td>
+                            <td class="px-6 py-4 font-bold text-slate-700 text-xs ${isVoided ? 'line-through' : ''}">${window.escapeHTML(t.person || '-')}</td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
                                     <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md ${window.getTypeStyles((t.type || '').toLowerCase())}">${typeLabel}</span>
-                                    <span class="font-bold text-slate-700 ${isVoided ? 'line-through' : ''}">${t.desc || 'No Desc'}</span>
+                                    <span class="font-bold text-slate-700 ${isVoided ? 'line-through' : ''}">${window.escapeHTML(t.desc || 'No Desc')}</span>
                                 </div>
                                 <div class="mt-1.5 flex flex-wrap items-center gap-2">
                                     ${allocs}
@@ -3956,6 +4011,12 @@
                             </td>
                         </tr>`;
                         }).join('') : `<tr><td colspan="7" class="py-12 text-center text-slate-400 uppercase font-bold tracking-widest text-xs">No matching records found</td></tr>`;
+                        
+                        if (filtered.length > window.txRenderLimit) {
+                            html += `<tr><td colspan="7" class="py-4 text-center"><button onclick="window.txRenderLimit += 50; window.renderAll(true);" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold transition-colors"><i data-lucide="chevron-down" class="w-4 h-4 inline-block mr-1"></i> Load More Transactions</button></td></tr>`;
+                        }
+                        
+                        body.innerHTML = html;
                     }
 
                     const lc = document.getElementById('log-count');
@@ -4058,13 +4119,14 @@
                         } else {
                             stagedContainer.innerHTML = stagedFolders.map((f, i) => {
                                 const isExpanded = window.expandedFolders && window.expandedFolders.has(f.cat);
+                                const safeCat = window.escapeHTML(f.cat);
                                 const txRows = f.txs.map(tx => `
                                     <div class="flex items-center justify-between py-2 px-3 bg-white/50 rounded-lg border border-amber-100 mb-1 group/item">
                                         <div class="flex items-center gap-3">
                                             ${tx.audited ? '<i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-500"></i>' : '<i data-lucide="circle" class="w-3.5 h-3.5 text-slate-300"></i>'}
                                             <div class="flex flex-col">
-                                                <span class="text-[10px] font-bold ${tx.audited ? 'text-slate-400' : 'text-slate-700'}">${tx.desc || 'No Desc'}</span>
-                                                <span class="text-[9px] text-slate-400 font-mono">${window.formatSafeDate(tx.invoiceDate || tx.subDate)} • ${(tx.amount || 0).toFixed(2)} AED</span>
+                                                <span class="text-[10px] font-bold ${tx.audited ? 'text-slate-400' : 'text-slate-700'}">${window.escapeHTML(tx.desc || 'No Desc')}</span>
+                                                <span class="text-[9px] text-slate-400 font-mono">${window.formatSafeDate(tx.invoiceDate || tx.subDate)} ? ${(tx.amount || 0).toFixed(2)} AED</span>
                                             </div>
                                         </div>
                                         <button onclick="event.stopPropagation(); window.unstageInvoice('${tx.id}')" class="opacity-0 group-hover/item:opacity-100 p-1 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all">
@@ -4074,11 +4136,11 @@
                                 `).join('');
 
                                 return `
-                                <div class="bg-amber-50/50 border border-amber-200 p-5 rounded-2xl relative overflow-hidden group cursor-pointer transition-all hover:bg-amber-100/80" onclick="window.toggleFolderExpansion('${f.cat}')">
+                                <div class="bg-amber-50/50 border border-amber-200 p-5 rounded-2xl relative overflow-hidden group cursor-pointer transition-all hover:bg-amber-100/80" onclick="window.toggleFolderExpansion('${escapeQuotes(f.cat)}')">
                                     <div class="flex justify-between items-start mb-4 gap-4">
                                         <div class="flex items-center gap-3 min-w-0">
                                             <div class="p-2.5 bg-amber-100 rounded-xl text-amber-600 shrink-0"><i data-lucide="${isExpanded ? 'folder-open' : 'folder'}" class="w-5 h-5"></i></div>
-                                            <h4 class="font-black text-slate-800 text-sm uppercase tracking-wide truncate" title="${f.cat}">${f.cat}</h4>
+                                            <h4 class="font-black text-slate-800 text-sm uppercase tracking-wide truncate" title="${safeCat}">${safeCat}</h4>
                                         </div>
                                         <div class="flex items-center gap-2 shrink-0">
                                             ${f.txs.length > 0 && f.txs.every(tx => tx.audited) ? `
@@ -4291,6 +4353,28 @@
                     const taxAmount = parseFloat(document.getElementById('form-tax-amount')?.value) || 0;
                     const netAmount = amount - taxAmount;
                     const paymentMethod = deductionUsed > 0 ? 'Advance' : 'Cash';
+
+                    if (activeTab === 'expense') {
+                        const isDuplicate = txs.some(t => {
+                            if (t.status === 'Voided' || (t.type || '').toLowerCase() !== 'expense') return false;
+                            
+                            const sameInvNo = invNo && t.invoiceNo === invNo;
+                            const samePersonAmountDate = t.person === person && 
+                                                         Math.abs((parseFloat(t.amount) || 0) - amount) < 0.01 &&
+                                                         ((invDate && t.invoiceDate === invDate) || (!invDate && t.subDate === dateInput.value));
+                            
+                            return sameInvNo || samePersonAmountDate;
+                        });
+
+                        if (isDuplicate) {
+                            const proceed = confirm(`⚠️ POTENTIAL DUPLICATE DETECTED ⚠️\n\nA transaction with this amount (${amount} AED), person, and date (or invoice number) already exists in the system.\n\nDo you want to proceed and add it anyway?`);
+                            if (!proceed) {
+                                btn.disabled = false;
+                                btn.innerHTML = originalContent;
+                                return;
+                            }
+                        }
+                    }
 
                     const boxAmountNeeded = amount - deductionUsed;
 
@@ -7935,17 +8019,23 @@
                 }
 
                 activeMakerTx = makerQueue[currentMakerIndex];
-                document.getElementById('maker-expense-id').innerText = `ID: ${activeMakerTx.invNo || activeMakerTx.id} - ${activeMakerTx.desc}`;
+                
+                let dupWarning = '';
+                if (activeMakerTx.invNo) {
+                    const dup = window.txs.find(t => t.id !== activeMakerTx.id && (t.type || '').toLowerCase() === 'expense' && t.status !== 'Voided' && t.invNo && t.invNo.toLowerCase() === activeMakerTx.invNo.toLowerCase() && t.person === activeMakerTx.person);
+                    if (dup) dupWarning = `<br><span class="text-rose-400 bg-rose-950/50 px-2 py-0.5 rounded text-xs mt-1 inline-block border border-rose-500 shadow-sm"><i data-lucide="alert-triangle" class="w-3 h-3 inline"></i> PREVIOUSLY SUBMITTED ON ${window.formatSafeDate(dup.subDate)} FOR ${dup.amount} AED</span>`;
+                }
+                
+                document.getElementById('maker-expense-id').innerHTML = `ID: ${window.escapeHTML(activeMakerTx.invNo || activeMakerTx.id)} - ${window.escapeHTML(activeMakerTx.desc)}${dupWarning}`;
 
                 // Set amounts — respect explicitly saved VAT (including zero)
                 const totalAmt = activeMakerTx.amount || 0;
                 
-                // Check if VAT was explicitly stored (taxAmount field exists in the transaction)
-                const hasExplicitVat = (activeMakerTx.taxAmount !== undefined && activeMakerTx.taxAmount !== null) ||
-                                       (activeMakerTx.tax_amount !== undefined && activeMakerTx.tax_amount !== null);
-                let vatAmt = hasExplicitVat
-                    ? parseFloat(activeMakerTx.taxAmount !== undefined ? activeMakerTx.taxAmount : activeMakerTx.tax_amount)
-                    : null;
+                let vatAmt = null;
+                if (activeMakerTx.taxAmount !== undefined) vatAmt = parseFloat(activeMakerTx.taxAmount);
+                else if (activeMakerTx.tax_amount !== undefined) vatAmt = parseFloat(activeMakerTx.tax_amount);
+                
+                if (isNaN(vatAmt)) vatAmt = null;
 
                 // Only auto-calculate if VAT was NEVER saved (vatAmt is null = truly unknown)
                 if (vatAmt === null && totalAmt > 0) {
