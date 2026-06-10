@@ -3027,12 +3027,43 @@
                         let listHtml = "";
                         data.debts.forEach(d => {
                             const rem = (d.staffOwed || 0) - (d.repaidAmount || 0);
+                            const totalBill = parseFloat(d.amount) || d.staffOwed || 0;
+                            const advUsed = parseFloat(d.advanceAmountUsed || d.advance_amount_used) || 0;
+                            
                             total += rem;
                             msg += `• *${new Date(d.subDate).toLocaleDateString()}*: ${d.desc} → *${rem.toFixed(2)} AED*\n`;
+                            
+                            let textDetails = [];
+                            let htmlDetails = [];
+                            
+                            if (advUsed > 0) {
+                                textDetails.push(`Bill: ${totalBill.toFixed(2)} | Adv: -${advUsed.toFixed(2)} | Added to Debt: ${d.staffOwed.toFixed(2)}`);
+                                htmlDetails.push(`Bill: ${totalBill.toFixed(2)} | Adv Used: -${advUsed.toFixed(2)} | Added to Debt: ${d.staffOwed.toFixed(2)}`);
+                            }
+                            if (d.repaidAmount > 0) {
+                                textDetails.push(`Settled Later: -${d.repaidAmount.toFixed(2)}`);
+                                htmlDetails.push(`Settled Later: -${d.repaidAmount.toFixed(2)}`);
+                            }
+                            
+                            if (textDetails.length > 0) {
+                                msg += `   _${textDetails.join(' // ')}_\n`;
+                            }
+                            
                             const safeDesc = d.desc && d.desc.length > 28 ? d.desc.substring(0, 28) + '...' : (d.desc || '');
-                            listHtml += `<div class="flex justify-between py-1 border-b border-dashed border-slate-200">
-                                <span class="pr-2 text-slate-800">${safeDesc}</span>
-                                <span class="font-bold text-slate-900">${rem.toFixed(2)}</span>
+                            
+                            let detailsHtml = '';
+                            if (htmlDetails.length > 0) {
+                                detailsHtml = `<div class="text-[8px] text-slate-500 font-bold mt-0.5 space-y-0.5">
+                                    ${htmlDetails.map(hd => `<div>${hd}</div>`).join('')}
+                                </div>`;
+                            }
+
+                            listHtml += `<div class="py-1.5 border-b border-dashed border-slate-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="pr-2 text-slate-800 text-[10px] font-bold">${window.escapeHTML(safeDesc)}</span>
+                                    <span class="font-black text-slate-900 text-[11px]">${rem.toFixed(2)}</span>
+                                </div>
+                                ${detailsHtml}
                             </div>`;
                         });
                         msg += `\n${divider}\n`;
@@ -3081,22 +3112,47 @@
                         msg += cta;
 
                         htmlPreview = `
-                            <p class="font-bold text-center mb-2 uppercase tracking-tighter underline">${title}</p>
-                            <div class="space-y-1 text-slate-700">
-                                <p>PERSON: <strong class="text-slate-900">${window.escapeHTML(person)}</strong></p>
-                                <p>TYPE: <strong class="text-slate-900">${data.type.toUpperCase().replace('_', ' ')}</strong></p>
-                                <p>MEMO: <strong class="text-slate-900">${window.escapeHTML(data.desc)}</strong></p>
-                                ${data.invNo ? `<p>INV NO: <strong>${window.escapeHTML(data.invNo)}</strong></p>` : ''}
-                                ${data.invDate ? `<p>INV DATE: <strong>${new Date(data.invDate).toLocaleDateString('en-GB')}</strong></p>` : ''}
-                            </div>
-                            <div class="my-4 border-t-2 border-slate-300 pt-2 font-black text-xs flex justify-between">
-                                <span>TOTAL AMOUNT:</span>
-                                <span>${data.amount.toFixed(2)} AED</span>
-                            </div>
-                            <div class="text-[8px] text-slate-500 space-y-1 italic border-t border-dashed border-slate-200 pt-2">
-                                ${data.paidFromAdv ? `<p>Deducted from Adv: ${data.paidFromAdv.toFixed(2)}</p>` : ''}
-                                ${data.addedToDebt ? `<p>Added to Debt: ${data.addedToDebt.toFixed(2)}</p>` : ''}
-                                <p class="pt-1 font-bold">WALLET: ${currentAdv.toFixed(2)} | OWED: ${currentDebt.toFixed(2)}</p>
+                            <div class="bg-white p-2">
+                                <p class="font-bold text-center mb-4 uppercase tracking-tighter text-[13px] border-b border-slate-200 pb-2">${title}</p>
+                                <div class="grid grid-cols-2 gap-2 text-[10px] mb-4 text-slate-700">
+                                    <div class="col-span-2">
+                                        <p class="text-[8px] text-slate-400 uppercase font-bold tracking-widest">Person</p>
+                                        <p class="font-black text-[11px] text-slate-900">${window.escapeHTML(person)}</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-[8px] text-slate-400 uppercase font-bold tracking-widest">Type / Memo</p>
+                                        <p class="font-bold text-slate-800">${data.type.toUpperCase().replace('_', ' ')} - ${window.escapeHTML(data.desc)}</p>
+                                    </div>
+                                    ${data.invNo ? `
+                                    <div class="col-span-2">
+                                        <p class="text-[8px] text-slate-400 uppercase font-bold tracking-widest">Invoice Details</p>
+                                        <p class="font-bold text-slate-800">No: ${window.escapeHTML(data.invNo)} ${data.invDate ? ' | Date: ' + new Date(data.invDate).toLocaleDateString('en-GB') : ''}</p>
+                                    </div>
+                                    ` : ''}
+                                </div>
+
+                                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 mb-4">
+                                    <div class="flex justify-between font-black text-[12px] mb-2 text-slate-900">
+                                        <span>TOTAL AMOUNT:</span>
+                                        <span>${data.amount.toFixed(2)} AED</span>
+                                    </div>
+                                    <div class="space-y-1 text-[9px] font-bold">
+                                        ${data.paidFromAdv ? `<div class="flex justify-between text-rose-500"><span>Paid via Advance:</span><span>-${data.paidFromAdv.toFixed(2)} AED</span></div>` : ''}
+                                        ${data.addedToDebt ? `<div class="flex justify-between text-emerald-600"><span>Added to Company Owed:</span><span>+${data.addedToDebt.toFixed(2)} AED</span></div>` : ''}
+                                    </div>
+                                </div>
+
+                                <div class="border-t-2 border-dashed border-slate-300 pt-3">
+                                    <p class="text-center font-bold text-[8px] text-slate-400 tracking-widest uppercase mb-2">Current Account Status</p>
+                                    <div class="flex justify-between text-[10px] font-bold mb-1">
+                                        <span>Advance Balance:</span>
+                                        <span class="text-indigo-600">${currentAdv.toFixed(2)} AED</span>
+                                    </div>
+                                    <div class="flex justify-between text-[10px] font-black">
+                                        <span>Company Owes You:</span>
+                                        <span class="text-rose-600">${currentDebt.toFixed(2)} AED</span>
+                                    </div>
+                                </div>
                             </div>
                         `;
                     }
@@ -3106,46 +3162,51 @@
                         msg += `${divider}\n\n`;
                         msg += `*ACCOUNT STATEMENT*\n\n`;
                         msg += `PERSON: *${person}*\n`;
-                        msg += `PERIOD: *${data.period}*\n\n`;
-
                         let rowsHtml = "";
                         data.rows.forEach(r => {
-                            msg += `• *${r.date}*: ${r.desc}\n   *${r.flow} AED*\n\n`;
+                            msg += `• *${r.date}*: ${r.desc}\n   *${r.amount} AED*\n`;
+                            if (r.detailsText) msg += `   _${r.detailsText}_\n`;
+                            msg += `\n`;
                             rowsHtml += `
-                                <div class="flex justify-between py-1.5 border-b border-dashed border-slate-200">
-                                    <div class="flex flex-col pr-2 flex-1 min-w-0">
-                                        <span class="text-[9px] font-bold text-slate-500">${r.date}</span>
-                                        <span class="text-[10px] text-slate-800 font-semibold break-words">${window.escapeHTML(r.desc)}</span>
+                                <div class="py-2 border-b border-dashed border-slate-200">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <div class="flex flex-col pr-2 flex-1 min-w-0">
+                                            <span class="text-[8px] font-bold text-slate-400">${r.date}</span>
+                                            <span class="text-[10px] text-slate-800 font-bold break-words">${window.escapeHTML(r.desc)}</span>
+                                        </div>
+                                        <span class="font-black text-[11px] shrink-0 ml-2">${r.amount.toFixed(2)} AED</span>
                                     </div>
-                                    <span class="font-black text-[11px] self-center shrink-0 ml-2">${r.flow}</span>
+                                    <div class="text-[8px] font-bold mt-1 space-y-0.5">
+                                        ${r.detailsHtml || ''}
+                                    </div>
                                 </div>
                             `;
                         });
 
                         msg += `${divider}\n`;
-                        msg += `*OPENING: ${data.opening.toFixed(2)} AED*\n`;
-                        msg += `*CLOSING: ${data.closing.toFixed(2)} AED*\n`;
-                        if (data.debt > 0) msg += `*DEBT (OWED TO YOU): ${data.debt.toFixed(2)} AED*\n`;
+                        if (data.debt > 0) msg += `*COMPANY OWES YOU: ${data.debt.toFixed(2)} AED*\n`;
                         if (data.advance > 0) msg += `*ACTIVE ADVANCE: ${data.advance.toFixed(2)} AED*\n`;
                         msg += `*** THANK YOU ***`;
                         msg += cta;
 
                         htmlPreview = `
-                            <p class="font-bold text-center mb-2 underline uppercase tracking-tighter">Account Statement</p>
-                            <p class="text-[8px] text-center mb-4">PERIOD: ${data.period}</p>
-                            <div class="space-y-1 mb-4">
-                                ${rowsHtml}
-                            </div>
-                            <div class="border-t-2 border-slate-400 pt-2 text-[9px] space-y-1">
-                                <div class="flex justify-between font-bold text-slate-700"><span>OPENING BALANCE:</span><span>${data.opening.toFixed(2)}</span></div>
-                                <div class="flex justify-between font-black text-[11px] border-t border-slate-300 pt-1 text-slate-900">
-                                    <span>CLOSING BALANCE:</span>
-                                    <span>${data.closing.toFixed(2)} AED</span>
+                            <div class="bg-white p-1">
+                                <p class="font-black text-center mb-1 uppercase tracking-tight text-[13px]">Account Statement</p>
+                                <p class="text-[8px] font-bold text-center mb-4 text-slate-400 uppercase tracking-widest">PERIOD: ${data.period}</p>
+                                <div class="space-y-0 mb-6">
+                                    ${rowsHtml}
                                 </div>
-                                ${((data.debt > 0 || data.advance > 0) ? '<div class="border-t border-slate-300 pt-1 mt-1 space-y-0.5">' : '')}
-                                ${(data.debt > 0 ? '<div class="flex justify-between font-bold text-rose-600"><span>OWED TO YOU:</span><span>' + data.debt.toFixed(2) + ' AED</span></div>' : '')}
-                                ${(data.advance > 0 ? '<div class="flex justify-between font-bold text-indigo-600"><span>ACTIVE ADVANCE:</span><span>' + data.advance.toFixed(2) + ' AED</span></div>' : '')}
-                                ${((data.debt > 0 || data.advance > 0) ? '</div>' : '')}
+                                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+                                    <p class="text-center font-bold text-[8px] text-slate-400 tracking-widest uppercase mb-2">Final Balances</p>
+                                    <div class="flex justify-between font-bold text-[11px]">
+                                        <span>Advance Balance:</span>
+                                        <span class="text-indigo-600">${data.advance.toFixed(2)} AED</span>
+                                    </div>
+                                    <div class="flex justify-between font-black text-[12px]">
+                                        <span>Company Owes You:</span>
+                                        <span class="text-rose-600">${data.debt.toFixed(2)} AED</span>
+                                    </div>
+                                </div>
                             </div>
                         `;
                     }
@@ -3338,24 +3399,45 @@
                         const amt = parseFloat(t.amount) || 0;
                         const ttype = (t.type || '').toLowerCase();
                         const dateStr = new Date(t.subDate).toLocaleDateString('en-GB');
-                        let flow = 0;
-                        let symbol = "";
 
-                        if (ttype === 'advance') { flow = amt; symbol = "+"; }
-                        else if (ttype === 'return_advance') { flow = -amt; symbol = "-"; }
-                        else if (ttype === 'expense' && t.isDeductedFromAdvance) {
-                            flow = -(parseFloat(t.advanceAmountUsed) || 0);
-                            symbol = "-";
+                        let mainFlow = 0;
+                        if (ttype === 'advance') { mainFlow = amt; }
+                        else if (ttype === 'return_advance') { mainFlow = -amt; }
+                        else if (ttype === 'expense' && t.isDeductedFromAdvance) { mainFlow = -(parseFloat(t.advanceAmountUsed) || 0); }
+                        currentBal += mainFlow;
+
+                        let detailsHtml = '';
+                        let detailsText = '';
+                        if (ttype === 'expense') {
+                            const advUsed = t.isDeductedFromAdvance ? (parseFloat(t.advanceAmountUsed) || 0) : 0;
+                            const debtAdded = amt - advUsed;
+                            if (advUsed > 0) {
+                                detailsHtml += `<span class="text-rose-500">Paid via Advance: -${advUsed.toFixed(2)}</span>`;
+                                detailsText += `Paid via Advance: -${advUsed.toFixed(2)}`;
+                            }
+                            if (debtAdded > 0) {
+                                detailsHtml += `<span class="text-emerald-600 ${advUsed > 0 ? 'ml-2' : ''}">Added to Owed: +${debtAdded.toFixed(2)}</span>`;
+                                if (detailsText) detailsText += ` | `;
+                                detailsText += `Added to Owed: +${debtAdded.toFixed(2)}`;
+                            }
+                        } else if (ttype === 'advance') {
+                            detailsHtml += `<span class="text-indigo-600 uppercase tracking-widest">Company Advance Issued</span>`;
+                            detailsText += `Company Advance Issued`;
+                        } else if (ttype === 'return_advance') {
+                            detailsHtml += `<span class="text-amber-600 uppercase tracking-widest">Cash Returned by Staff</span>`;
+                            detailsText += `Cash Returned by Staff`;
+                        } else if (ttype === 'settle_debt') {
+                            detailsHtml += `<span class="text-blue-600 uppercase tracking-widest">Debt Settled/Paid</span>`;
+                            detailsText += `Debt Settled/Paid`;
                         }
 
-                        currentBal += flow;
-                        if (flow !== 0) {
-                            statementRows.push({
-                                date: dateStr,
-                                desc: t.desc || t.desc_text || '-',
-                                flow: `${symbol}${Math.abs(flow).toFixed(2)}`
-                            });
-                        }
+                        statementRows.push({
+                            date: dateStr,
+                            desc: t.desc || t.desc_text || '-',
+                            amount: amt,
+                            detailsHtml: detailsHtml,
+                            detailsText: detailsText
+                        });
                     });
 
                     pendingWhatsAppPayload = {
