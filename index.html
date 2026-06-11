@@ -585,12 +585,18 @@
                                 </div>
                             </div>
 
-                            <div class="space-y-2">
-                                <label
-                                    class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Description
-                                    / Memo</label>
-                                <input type="text" id="form-desc" required placeholder="What is this transaction for?"
-                                    class="modern-input w-full px-4 py-3 rounded-xl font-medium text-sm text-slate-800">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Vendor (Optional)</label>
+                                    <input type="text" id="form-vendor" list="vendor-list" placeholder="Select or type..."
+                                        onchange="window.handleMainVendorChange(this.value)"
+                                        class="modern-input w-full px-4 py-3 rounded-xl font-medium text-sm text-slate-800">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Description / Memo</label>
+                                    <input type="text" id="form-desc" required placeholder="What is this transaction for?"
+                                        class="modern-input w-full px-4 py-3 rounded-xl font-medium text-sm text-slate-800">
+                                </div>
                             </div>
 
                             <button type="submit" id="process-btn"
@@ -822,6 +828,11 @@
                                 </div>
                                 
                                 <div class="group">
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block group-focus-within:text-indigo-600 transition-colors">Vendor (Optional)</label>
+                                    <input type="text" id="maker-vendor" list="vendor-list" placeholder="Select or type..." onchange="window.handleVendorChange(this.value)" class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-bold text-slate-800 focus:border-indigo-500 focus:bg-white outline-none transition-all">
+                                    <datalist id="vendor-list"></datalist>
+                                </div>
+                                <div class="group mt-3">
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block group-focus-within:text-indigo-600 transition-colors">Details / Description</label>
                                     <input type="text" id="maker-desc" class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-bold text-slate-800 focus:border-indigo-500 focus:bg-white outline-none transition-all">
                                 </div>
@@ -1040,6 +1051,24 @@
                                 View Records
                             </button>
                         </div>
+                        
+                        <!-- System Audit Logs -->
+                        <div
+                            class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><i data-lucide="list"
+                                        class="w-5 h-5"></i></div>
+                                <div>
+                                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">System
+                                        Audit Logs</h4>
+                                    <p class="text-[10px] text-slate-500 font-medium">Global Activity Trace</p>
+                                </div>
+                            </div>
+                            <button onclick="window.viewSystemLogs()"
+                                class="bg-indigo-50 text-indigo-700 px-5 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-indigo-100 transition-all border border-indigo-200">
+                                View Logs
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Data Administration -->
@@ -1136,9 +1165,22 @@
                         </div>
                         <div id="list-category" class="flex flex-wrap gap-2 content-start flex-grow"></div>
                     </div>
+
+                    <!-- Vendors Config -->
+                    <div class="modern-card p-6 h-full flex flex-col">
+                        <h3 class="font-black mb-6 flex items-center gap-2 text-slate-800 uppercase text-xs tracking-widest">
+                            <i data-lucide="truck" class="w-4 h-4 text-fuchsia-500"></i> Vendors
+                        </h3>
+                        <div class="flex gap-2 mb-4">
+                            <input type="text" id="new-vendor" placeholder="Vendor Name" class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs font-bold focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-500 transition-all">
+                            <button onclick="window.addItem('vendor')" class="bg-fuchsia-600 text-white px-4 rounded-xl font-bold text-xs hover:bg-fuchsia-700 transition-all shadow-md">Add</button>
+                        </div>
+                        <div id="list-vendor" class="flex flex-wrap gap-2 content-start flex-grow"></div>
+                    </div>
                 </div>
 
                 <div class="pt-8 border-t border-slate-200 flex flex-col gap-4">
+                    <button onclick="window.viewSystemLogs()" class="w-full bg-slate-50 text-slate-600 py-4 rounded-xl font-black border border-slate-200 uppercase text-xs tracking-widest hover:bg-slate-100 hover:border-slate-300 transition-all flex justify-center items-center gap-2"><i data-lucide="list" class="w-4 h-4"></i> View System Logs</button>
                     <button onclick="window.resetData()"
                         class="w-full bg-rose-50 text-rose-600 py-4 rounded-xl font-black border border-rose-200 uppercase text-xs tracking-widest hover:bg-rose-100 hover:border-rose-300 transition-all flex justify-center items-center gap-2"><i
                             data-lucide="alert-triangle" class="w-4 h-4"></i> Danger: Factory Reset Database</button>
@@ -1664,6 +1706,16 @@
                                         <span class="text-xs font-black text-slate-400 ml-1 uppercase tracking-widest">AED</span>
                                     </div>
                                 </div>
+                                <div id="td-funding-breakdown" class="hidden mt-4 pt-4 border-t border-dashed border-slate-200">
+                                    <div class="flex justify-between items-center text-xs">
+                                        <span class="font-bold text-slate-400 uppercase tracking-tighter">Paid via Advance</span>
+                                        <span class="font-black text-rose-500" id="td-adv-used">0.00</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs mt-2">
+                                        <span class="font-bold text-slate-400 uppercase tracking-tighter">Added to Debt</span>
+                                        <span class="font-black text-emerald-600" id="td-debt-added">0.00</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1706,6 +1758,18 @@
                                 <div class="flex justify-between items-start text-[11px]">
                                     <span class="font-bold text-indigo-400 uppercase tracking-tight">Audit Status</span>
                                     <div id="td-audit-status" class="text-right font-black">--</div>
+                                </div>
+                                <div id="td-wallet-snapshot" class="hidden flex justify-between items-start text-[11px] bg-white/50 p-2 rounded-xl">
+                                    <span class="font-bold text-indigo-400 uppercase tracking-tight">Balance Snapshot</span>
+                                    <div id="td-snapshot-details" class="text-right font-black text-slate-600">--</div>
+                                </div>
+                                <div id="td-void-reason-container" class="hidden flex justify-between items-start text-[11px] bg-rose-50 p-2 rounded-xl border border-rose-100">
+                                    <span class="font-bold text-rose-500 uppercase tracking-tight">Void Reason</span>
+                                    <div id="td-void-reason" class="text-right font-black text-rose-600">--</div>
+                                </div>
+                                <div id="td-settlement-links" class="hidden flex justify-between items-start text-[11px] bg-emerald-50 p-2 rounded-xl border border-emerald-100">
+                                    <span class="font-bold text-emerald-500 uppercase tracking-tight">Bills Paid</span>
+                                    <div id="td-settlement-details" class="text-right font-black text-emerald-600 break-words max-w-[150px]">--</div>
                                 </div>
                                 <div class="flex justify-between items-start text-[11px]">
                                     <span class="font-bold text-indigo-400 uppercase tracking-tight">Batch Source</span>
@@ -2043,6 +2107,8 @@
             let staff = []; // Array of objects {name: "Name", phone: "123"} or plain strings (legacy)
             let sources = [];
             let categories = ["Warehouses", "Open Yard", "Admin Building", "Site General"];
+            let vendors = [];
+            let systemLogs = [];
             let activeTab = 'expense';
             let pendingTxData = null;
             let settlingId = null;
@@ -2114,6 +2180,48 @@
                         resolve(canvas.toDataURL('image/jpeg', 0.8));
                     };
                 });
+            };
+
+            window.logSystemAction = async (desc) => {
+                try {
+                    if (!currentUser) return;
+                    const logEntry = {
+                        timestamp: new Date().toISOString(),
+                        desc: desc,
+                        user: currentUser.email || currentUser.uid
+                    };
+                    systemLogs.unshift(logEntry); // Add to beginning
+                    if (systemLogs.length > 500) systemLogs.length = 500; // Keep last 500 logs
+                    await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { systemLogs }, { merge: true });
+                } catch (e) {
+                    console.error("Failed to log system action:", e);
+                }
+            };
+
+            window.viewSystemLogs = () => {
+                const logsHtml = systemLogs.map(log => `
+                    <div class="border-b border-slate-100 py-3 flex gap-4 text-xs">
+                        <div class="text-slate-400 font-bold whitespace-nowrap">${new Date(log.timestamp).toLocaleString()}</div>
+                        <div class="text-slate-700 font-bold flex-1">${log.desc}</div>
+                        <div class="text-indigo-400 font-black uppercase tracking-widest text-[9px]">${log.user}</div>
+                    </div>
+                `).join('');
+
+                const modalHtml = `
+                    <div id="system-logs-modal" class="fixed inset-0 z-[7000] flex items-center justify-center p-4 modal-overlay no-print transition-smooth bg-slate-900/60 backdrop-blur-sm">
+                        <div class="bg-white rounded-3xl shadow-2xl w-[800px] max-h-[85vh] overflow-hidden flex flex-col">
+                            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                <h3 class="font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><i data-lucide="list" class="w-5 h-5 text-indigo-500"></i> System Audit Logs</h3>
+                                <button onclick="document.getElementById('system-logs-modal').remove()" class="text-slate-400 hover:text-slate-800 transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+                            </div>
+                            <div class="p-6 overflow-y-auto no-scrollbar flex-1 bg-white">
+                                ${logsHtml || '<p class="text-slate-400 text-center py-8 font-bold">No system logs recorded yet.</p>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                lucide.createIcons();
             };
 
             window.uploadInvoiceScan = async (customData = null, txId = null) => {
@@ -3810,7 +3918,12 @@
                             return `<div class="bg-white px-3 py-2 rounded-xl border border-slate-100 flex items-center justify-between gap-3 min-w-[100px] hover:shadow-md transition-smooth"><span class="text-[11px] font-bold text-slate-600 uppercase tracking-tight">${name} ${phoneDisplay}</span><button onclick="window.deleteItem('${type}', ${idx})" class="text-slate-300 hover:text-rose-500 transition-colors"><i data-lucide="x" class="w-3 h-3"></i></button></div>`;
                         }).join('');
                 };
-                listFn('list-staff', staff, 'staff'); listFn('list-source', sources, 'source'); listFn('list-category', categories, 'category');
+                listFn('list-staff', staff, 'staff'); listFn('list-source', sources, 'source'); listFn('list-category', categories, 'category'); listFn('list-vendor', vendors, 'vendor');
+
+                const vendorDatalist = document.getElementById('vendor-list');
+                if (vendorDatalist) {
+                    vendorDatalist.innerHTML = vendors.map(v => `<option value="${v}">`).join('');
+                }
 
                 const filterCat = document.getElementById('filter-cat');
                 if (filterCat) {
@@ -4420,6 +4533,15 @@
                     const dateInput = document.getElementById('form-sub-date');
                     if (!amountInput || !descInput || !dateInput) throw new Error("Missing inputs");
 
+                    const vendorInput = document.getElementById('form-vendor');
+                    if (vendorInput && vendorInput.value.trim()) {
+                        const newVendor = vendorInput.value.trim();
+                        if (!vendors.includes(newVendor)) {
+                            vendors.push(newVendor);
+                            setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { vendors }, { merge: true }).catch(console.error);
+                        }
+                    }
+
                     const amount = parseFloat(amountInput.value);
                     const totals = getTotals();
                     const personSelect = document.getElementById('form-person');
@@ -4507,7 +4629,11 @@
                         batch_id: null,
                         user_id: currentUser.uid,
                         manager_owed: 0,
-                        repaid_amount: 0
+                        repaid_amount: 0,
+                        wallet_snapshot: {
+                            advance: getAdvanceWalletFor(person),
+                            debt: getDebtToStaff(person)
+                        }
                     };
 
                     if (paidFromBox > 0 && paidFromBox > (totals.balance + 0.01)) {
@@ -4539,6 +4665,7 @@
                     }
 
                     await setDoc(newTxRef, tx);
+                    if (window.logSystemAction) window.logSystemAction(`Created new transaction #${newTxRef.id.substring(0,5)} (${tx.amount} AED)`);
                     window.showStatus("Transaction Saved!");
 
                     // Automatically show receipt modal
@@ -6367,6 +6494,8 @@
                         status: 'Voided',
                         void_reason: reason
                     });
+                    
+                    if (window.logSystemAction) window.logSystemAction(`Voided TX #${id.substring(0,5)} (${tx.amount} AED). Reason: ${reason}`);
 
                     window.showStatus("Transaction Voided.");
                 } catch (error) { window.showStatus("Error: " + error.message, true); return; }
@@ -6411,6 +6540,7 @@
                             advanceAmountUsed: 0
                         };
                         window.openReceiptPreview(null, mockTx);
+                        if (window.logSystemAction) window.logSystemAction(`Returned Advance for ${pName}: ${val} AED`);
                     } else {
                         if (!target) throw new Error("Original transaction not found for debt settlement.");
                         const totals = getTotals();
@@ -6448,6 +6578,7 @@
                             advanceAmountUsed: 0
                         };
                         window.openReceiptPreview(null, mockTx);
+                        if (window.logSystemAction) window.logSystemAction(`Settled Debt for ${receiverName}: ${val} AED (Covered TX #${target.id.substring(0,5)})`);
                     }
                     window.showStatus("Settled.");
                     window.closeModal();
@@ -6474,24 +6605,26 @@
                     phoneInput.value = '';
                 } else if (type === 'source') {
                     sources.push(val);
+                } else if (type === 'vendor') {
+                    vendors.push(val);
                 } else {
                     categories.push(val);
                 }
 
                 input.value = '';
                 try {
-                    await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { staff, sources, categories });
+                    await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { staff, sources, categories, vendors, systemLogs }, { merge: true });
                 } catch (error) {
                     window.showStatus("Error: " + error.message, true);
-                    if (type === 'staff') staff.pop(); else if (type === 'source') sources.pop(); else categories.pop();
+                    if (type === 'staff') staff.pop(); else if (type === 'source') sources.pop(); else if (type === 'vendor') vendors.pop(); else categories.pop();
                 }
             };
 
             window.deleteItem = async (type, index) => {
                 if (!currentUser) return;
-                if (type === 'staff') staff.splice(index, 1); else if (type === 'source') sources.splice(index, 1); else categories.splice(index, 1);
+                if (type === 'staff') staff.splice(index, 1); else if (type === 'source') sources.splice(index, 1); else if (type === 'vendor') vendors.splice(index, 1); else categories.splice(index, 1);
                 try {
-                    await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { staff, sources, categories });
+                    await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { staff, sources, categories, vendors, systemLogs }, { merge: true });
                 } catch (error) { window.showStatus("Error: " + error.message, true); }
             };
 
@@ -6704,7 +6837,8 @@
                     pendingTxData.settled = false;
                     pendingTxData.user_id = currentUser.uid;
 
-                    await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), pendingTxData);
+                    const docRef = await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), pendingTxData);
+                    if (window.logSystemAction) window.logSystemAction(`Created new transaction with partial funding #${docRef.id.substring(0,5)} (${pendingTxData.amount} AED)`);
                     window.closeModal();
                 } catch (e) {
                     window.showStatus("Error: " + e.message, true);
@@ -7281,6 +7415,8 @@
                 });
                 sources = d.sources || [];
                 categories = d.categories || ["Warehouses", "Open Yard", "Admin Building", "Site General"];
+                vendors = d.vendors || [];
+                systemLogs = d.systemLogs || [];
                 lastCashCountDate = d.last_cash_count_date || null;
                 renderRegistry();
                 renderPersonSelect();
@@ -8005,6 +8141,18 @@
                 document.getElementById('td-vat').innerText = tax.toFixed(2);
                 document.getElementById('td-total').innerText = (t.amount || 0).toFixed(2);
                 
+                const advUsed = parseFloat(t.advanceAmountUsed || t.advance_amount_used) || 0;
+                const debtAdded = parseFloat(t.staffOwed || t.staff_owed || t.addedToDebt) || 0;
+                const fundingBreakdown = document.getElementById('td-funding-breakdown');
+                
+                if (advUsed > 0 || debtAdded > 0) {
+                    fundingBreakdown.classList.remove('hidden');
+                    document.getElementById('td-adv-used').innerText = `-${advUsed.toFixed(2)} AED`;
+                    document.getElementById('td-debt-added').innerText = `+${debtAdded.toFixed(2)} AED`;
+                } else {
+                    if(fundingBreakdown) fundingBreakdown.classList.add('hidden');
+                }
+                
                 // Allocations
                 const allocsCont = document.getElementById('td-allocations');
                 if (t.allocations && t.allocations.length > 0) {
@@ -8062,6 +8210,34 @@
                     auditStatus.innerHTML = `<span class="text-emerald-600 flex items-center gap-1 justify-end"><i data-lucide="check-circle-2" class="w-3 h-3"></i> VERIFIED</span>`;
                 } else {
                     auditStatus.innerHTML = `<span class="text-slate-400 uppercase">UNAUDITED</span>`;
+                }
+
+                // Balance Snapshot
+                const snapshotEl = document.getElementById('td-wallet-snapshot');
+                if (t.wallet_snapshot) {
+                    snapshotEl.classList.remove('hidden');
+                    document.getElementById('td-snapshot-details').innerText = `Adv: ${t.wallet_snapshot.advance.toFixed(2)} | Debt: ${t.wallet_snapshot.debt.toFixed(2)}`;
+                } else {
+                    snapshotEl.classList.add('hidden');
+                }
+
+                // Void Reason
+                const voidEl = document.getElementById('td-void-reason-container');
+                if (t.status === 'Voided' && (t.voidReason || t.void_reason)) {
+                    voidEl.classList.remove('hidden');
+                    document.getElementById('td-void-reason').innerText = t.voidReason || t.void_reason;
+                } else {
+                    voidEl.classList.add('hidden');
+                }
+
+                // Settlement Links
+                const settleEl = document.getElementById('td-settlement-links');
+                const settledIds = t.covered_txs || (t.settledTxId ? [t.settledTxId] : (t.settled_tx_id ? [t.settled_tx_id] : null));
+                if (t.type === 'settle_debt' && settledIds && settledIds.length > 0) {
+                    settleEl.classList.remove('hidden');
+                    document.getElementById('td-settlement-details').innerText = settledIds.map(id => '#' + id.substring(0, 5)).join(', ');
+                } else {
+                    settleEl.classList.add('hidden');
                 }
 
                 const batchEl = document.getElementById('td-batch');
@@ -8169,6 +8345,22 @@
                 }
             };
 
+            window.handleVendorChange = (val) => {
+                if (!val) return;
+                const descField = document.getElementById('maker-desc');
+                if (descField && !descField.value.startsWith(val)) {
+                    descField.value = val + ' - ' + descField.value.replace(/^[^-]+-\s*/, '');
+                }
+            };
+
+            window.handleMainVendorChange = (val) => {
+                if (!val) return;
+                const descField = document.getElementById('form-desc');
+                if (descField && !descField.value.startsWith(val)) {
+                    descField.value = val + ' - ' + descField.value.replace(/^[^-]+-\s*/, '');
+                }
+            };
+
             window.approveMakerExpense = async () => {
                 if (!activeMakerTx) return;
 
@@ -8178,6 +8370,12 @@
                 const newDate = document.getElementById('maker-date').value;
                 const newDesc = document.getElementById('maker-desc').value;
                 const newInvNo = document.getElementById('maker-inv-no').value;
+                const newVendor = document.getElementById('maker-vendor').value.trim();
+
+                if (newVendor && !vendors.includes(newVendor)) {
+                    vendors.push(newVendor);
+                    setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { vendors }, { merge: true }).catch(console.error);
+                }
 
                 // Update Firestore
                 try {
@@ -8211,6 +8409,8 @@
                     }
 
                     await updateDoc(docRef, updateData);
+                    
+                    if (window.logSystemAction) window.logSystemAction(`Audited and approved TX #${activeMakerTx.id.substring(0,5)} (${newTotal} AED)`);
 
                     window.showStatus(`Saved & Audited ${activeMakerTx.invNo || activeMakerTx.id}`);
                 } catch (e) {
