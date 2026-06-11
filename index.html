@@ -585,14 +585,14 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="space-y-2">
+                            <div id="vendor-desc-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div id="vendor-container" class="space-y-2">
                                     <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Vendor (Optional)</label>
                                     <input type="text" id="form-vendor" list="vendor-list" placeholder="Select or type..."
                                         onchange="window.handleMainVendorChange(this.value)"
                                         class="modern-input w-full px-4 py-3 rounded-xl font-medium text-sm text-slate-800">
                                 </div>
-                                <div class="space-y-2">
+                                <div id="desc-container" class="space-y-2">
                                     <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide ml-1">Description / Memo</label>
                                     <input type="text" id="form-desc" required placeholder="What is this transaction for?"
                                         class="modern-input w-full px-4 py-3 rounded-xl font-medium text-sm text-slate-800">
@@ -3541,7 +3541,7 @@
 
                         statementRows.push({
                             date: dateStr,
-                            desc: t.desc || t.desc_text || '-',
+                            desc: window.getEnrichedDesc(t),
                             amount: amt,
                             detailsHtml: detailsHtml,
                             detailsText: detailsText
@@ -3621,7 +3621,7 @@
                             <td style="padding: 8px; font-size: 10px;">${new Date(t.subDate).toLocaleDateString()}</td>
                             <td style="padding: 8px; font-size: 10px;">
                                 <strong>${ttype.replace('_', ' ').toUpperCase()}</strong><br/>
-                                <span style="color: #666;">${window.escapeHTML(t.desc || '-')}</span>
+                                <span style="color: #666;">${window.escapeHTML(window.getEnrichedDesc(t))}</span>
                             </td>
                             <td style="padding: 8px; font-size: 10px; text-align: right; color: #059669;">${flowIn > 0 ? flowIn.toFixed(2) : '-'}</td>
                             <td style="padding: 8px; font-size: 10px; text-align: right; color: #dc2626;">${flowOut > 0 ? flowOut.toFixed(2) : '-'}</td>
@@ -3886,7 +3886,7 @@
                         <tr class="hover:bg-slate-50">
                             <td class="px-4 py-3 font-mono text-[10px] text-slate-500">${new Date(t.subDate).toLocaleDateString()}</td>
                             <td class="px-4 py-3"><span class="text-[9px] font-black uppercase px-2 py-1 rounded-md ${window.getTypeStyles(ttype)}">${ttype.replace('_', ' ')}</span></td>
-                            <td class="px-4 py-3 font-bold text-xs text-slate-700 truncate max-w-[200px]" title="${t.desc}">${t.desc || '-'}</td>
+                            <td class="px-4 py-3 font-bold text-xs text-slate-700 truncate max-w-[200px]" title="${window.escapeHTML(window.getEnrichedDesc(t))}">${window.escapeHTML(window.getEnrichedDesc(t))}</td>
                             <td class="px-4 py-3 font-mono text-xs text-right text-emerald-600 font-bold">${flowIn > 0 ? flowIn.toFixed(2) : '-'}</td>
                             <td class="px-4 py-3 font-mono text-xs text-right text-rose-600 font-bold">${flowOut > 0 ? flowOut.toFixed(2) : '-'}</td>
                             <td class="px-4 py-3 font-mono text-xs text-right text-slate-800 font-bold">${runBal.toFixed(2)}</td>
@@ -4053,6 +4053,57 @@
                 return new Date(dString).toLocaleDateString('en-GB');
             };
 
+            window.getEnrichedDesc = (t) => {
+                let baseDesc = t.desc || t.desc_text || '-';
+                
+                // Strip out manually injected extended description to prevent double-rendering
+                if (baseDesc.includes('| Orig Exp:')) {
+                    baseDesc = baseDesc.split('| Orig Exp:')[0].trim();
+                }
+
+                if (t.type === 'expense' && (t.managerOwed || t.staffOwed)) {
+                    const initialDebt = t.managerOwed || t.staffOwed || 0;
+                    const paid = t.repaidAmount || 0;
+                    const rem = initialDebt - paid;
+                    baseDesc += ` | Initial Debt: ${initialDebt.toFixed(2)}`;
+                    if (paid > 0) baseDesc += ` | Paid: ${paid.toFixed(2)}`;
+                    baseDesc += ` | Remaining: ${Math.max(0, rem).toFixed(2)}`;
+                } else if (t.type === 'settle_debt' || t.type === 'settle') {
+                    let target = null;
+                    if (t.settled_tx_id) {
+                        target = txs.find(x => x.id === t.settled_tx_id);
+                    } else {
+                        let searchDesc = baseDesc;
+                        if (searchDesc.startsWith('Pay: ')) searchDesc = searchDesc.substring(5).trim();
+                        // Find the oldest expense with this exact description and some debt
+                        target = txs.find(x => x.type === 'expense' && (x.desc === searchDesc || x.desc_text === searchDesc) && (x.managerOwed || x.staffOwed));
+                    }
+
+                    if (target) {
+                        const pastSettlements = txs.filter(x => {
+                            if (x.type !== 'settle_debt' && x.type !== 'settle') return false;
+                            if (x.settled_tx_id) return x.settled_tx_id === target.id;
+                            let xDesc = x.desc || x.desc_text || '';
+                            if (xDesc.startsWith('Pay: ')) xDesc = xDesc.substring(5).trim();
+                            return xDesc === (target.desc || target.desc_text);
+                        }).filter(x => new Date(x.timestamp || 0) <= new Date(t.timestamp || 0)).sort((a,b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+                        
+                        let historyStr = '';
+                        if (pastSettlements.length > 0) {
+                            historyStr = pastSettlements.map(p => `${window.formatSafeDate(p.subDate || p.sub_date)}: ${parseFloat(p.amount||0).toFixed(2)}`).join(', ');
+                        }
+                        const initialDebt = target.managerOwed || target.staffOwed || 0;
+                        const paidBeforeThis = pastSettlements.reduce((sum, p) => sum + (p.id === t.id ? 0 : parseFloat(p.amount||0)), 0);
+                        const rem = initialDebt - paidBeforeThis - (parseFloat(t.amount) || 0);
+
+                        baseDesc += ` | Orig Exp: ${(parseFloat(target.amount)||0).toFixed(2)} | Initial Debt: ${initialDebt.toFixed(2)}`;
+                        if (historyStr) baseDesc += ` | History: [${historyStr}]`;
+                        baseDesc += ` | Remaining Debt: ${Math.max(0, rem).toFixed(2)}`;
+                    }
+                }
+                return baseDesc;
+            };
+
             window.txRenderLimit = 50;
             window.addEventListener('scroll', () => {
                 if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
@@ -4181,7 +4232,7 @@
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
                                     <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md ${window.getTypeStyles((t.type || '').toLowerCase())}">${typeLabel}</span>
-                                    <span class="font-bold text-slate-700 ${isVoided ? 'line-through' : ''}">${window.escapeHTML(t.desc || 'No Desc')}</span>
+                                    <span class="font-bold text-slate-700 ${isVoided ? 'line-through' : ''}">${window.escapeHTML(window.getEnrichedDesc(t))}</span>
                                 </div>
                                 <div class="mt-1.5 flex flex-wrap items-center gap-2">
                                     ${allocs}
@@ -4405,8 +4456,15 @@
                 });
                 const r = document.getElementById('reimburse-fields');
                 const a = document.getElementById('allocation-section');
+                const vCont = document.getElementById('vendor-container');
+                const vGrid = document.getElementById('vendor-desc-grid');
                 if (r) r.classList.toggle('hidden', tab !== 'expense');
                 if (a) a.classList.toggle('hidden', tab !== 'expense');
+                if (vCont) vCont.classList.toggle('hidden', tab !== 'expense');
+                if (vGrid) {
+                    if (tab === 'expense') vGrid.classList.add('md:grid-cols-2');
+                    else vGrid.classList.remove('md:grid-cols-2');
+                }
                 renderPersonSelect();
                 if (tab === 'expense') {
                     currentAllocations = [{ id: Date.now(), category: categories[0], propertyNo: '' }];
@@ -6556,11 +6614,27 @@
                         });
 
                         const receiverName = target.managerOwed ? 'Admin' : target.person;
+                        const origDesc = target.desc || target.desc_text || '';
+                        
+                        const pastSettlements = txs.filter(t => t.type === 'settle_debt' && t.settled_tx_id === target.id).sort((a,b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+                        let historyStr = '';
+                        if (pastSettlements.length > 0) {
+                            historyStr = pastSettlements.map(p => `${window.formatSafeDate(p.subDate || p.sub_date)}: ${p.amount.toFixed(2)}`).join(', ');
+                        }
+                        
+                        const initialDebt = target.managerOwed || target.staffOwed || 0;
+                        const remaining = initialDebt - (target.repaidAmount || 0) - val;
+                        
+                        let extendedDesc = `Pay: ${origDesc} | Orig Exp: ${(target.amount||0).toFixed(2)} | Initial Debt: ${initialDebt.toFixed(2)}`;
+                        if (historyStr) extendedDesc += ` | Past Paid: [${historyStr}]`;
+                        extendedDesc += ` | Current Pay (${window.formatSafeDate(window.getLocalDate())}): ${val.toFixed(2)}`;
+                        extendedDesc += ` | Remaining Debt: ${Math.max(0, remaining).toFixed(2)}`;
+
                         await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), {
                             type: 'settle_debt',
                             amount: val,
                             person: receiverName,
-                            desc_text: `Pay: ${target.desc || target.desc_text}`,
+                            desc_text: extendedDesc,
                             sub_date: window.getLocalDate(),
                             paid_from_box: val,
                             timestamp: new Date().toISOString(),
@@ -6572,7 +6646,7 @@
                             type: 'settle_debt',
                             amount: val,
                             person: receiverName,
-                            desc: `Pay: ${target.desc || target.desc_text}`,
+                            desc: extendedDesc,
                             subDate: window.getLocalDate(),
                             isDeductedFromAdvance: false,
                             advanceAmountUsed: 0
@@ -8129,7 +8203,7 @@
                 typePill.className = `inline-block px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter mb-2 ${window.getTypeStyles(type)}`;
                 
                 // Content
-                document.getElementById('td-desc').innerText = t.desc || t.desc_text || 'No Description';
+                document.getElementById('td-desc').innerText = window.getEnrichedDesc(t);
                 document.getElementById('td-date-sub').innerText = `INV: ${t.invoiceNo || 'N/A'} • DATE: ${window.formatSafeDate(t.invoiceDate || t.subDate)}`;
                 document.getElementById('td-person').innerText = t.person || '-';
                 document.getElementById('td-method').innerText = t.paymentMethod || 'Cash';
