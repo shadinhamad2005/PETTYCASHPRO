@@ -1177,6 +1177,18 @@
                         </div>
                         <div id="list-vendor" class="flex flex-wrap gap-2 content-start flex-grow"></div>
                     </div>
+
+                    <!-- Prepaid Vendors Config -->
+                    <div class="modern-card p-6 h-full flex flex-col">
+                        <h3 class="font-black mb-6 flex items-center gap-2 text-slate-800 uppercase text-xs tracking-widest">
+                            <i data-lucide="wallet" class="w-4 h-4 text-sky-500"></i> Prepaid Vendors
+                        </h3>
+                        <div class="flex gap-2 mb-4">
+                            <input type="text" id="new-prepaid_vendor" placeholder="Prepaid Vendor Name" class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs font-bold focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all">
+                            <button onclick="window.addItem('prepaid_vendor')" class="bg-sky-600 text-white px-4 rounded-xl font-bold text-xs hover:bg-sky-700 transition-all shadow-md">Add</button>
+                        </div>
+                        <div id="list-prepaid_vendor" class="flex flex-wrap gap-2 content-start flex-grow"></div>
+                    </div>
                 </div>
 
                 <div class="pt-8 border-t border-slate-200 flex flex-col gap-4">
@@ -1300,7 +1312,7 @@
             <div
                 class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
                 <div class="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-800">Staff Statement</h3>
+                    <h3 id="staff-modal-title" class="font-bold text-slate-800">Staff Statement</h3>
                     <button onclick="window.closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x"
                             class="w-5 h-5"></i></button>
                 </div>
@@ -2108,6 +2120,7 @@
             let sources = [];
             let categories = ["Warehouses", "Open Yard", "Admin Building", "Site General"];
             let vendors = [];
+            let prepaidVendors = [];
             let systemLogs = [];
             let activeTab = 'expense';
             let pendingTxData = null;
@@ -2905,6 +2918,24 @@
             window.checkAdvanceWallet = function (person) {
                 const container = document.getElementById('advance-deduction-container');
                 const reimContainer = document.getElementById('reimburse-option-container');
+                
+                const isPrepaid = prepaidVendors.includes(person);
+                const tabAdvBtn = document.querySelector('button[data-tab="advance"]');
+                if (tabAdvBtn) {
+                    if (isPrepaid) {
+                        tabAdvBtn.innerHTML = '<i data-lucide="send"></i> Top-Up Vendor Wallet';
+                        if (activeTab === 'advance') {
+                            document.getElementById('process-btn').innerHTML = '<i data-lucide="save"></i> Process Top-Up';
+                        }
+                    } else {
+                        tabAdvBtn.innerHTML = '<i data-lucide="send"></i> Give Advance';
+                        if (activeTab === 'advance') {
+                            document.getElementById('process-btn').innerHTML = '<i data-lucide="save"></i> Process Transaction';
+                        }
+                    }
+                    lucide.createIcons();
+                }
+
                 if (!container) return;
                 if (activeTab !== 'expense') {
                     container.classList.add('hidden');
@@ -2916,8 +2947,8 @@
                     container.classList.remove('hidden');
                     const tEl = document.getElementById('advance-deduction-text');
                     const bEl = document.getElementById('advance-balance-text');
-                    if (tEl) tEl.innerText = `Deduct from ${person}'s Advance`;
-                    if (bEl) bEl.innerText = `Available: ${wallet.toFixed(2)} AED`;
+                    if (tEl) tEl.innerText = isPrepaid ? `Deduct from Vendor Wallet` : `Deduct from ${person}'s Advance`;
+                    if (bEl) bEl.innerText = isPrepaid ? `Wallet Balance: ${wallet.toFixed(2)} AED` : `Available: ${wallet.toFixed(2)} AED`;
                 } else { container.classList.add('hidden'); }
 
                 if (reimContainer) {
@@ -3265,10 +3296,11 @@
                         `;
                     }
                     else if (type === 'statement') {
+                        const isPrepaid = prepaidVendors.includes(person);
                         msg = `${header} ${String.fromCodePoint(0x1F4DC)}\n`;
                         msg += `DATE: ${new Date().toLocaleDateString('en-GB')}\n`;
                         msg += `${divider}\n\n`;
-                        msg += `*ACCOUNT STATEMENT*\n\n`;
+                        msg += isPrepaid ? `*VENDOR WALLET STATEMENT*\n\n` : `*ACCOUNT STATEMENT*\n\n`;
                         msg += `PERSON: *${person}*\n`;
                         let rowsHtml = "";
                         data.rows.forEach(r => {
@@ -3292,14 +3324,15 @@
                         });
 
                         msg += `${divider}\n`;
-                        if (data.debt > 0) msg += `*COMPANY OWES YOU: ${data.debt.toFixed(2)} AED*\n`;
+                        const companyOwesText = isPrepaid ? 'COMPANY OWES VENDOR' : 'COMPANY OWES YOU';
+                        if (data.debt > 0) msg += `*${companyOwesText}: ${data.debt.toFixed(2)} AED*\n`;
                         if (data.advance > 0) msg += `*ACTIVE ADVANCE: ${data.advance.toFixed(2)} AED*\n`;
                         msg += `*** THANK YOU ***`;
                         msg += cta;
 
                         htmlPreview = `
                             <div class="bg-white p-1">
-                                <p class="font-black text-center mb-1 uppercase tracking-tight text-[13px]">Account Statement</p>
+                                <p class="font-black text-center mb-1 uppercase tracking-tight text-[13px]">${isPrepaid ? 'Vendor Wallet Statement' : 'Account Statement'}</p>
                                 <p class="text-[8px] font-bold text-center mb-4 text-slate-400 uppercase tracking-widest">PERIOD: ${data.period}</p>
                                 <div class="space-y-0 mb-6">
                                     ${rowsHtml}
@@ -3311,7 +3344,7 @@
                                         <span class="text-indigo-600">${data.advance.toFixed(2)} AED</span>
                                     </div>
                                     <div class="flex justify-between font-black text-[12px]">
-                                        <span>Company Owes You:</span>
+                                        <span>${isPrepaid ? 'Company Owes Vendor:' : 'Company Owes You:'}</span>
                                         <span class="text-rose-600">${data.debt.toFixed(2)} AED</span>
                                     </div>
                                 </div>
@@ -3808,6 +3841,11 @@
             window.openStaffModal = (name) => {
                 const modal = document.getElementById('staff-modal');
                 document.getElementById('staff-modal-name').innerText = name;
+                
+                const titleEl = document.getElementById('staff-modal-title');
+                if (titleEl) {
+                    titleEl.innerText = prepaidVendors.includes(name) ? 'Vendor Wallet Statement' : 'Staff Statement';
+                }
 
                 let totalSpent = 0;
                 let thisMonthSpent = 0;
@@ -3918,7 +3956,7 @@
                             return `<div class="bg-white px-3 py-2 rounded-xl border border-slate-100 flex items-center justify-between gap-3 min-w-[100px] hover:shadow-md transition-smooth"><span class="text-[11px] font-bold text-slate-600 uppercase tracking-tight">${name} ${phoneDisplay}</span><button onclick="window.deleteItem('${type}', ${idx})" class="text-slate-300 hover:text-rose-500 transition-colors"><i data-lucide="x" class="w-3 h-3"></i></button></div>`;
                         }).join('');
                 };
-                listFn('list-staff', staff, 'staff'); listFn('list-source', sources, 'source'); listFn('list-category', categories, 'category'); listFn('list-vendor', vendors, 'vendor');
+                listFn('list-staff', staff, 'staff'); listFn('list-source', sources, 'source'); listFn('list-category', categories, 'category'); listFn('list-vendor', vendors, 'vendor'); listFn('list-prepaid_vendor', prepaidVendors, 'prepaid_vendor');
 
                 const vendorDatalist = document.getElementById('vendor-list');
                 if (vendorDatalist) {
@@ -3947,7 +3985,13 @@
                 try {
                     const wrapper = document.getElementById('person-select-wrapper');
                     if (!wrapper) return;
-                    const list = activeTab === 'receive' ? sources : staff.map(s => getStaffName(s));
+                    let list = [];
+                    if (activeTab === 'receive') {
+                        list = sources;
+                    } else {
+                        const staffNames = staff.map(s => getStaffName(s));
+                        list = [...staffNames, ...prepaidVendors].sort();
+                    }
                     if (list.length === 0) {
                         wrapper.innerHTML = `<button type="button" onclick="window.switchView('settings')" class="w-full px-5 py-4 rounded-xl border-2 border-dashed border-slate-200 text-slate-400 text-[10px] font-bold uppercase hover:border-indigo-300 hover:text-indigo-500 transition-all">Setup Registry</button>`;
                         return;
@@ -6681,24 +6725,26 @@
                     sources.push(val);
                 } else if (type === 'vendor') {
                     vendors.push(val);
+                } else if (type === 'prepaid_vendor') {
+                    prepaidVendors.push(val);
                 } else {
                     categories.push(val);
                 }
 
                 input.value = '';
                 try {
-                    await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { staff, sources, categories, vendors, systemLogs }, { merge: true });
+                    await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { staff, sources, categories, vendors, prepaidVendors, systemLogs }, { merge: true });
                 } catch (error) {
                     window.showStatus("Error: " + error.message, true);
-                    if (type === 'staff') staff.pop(); else if (type === 'source') sources.pop(); else if (type === 'vendor') vendors.pop(); else categories.pop();
+                    if (type === 'staff') staff.pop(); else if (type === 'source') sources.pop(); else if (type === 'vendor') vendors.pop(); else if (type === 'prepaid_vendor') prepaidVendors.pop(); else categories.pop();
                 }
             };
 
             window.deleteItem = async (type, index) => {
                 if (!currentUser) return;
-                if (type === 'staff') staff.splice(index, 1); else if (type === 'source') sources.splice(index, 1); else if (type === 'vendor') vendors.splice(index, 1); else categories.splice(index, 1);
+                if (type === 'staff') staff.splice(index, 1); else if (type === 'source') sources.splice(index, 1); else if (type === 'vendor') vendors.splice(index, 1); else if (type === 'prepaid_vendor') prepaidVendors.splice(index, 1); else categories.splice(index, 1);
                 try {
-                    await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { staff, sources, categories, vendors, systemLogs }, { merge: true });
+                    await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'settings'), { staff, sources, categories, vendors, prepaidVendors, systemLogs }, { merge: true });
                 } catch (error) { window.showStatus("Error: " + error.message, true); }
             };
 
@@ -7490,6 +7536,7 @@
                 sources = d.sources || [];
                 categories = d.categories || ["Warehouses", "Open Yard", "Admin Building", "Site General"];
                 vendors = d.vendors || [];
+                prepaidVendors = d.prepaidVendors || [];
                 systemLogs = d.systemLogs || [];
                 lastCashCountDate = d.last_cash_count_date || null;
                 renderRegistry();
@@ -7639,6 +7686,7 @@
                         text: input.value.trim(),
                         createdAt: new Date().toISOString(),
                         pinned: false,
+                        completed: false,
                         author: currentUser.email || 'Admin'
                     };
                     
@@ -7676,6 +7724,16 @@
                 }
             };
 
+            window.toggleNoteCompletion = async (id, currentStatus) => {
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'important_notes', id), {
+                        completed: !currentStatus
+                    });
+                } catch (e) {
+                    console.error("Complete Note Error", e);
+                }
+            };
+
             window.renderNotes = () => {
                 const grid = document.getElementById('notes-grid');
                 if (!grid) return;
@@ -7687,29 +7745,35 @@
 
                 grid.innerHTML = notes.map(n => {
                     const dateStr = n.createdAt ? new Date(n.createdAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+                    const isCompleted = !!n.completed;
                     
                     return `
-                        <div class="modern-card p-6 border-l-4 ${n.pinned ? 'border-l-amber-500 bg-amber-50/20' : 'border-l-slate-300'} flex flex-col h-full relative group">
-                            <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onclick="window.togglePinNote('${n.id}', ${n.pinned})" class="p-2 ${n.pinned ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'} hover:scale-110 rounded-xl transition-all" title="${n.pinned ? 'Unpin' : 'Pin to top'}">
-                                    <i data-lucide="pin" class="w-4 h-4 ${n.pinned ? 'fill-amber-600' : ''}"></i>
-                                </button>
-                                <button onclick="window.deleteNote('${n.id}')" class="p-2 bg-rose-50 text-rose-500 hover:scale-110 rounded-xl transition-all" title="Delete Note">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        <div class="modern-card p-6 border-l-4 ${n.pinned ? 'border-l-amber-500 bg-amber-50/20' : (isCompleted ? 'border-l-emerald-500 bg-slate-50 opacity-75' : 'border-l-slate-300')} flex flex-col h-full relative group transition-all duration-300">
+                            <div class="absolute top-4 right-4 flex gap-2 z-10">
+                                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onclick="window.togglePinNote('${n.id}', ${n.pinned})" class="p-2 ${n.pinned ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'} hover:scale-110 rounded-xl transition-all" title="${n.pinned ? 'Unpin' : 'Pin to top'}">
+                                        <i data-lucide="pin" class="w-4 h-4 ${n.pinned ? 'fill-amber-600' : ''}"></i>
+                                    </button>
+                                    <button onclick="window.deleteNote('${n.id}')" class="p-2 bg-rose-50 text-rose-500 hover:scale-110 rounded-xl transition-all" title="Delete Note">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <button onclick="window.toggleNoteCompletion('${n.id}', ${isCompleted})" class="p-1.5 ${isCompleted ? 'text-emerald-500 hover:text-slate-400' : 'text-slate-300 hover:text-emerald-500'} transition-colors" title="${isCompleted ? 'Mark as incomplete' : 'Mark as completed'}">
+                                    <i data-lucide="${isCompleted ? 'check-square' : 'square'}" class="w-5 h-5"></i>
                                 </button>
                             </div>
                             
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="w-8 h-8 ${n.pinned ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500'} rounded-lg flex items-center justify-center">
-                                    <i data-lucide="sticky-note" class="w-4 h-4"></i>
+                            <div class="flex items-center gap-2 mb-4 pr-12">
+                                <div class="w-8 h-8 ${n.pinned ? 'bg-amber-100 text-amber-600' : (isCompleted ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500')} rounded-lg flex items-center justify-center shrink-0">
+                                    <i data-lucide="${isCompleted ? 'check-circle' : 'sticky-note'}" class="w-4 h-4"></i>
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="text-[9px] font-black uppercase text-slate-400 tracking-widest">${n.author}</span>
+                                    <span class="text-[9px] font-black uppercase ${isCompleted ? 'text-emerald-500' : 'text-slate-400'} tracking-widest">${n.author}</span>
                                     <span class="text-[9px] font-bold text-slate-400">${dateStr}</span>
                                 </div>
                             </div>
                             
-                            <div class="text-sm font-medium text-slate-700 whitespace-pre-wrap flex-grow">${n.text}</div>
+                            <div class="text-sm font-medium ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-700'} whitespace-pre-wrap flex-grow">${n.text}</div>
                         </div>
                     `;
                 }).join('');
