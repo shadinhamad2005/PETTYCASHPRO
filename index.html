@@ -989,7 +989,8 @@
                                     <th class="px-6 py-4">Person</th>
                                     <th class="px-6 py-4">Details</th>
                                     <th class="px-6 py-4">Amount</th>
-                                    <th class="px-6 py-4">Balance</th>
+                                    <th class="px-6 py-4">Main Box Bal</th>
+                                    <th class="px-6 py-4">Staff Bal</th>
                                     <th class="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -1067,6 +1068,22 @@
                             <button onclick="window.viewSystemLogs()"
                                 class="bg-indigo-50 text-indigo-700 px-5 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-indigo-100 transition-all border border-indigo-200">
                                 View Logs
+                            </button>
+                        </div>
+                        
+                        <!-- Discrepancy Scanner -->
+                        <div
+                            class="bg-white p-6 rounded-2xl border border-rose-200 shadow-sm flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-rose-50 text-rose-600 rounded-lg"><i data-lucide="scan-search" class="w-5 h-5"></i></div>
+                                <div>
+                                    <h4 class="text-sm font-black text-rose-800 uppercase tracking-wider">Discrepancy Scanner</h4>
+                                    <p class="text-[10px] text-rose-500 font-medium">Audit Ledger Health</p>
+                                </div>
+                            </div>
+                            <button onclick="window.runLedgerScanner()"
+                                class="bg-rose-600 text-white shadow-md shadow-rose-200 px-4 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:-translate-y-0.5 hover:shadow-lg transition-all flex items-center gap-2">
+                                <i data-lucide="scan-search" class="w-4 h-4"></i> Run Scan
                             </button>
                         </div>
                     </div>
@@ -1199,6 +1216,31 @@
                 </div>
             </div>
         </main>
+
+        <!-- Ledger Scanner Modal -->
+        <div id="scanner-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] animate-in fade-in duration-200 p-4">
+            <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-rose-100 text-rose-600 p-2 rounded-xl">
+                            <i data-lucide="scan-search" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-black text-slate-800 tracking-tight uppercase">Discrepancy Report</h2>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Automated Ledger Health Check</p>
+                        </div>
+                    </div>
+                    <button onclick="document.getElementById('scanner-modal').classList.add('hidden')" class="p-2 bg-slate-200 text-slate-500 hover:bg-slate-300 hover:text-slate-800 rounded-full transition-all">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="p-6 overflow-y-auto bg-slate-50 flex-grow">
+                    <div id="scanner-results" class="space-y-4">
+                        <!-- Results injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Diagnostics Modal -->
         <div id="diag-modal" class="fixed inset-0 modal-overlay hidden flex items-center justify-center z-50 p-4">
@@ -3861,7 +3903,7 @@
 
                 let firstExpenseDate = null;
 
-                const personalTxs = txs.filter(t => t.person === name).sort((a, b) => (b.subDate || '').localeCompare(a.subDate || ''));
+                const personalTxs = txs.filter(t => t.person === name && t.status !== 'Voided').sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''));
 
                 personalTxs.forEach(t => {
                     const ttype = (t.type || '').toLowerCase();
@@ -3912,10 +3954,14 @@
 
                     if (ttype === 'advance') { flowIn = amt; runFlow = amt; }
                     else if (ttype === 'return_advance') { flowOut = amt; runFlow = -amt; }
-                    else if (ttype === 'expense' && t.isDeductedFromAdvance) {
-                        const used = parseFloat(t.advanceAmountUsed) || 0;
-                        flowOut = used;
-                        runFlow = -used;
+                    else if (ttype === 'expense') {
+                        const advUsed = parseFloat(t.advanceAmountUsed) || 0;
+                        const debtAdded = parseFloat(t.staffOwed) || 0;
+                        flowOut = advUsed + debtAdded;
+                        runFlow = -(advUsed + debtAdded);
+                    } else if (ttype === 'settle_debt') {
+                        flowIn = amt; // received payment for out of pocket
+                        runFlow = amt;
                     }
 
                     runBal += runFlow;
@@ -4125,6 +4171,7 @@
 
                     if (target) {
                         const pastSettlements = txs.filter(x => {
+                            if (x.status === 'Voided') return false;
                             if (x.type !== 'settle_debt' && x.type !== 'settle') return false;
                             if (x.settled_tx_id) return x.settled_tx_id === target.id;
                             let xDesc = x.desc || x.desc_text || '';
@@ -4192,24 +4239,24 @@
                     const filterGeneral = document.getElementById('filter-general')?.value.toLowerCase().trim() || '';
                     const filterPerson = document.getElementById('filter-person-history')?.value || '';
 
-                    const sorted = [...txs].sort((a, b) => {
-                        const da = a.invoiceDate || a.subDate || a.timestamp || '';
-                        const db = b.invoiceDate || b.subDate || b.timestamp || '';
-                        if (da !== db) return da.localeCompare(db);
-                        return (a.timestamp || '').localeCompare(b.timestamp || '');
-                    });
-                    let curr = 0; const rbMap = {};
+                    const sorted = [...txs].sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
+                    let curr = 0; 
+                    const rbMap = {};
+                    const sbMap = {};
+                    const currentStaffBalances = {};
+                    
                     sorted.forEach(t => {
                         if (t.status === 'Voided') {
                             rbMap[t.id] = Math.round(curr * 100) / 100;
+                            if (t.person) sbMap[t.id] = Math.round((currentStaffBalances[t.person] || 0) * 100) / 100;
                             return;
                         }
 
                         const pfb = parseFloat(t.paidFromBox) || 0;
                         const amt = parseFloat(t.amount) || 0;
                         const ttype = (t.type || '').toLowerCase();
+                        
                         let flow = 0;
-
                         if (ttype === 'receive' || ttype === 'return_advance') {
                             flow = amt;
                         } else if (ttype === 'settle_debt') {
@@ -4217,9 +4264,24 @@
                         } else {
                             flow = -pfb;
                         }
-
                         curr += flow;
                         rbMap[t.id] = Math.round(curr * 100) / 100;
+                        
+                        if (t.person) {
+                            if (!currentStaffBalances[t.person]) currentStaffBalances[t.person] = 0;
+                            let sFlow = 0;
+                            if (ttype === 'advance') sFlow = amt;
+                            else if (ttype === 'return_advance') sFlow = -amt;
+                            else if (ttype === 'expense') {
+                                const advUsed = parseFloat(t.advanceAmountUsed) || 0;
+                                const debtAdded = parseFloat(t.staffOwed) || 0;
+                                sFlow = -(advUsed + debtAdded);
+                            } else if (ttype === 'settle_debt') {
+                                sFlow = amt;
+                            }
+                            currentStaffBalances[t.person] += sFlow;
+                            sbMap[t.id] = Math.round(currentStaffBalances[t.person] * 100) / 100;
+                        }
                     });
 
                     const filtered = txs.filter(t => {
@@ -4291,6 +4353,7 @@
                                 ${!isVoided ? debtTag : ''}
                             </td>
                             <td class="px-6 py-4 font-bold font-mono ${(rbMap[t.id] || 0) < 0 ? 'text-rose-600' : 'text-indigo-600'}">${(rbMap[t.id] || 0).toFixed(2)}</td>
+                            <td class="px-6 py-4 font-bold font-mono text-[11px] ${!t.person ? 'text-slate-300' : ((sbMap[t.id] || 0) < 0 ? 'text-rose-600' : 'text-emerald-600')}">${!t.person ? '-' : ((sbMap[t.id] || 0) > 0 ? '+' : '') + (sbMap[t.id] || 0).toFixed(2)}</td>
                             <td class="text-right px-6 py-4" onclick="event.stopPropagation()">
                                 <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onclick="window.viewTransactionDetails('${t.id}')" class="text-slate-400 hover:text-indigo-600 p-1.5 hover:bg-indigo-50 rounded-lg transition-colors" title="View Details"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
@@ -8595,10 +8658,164 @@
                 
                 // FINAL VERSION CONFIRMATION
                 console.log("PettyCashPro v5.5 Build-06-May-22:50 LOADED");
-                window.showStatus("System Update v5.5 Applied Successfully ✅", false);
+                window.showStatus("System Update v5.5 Applied Successfully.", false);
+            };
+
+            window.runLedgerScanner = () => {
+                const results = [];
+                const sorted = [...txs].sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
+                
+                const staffBals = {};
+                const knownHashes = new Set();
+                let mathErrors = 0, duplicates = 0, negativeAdvances = 0, phantomSettles = 0;
+
+                sorted.forEach(t => {
+                    if (t.status === 'Voided') return;
+                    
+                    const amt = parseFloat(t.amount) || 0;
+                    const pfb = parseFloat(t.paidFromBox) || 0;
+                    const advUsed = parseFloat(t.advanceAmountUsed) || 0;
+                    const staffO = parseFloat(t.staffOwed) || 0;
+                    const manO = parseFloat(t.managerOwed) || 0;
+                    const ttype = (t.type || '').toLowerCase();
+                    const p = t.person;
+
+                    if (ttype === 'expense') {
+                        const sum = pfb + advUsed + staffO + manO;
+                        if (Math.abs(amt - sum) > 0.05) {
+                            mathErrors++;
+                            results.push(`
+                                <div class="bg-white border-l-4 border-l-rose-500 p-4 rounded-xl shadow-sm cursor-pointer hover:bg-slate-50" onclick="window.viewTransactionDetails('${t.id}')">
+                                    <div class="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1">Math Imbalance</div>
+                                    <div class="text-sm font-bold text-slate-700">${window.escapeHTML(t.desc)}</div>
+                                    <div class="text-xs text-slate-500 mt-1">Amount is ${amt.toFixed(2)}, but parts sum to ${sum.toFixed(2)} (Box: ${pfb}, Adv: ${advUsed}, Debt: ${staffO+manO})</div>
+                                </div>
+                            `);
+                        }
+                    }
+
+                    if (ttype === 'expense') {
+                        const hash = `${t.subDate}-${p}-${amt}-${(t.desc||'').trim().toLowerCase()}`;
+                        if (knownHashes.has(hash)) {
+                            duplicates++;
+                            results.push(`
+                                <div class="bg-white border-l-4 border-l-amber-500 p-4 rounded-xl shadow-sm cursor-pointer hover:bg-slate-50" onclick="window.viewTransactionDetails('${t.id}')">
+                                    <div class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1">Possible Duplicate</div>
+                                    <div class="text-sm font-bold text-slate-700">${window.escapeHTML(t.desc)}</div>
+                                    <div class="text-xs text-slate-500 mt-1">Another transaction with identical amount (${amt}), date (${t.subDate}), and description was found.</div>
+                                </div>
+                            `);
+                        }
+                        knownHashes.add(hash);
+                    }
+
+                    if (p) {
+                        if (!staffBals[p]) staffBals[p] = { adv: 0, debt: 0 };
+                        if (ttype === 'advance') staffBals[p].adv += amt;
+                        else if (ttype === 'return_advance') {
+                            staffBals[p].adv -= amt;
+                            if (staffBals[p].adv < -0.01) {
+                                negativeAdvances++;
+                                results.push(`
+                                    <div class="bg-white border-l-4 border-l-purple-500 p-4 rounded-xl shadow-sm cursor-pointer hover:bg-slate-50" onclick="window.viewTransactionDetails('${t.id}')">
+                                        <div class="text-[10px] font-black text-purple-500 uppercase tracking-widest mb-1">Negative Advance Wallet</div>
+                                        <div class="text-sm font-bold text-slate-700">${window.escapeHTML(p)} returned ${amt.toFixed(2)}</div>
+                                        <div class="text-xs text-slate-500 mt-1">This pushed their tracked advance wallet below zero (to ${staffBals[p].adv.toFixed(2)}).</div>
+                                    </div>
+                                `);
+                            }
+                        }
+                    }
+
+                    if (ttype === 'expense') {
+                        const sDebt = staffO;
+                        const mDebt = manO;
+                        
+                        if (p) {
+                            if (!staffBals[p]) staffBals[p] = { adv: 0, debt: 0 };
+                            staffBals[p].debt += sDebt;
+                        }
+                        
+                        if (mDebt > 0) {
+                            if (!staffBals['Admin']) staffBals['Admin'] = { adv: 0, debt: 0 };
+                            staffBals['Admin'].debt += mDebt;
+                        }
+                        
+                        if (p && t.isDeductedFromAdvance) {
+                            if (!staffBals[p]) staffBals[p] = { adv: 0, debt: 0 };
+                            staffBals[p].adv -= advUsed;
+                            if (staffBals[p].adv < -0.01) {
+                                negativeAdvances++;
+                                results.push(`
+                                    <div class="bg-white border-l-4 border-l-purple-500 p-4 rounded-xl shadow-sm cursor-pointer hover:bg-slate-50" onclick="window.viewTransactionDetails('${t.id}')">
+                                        <div class="text-[10px] font-black text-purple-500 uppercase tracking-widest mb-1">Overdrawn Advance</div>
+                                        <div class="text-sm font-bold text-slate-700">${window.escapeHTML(p)} used ${advUsed.toFixed(2)} from advance</div>
+                                        <div class="text-xs text-slate-500 mt-1">This pushed their tracked advance wallet below zero (to ${staffBals[p].adv.toFixed(2)}).</div>
+                                    </div>
+                                `);
+                            }
+                        }
+                    }
+                    else if (ttype === 'settle_debt') {
+                        if (p) {
+                            if (!staffBals[p]) staffBals[p] = { adv: 0, debt: 0 };
+                            staffBals[p].debt -= amt;
+                            if (staffBals[p].debt < -0.01) {
+                                phantomSettles++;
+                                results.push(`
+                                    <div class="bg-white border-l-4 border-l-orange-500 p-4 rounded-xl shadow-sm cursor-pointer hover:bg-slate-50" onclick="window.viewTransactionDetails('${t.id}')">
+                                        <div class="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-1">Phantom Settlement</div>
+                                        <div class="text-sm font-bold text-slate-700">${window.escapeHTML(p)} received ${amt.toFixed(2)} settlement</div>
+                                        <div class="text-xs text-slate-500 mt-1">The system only tracked them having ${(staffBals[p].debt + amt).toFixed(2)} in debt prior to this.</div>
+                                    </div>
+                                `);
+                            }
+                        }
+                    }
+                });
+
+                const container = document.getElementById('scanner-results');
+                if (results.length === 0) {
+                    container.innerHTML = `
+                        <div class="p-8 text-center bg-white rounded-2xl border border-emerald-100 shadow-sm">
+                            <div class="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="shield-check" class="w-8 h-8"></i>
+                            </div>
+                            <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Ledger is 100% Healthy</h3>
+                            <p class="text-xs font-bold text-slate-500 mt-2">No mathematical errors, duplicates, or negative balances found!</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl text-center"><div class="text-2xl font-black text-rose-600">${mathErrors}</div><div class="text-[9px] font-bold text-rose-400 uppercase tracking-widest mt-1">Math Errors</div></div>
+                            <div class="bg-amber-50 border border-amber-100 p-4 rounded-xl text-center"><div class="text-2xl font-black text-amber-600">${duplicates}</div><div class="text-[9px] font-bold text-amber-400 uppercase tracking-widest mt-1">Duplicates</div></div>
+                            <div class="bg-purple-50 border border-purple-100 p-4 rounded-xl text-center"><div class="text-2xl font-black text-purple-600">${negativeAdvances}</div><div class="text-[9px] font-bold text-purple-400 uppercase tracking-widest mt-1">Overdrawn</div></div>
+                            <div class="bg-orange-50 border border-orange-100 p-4 rounded-xl text-center"><div class="text-2xl font-black text-orange-600">${phantomSettles}</div><div class="text-[9px] font-bold text-orange-400 uppercase tracking-widest mt-1">Overpaid</div></div>
+                        </div>
+                        <div class="space-y-3">
+                            ${results.join('')}
+                        </div>
+                    `;
+                }
+
+                document.getElementById('scanner-modal').classList.remove('hidden');
+                lucide.createIcons();
             };
         }
     </script>
+
+    <!-- Discrepancy Scanner Modal -->
+    <div id="scanner-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[80vh]">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-xl font-black text-slate-800">Ledger Discrepancy Scanner</h2>
+                <button onclick="document.getElementById('scanner-modal').classList.add('hidden')" class="p-2 hover:bg-slate-100 rounded-full"><i data-lucide="x"></i></button>
+            </div>
+            <div id="scanner-results" class="p-6 overflow-y-auto"></div>
+        </div>
+    </div>
+
     <!-- Processed Batches Modal (Full Screen) -->
     <div id="processed-batches-modal" class="fixed inset-0 bg-white z-[9999] hidden flex-col animate-in slide-in-from-bottom-12 duration-500">
         <div class="w-full flex flex-col h-full overflow-hidden">
