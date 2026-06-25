@@ -2882,7 +2882,7 @@
 
                         if (diff < 0) {
                             await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), {
-                                type: 'advance',
+                                type: 'expense',
                                 amount: Math.abs(diff),
                                 person: 'Admin',
                                 desc_text: `Cash Count Shortage: ${reason}`,
@@ -2890,6 +2890,9 @@
                                 timestamp: new Date().toISOString(),
                                 user_id: currentUser.uid,
                                 paid_from_box: Math.abs(diff),
+                                staff_owed: 0,
+                                manager_owed: 0,
+                                is_shortage: true,
                                 status: 'Active'
                             });
                         } else {
@@ -2902,6 +2905,9 @@
                                 timestamp: new Date().toISOString(),
                                 user_id: currentUser.uid,
                                 paid_from_box: -diff,
+                                staff_owed: 0,
+                                manager_owed: diff,
+                                is_surplus: true,
                                 status: 'Active'
                             });
                         }
@@ -3078,7 +3084,7 @@
                     if (t.status === 'Voided') return;
                     const ttype = (t.type || '').toLowerCase();
                     if (t.person === person) {
-                        if (ttype === 'advance') given += (parseFloat(t.amount) || 0);
+                        if (ttype === 'advance' || t.is_shortage || t.isShortage) given += (parseFloat(t.amount) || 0);
                         if (t.isDeductedFromAdvance) used += (parseFloat(t.advanceAmountUsed) || 0);
                         if (ttype === 'return_advance') refunded += (parseFloat(t.amount) || 0);
                     }
@@ -4069,7 +4075,7 @@
                     const advList = document.getElementById('advances-list');
                     const advSect = document.getElementById('advances-section');
                     if (advList && advSect) {
-                        const uniqueStaff = [...new Set(staff.map(s => getStaffName(s)))];
+                        const uniqueStaff = [...new Set([...staff.map(s => getStaffName(s)), 'Admin'])];
                         const activeAdvances = uniqueStaff.map(s => ({ name: s, balance: getAdvanceWalletFor(s) })).filter(x => x.balance > 0.01);
                         advSect.classList.toggle('hidden', activeAdvances.length === 0);
                         advList.innerHTML = activeAdvances.map(a => {
@@ -7626,6 +7632,8 @@
                     allocations: dbTx.allocations || [],
                     isDeductedFromAdvance: !!dbTx.is_deducted_from_advance,
                     advanceAmountUsed: parseFloat(dbTx.advance_amount_used || 0),
+                    isShortage: !!dbTx.is_shortage,
+                    isSurplus: !!dbTx.is_surplus,
                     settled: ((dbTx.manager_owed || 0) + (dbTx.staff_owed || 0) > 0)
                         ? ((dbTx.repaid_amount || 0) >= ((dbTx.manager_owed || 0) + (dbTx.staff_owed || 0) - 0.01))
                         : !!dbTx.settled,
@@ -7652,6 +7660,27 @@
                 try {
                     const q = query(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'));
                     const snap = await getDocs(q);
+                    
+                    // ONE-TIME MIGRATION FOR OLD CASH COUNTS
+                    snap.docs.forEach(d => {
+                        const data = d.data();
+                        const desc = data.desc_text || data.desc || '';
+                        if (desc.startsWith('Cash Count Shortage:') && (data.type === 'advance' || data.tx_type === 'advance') && !data.is_shortage) {
+                            updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', d.id), {
+                                type: 'expense',
+                                staff_owed: 0,
+                                manager_owed: 0,
+                                is_shortage: true
+                            }).catch(console.error);
+                        }
+                        if (desc.startsWith('Cash Count Surplus:') && (data.type === 'receive' || data.tx_type === 'receive') && !data.is_surplus) {
+                            updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', d.id), {
+                                manager_owed: data.amount,
+                                is_surplus: true
+                            }).catch(console.error);
+                        }
+                    });
+
                     txs = snap.docs.map(doc => mapTxFromDB(doc.id, doc.data()));
                     txs.sort((a, b) => {
                         const da = a.invoiceDate || a.subDate || a.timestamp || '';
@@ -7675,6 +7704,26 @@
 
                 const txQuery = query(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'));
                 window.unsubTxs = onSnapshot(txQuery, (snapshot) => {
+                    // ONE-TIME MIGRATION FOR OLD CASH COUNTS
+                    snapshot.docs.forEach(d => {
+                        const data = d.data();
+                        const desc = data.desc_text || data.desc || '';
+                        if (desc.startsWith('Cash Count Shortage:') && (data.type === 'advance' || data.tx_type === 'advance') && !data.is_shortage) {
+                            updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', d.id), {
+                                type: 'expense',
+                                staff_owed: 0,
+                                manager_owed: 0,
+                                is_shortage: true
+                            }).catch(console.error);
+                        }
+                        if (desc.startsWith('Cash Count Surplus:') && (data.type === 'receive' || data.tx_type === 'receive') && !data.is_surplus) {
+                            updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', d.id), {
+                                manager_owed: data.amount,
+                                is_surplus: true
+                            }).catch(console.error);
+                        }
+                    });
+
                     txs = snapshot.docs.map(doc => mapTxFromDB(doc.id, doc.data()));
                     txs.sort((a, b) => {
                         const da = a.invoiceDate || a.subDate || a.timestamp || '';
