@@ -658,7 +658,7 @@
                 <div class="bg-blue-600 text-white p-8 rounded-[2rem] shadow-xl relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-8 opacity-10"><i data-lucide="refresh-cw"
                             class="w-48 h-48"></i></div>
-                    <div class="relative z-10 flex justify-between items-center">
+                    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
                             <h2 class="text-3xl font-black mb-2 tracking-tight">Reimbursements</h2>
                             <p class="text-blue-100 font-bold opacity-80 uppercase text-[10px] tracking-widest">Submit &
@@ -673,6 +673,83 @@
                                 class="bg-white text-blue-600 px-6 py-3 rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all flex items-center gap-2">
                                 <i data-lucide="plus-circle" class="w-5 h-5"></i> Stage New Invoices
                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reimbursement Pipeline Command Dashboard -->
+                <div class="bg-blue-600 text-white p-6 md:p-8 rounded-[2rem] shadow-xl relative overflow-hidden space-y-6">
+                    <div class="absolute -top-10 -right-10 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+                    
+                    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/20 text-white border border-white/30 backdrop-blur-sm">Accounts Pipeline</span>
+                                <h3 class="text-xl md:text-2xl font-black tracking-tight text-white">Reimbursement Command Center</h3>
+                            </div>
+                            <p class="text-blue-100 font-medium text-xs">Live tracking of batches submitted to Accounts & cash returned to Box</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <button onclick="window.openProcessedModal()" class="px-4 py-2.5 bg-white/15 hover:bg-white/25 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition-all border border-white/25 shadow-sm backdrop-blur-sm">
+                                <i data-lucide="archive" class="w-4 h-4 text-emerald-300"></i> View Processed Archive
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 4 Live KPI Cards -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 relative z-10">
+                        <!-- Total Submitted in Batches -->
+                        <div class="bg-white/10 hover:bg-white/15 border border-white/20 rounded-2xl p-4 backdrop-blur-md transition-all">
+                            <div class="text-[10px] font-black uppercase tracking-wider text-blue-200 flex items-center gap-1.5 mb-1">
+                                <i data-lucide="folder-clock" class="w-3.5 h-3.5"></i> Total Submitted
+                            </div>
+                            <div id="rb-kpi-submitted" class="text-xl sm:text-2xl font-black text-white">AED 0.00</div>
+                            <div id="rb-kpi-submitted-sub" class="text-[10px] text-blue-100/80 font-semibold mt-0.5">0 batches pending</div>
+                        </div>
+
+                        <!-- Cash Received Back into Box -->
+                        <div class="bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-300/40 rounded-2xl p-4 backdrop-blur-md transition-all">
+                            <div class="text-[10px] font-black uppercase tracking-wider text-emerald-200 flex items-center gap-1.5 mb-1">
+                                <i data-lucide="wallet-cards" class="w-3.5 h-3.5"></i> Received in Box
+                            </div>
+                            <div id="rb-kpi-received" class="text-xl sm:text-2xl font-black text-emerald-100">AED 0.00</div>
+                            <div id="rb-kpi-received-sub" class="text-[10px] text-emerald-100/80 font-semibold mt-0.5">Credited to Box</div>
+                        </div>
+
+                        <!-- Net Outstanding from Finance -->
+                        <div class="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-300/40 rounded-2xl p-4 backdrop-blur-md transition-all">
+                            <div class="text-[10px] font-black uppercase tracking-wider text-amber-200 flex items-center gap-1.5 mb-1">
+                                <i data-lucide="hourglass" class="w-3.5 h-3.5"></i> Still with Finance
+                            </div>
+                            <div id="rb-kpi-pending" class="text-xl sm:text-2xl font-black text-amber-100">AED 0.00</div>
+                            <div id="rb-kpi-pending-sub" class="text-[10px] text-amber-100/80 font-semibold mt-0.5">Awaiting collection</div>
+                        </div>
+
+                        <!-- Invoices Ready for Processing (Unbatched) -->
+                        <div onclick="window.submitToAccounts()" title="Click to view and stage unbatched invoices" class="bg-white/10 hover:bg-white/15 border border-white/20 rounded-2xl p-4 backdrop-blur-md transition-all cursor-pointer group">
+                            <div class="text-[10px] font-black uppercase tracking-wider text-sky-200 flex items-center justify-between mb-1">
+                                <span class="flex items-center gap-1.5">
+                                    <i data-lucide="receipt" class="w-3.5 h-3.5"></i> Ready for Processing
+                                </span>
+                                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity"></i>
+                            </div>
+                            <div id="rb-kpi-ready" class="text-xl sm:text-2xl font-black text-white">AED 0.00</div>
+                            <div id="rb-kpi-ready-sub" class="text-[10px] text-blue-100/80 font-semibold mt-0.5">0 unbatched invoices</div>
+                        </div>
+                    </div>
+
+                    <!-- Pipeline Recovery Strip & Category Exposure Chips -->
+                    <div class="pt-4 border-t border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs relative z-10">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-blue-200">Categories Awaiting Cash:</span>
+                            <div id="rb-category-chips" class="flex items-center gap-1.5 flex-wrap">
+                                <!-- Chips dynamically injected -->
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-[10px] font-bold text-blue-200">Recovery Rate:</span>
+                            <span id="rb-recovery-rate-badge" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-white/20 text-white border border-white/30">0%</span>
                         </div>
                     </div>
                 </div>
@@ -693,52 +770,451 @@
 
                 <hr class="border-slate-200">
 
-                <h3
-                    class="text-xl font-black text-slate-800 uppercase tracking-tight mb-4 mt-8 flex items-center gap-2">
-                    <i data-lucide="archive" class="text-slate-400 w-6 h-6"></i> Pending Reimbursement Batches</h3>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 mt-8">
+                    <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                        <i data-lucide="archive" class="text-slate-400 w-6 h-6"></i> Pending Reimbursement Batches
+                    </h3>
+                    <!-- Filter Pills -->
+                    <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+                        <button type="button" onclick="window.filterPendingBatches('all')" id="batch-filter-all" class="px-3 py-1 rounded-lg text-xs font-black bg-white text-slate-800 shadow-xs transition-all">All (<span id="batch-count-all">0</span>)</button>
+                        <button type="button" onclick="window.filterPendingBatches('partial')" id="batch-filter-partial" class="px-3 py-1 rounded-lg text-xs font-bold text-amber-700 hover:bg-white/60 transition-all flex items-center gap-1">Partially Paid (<span id="batch-count-partial">0</span>)</button>
+                        <button type="button" onclick="window.filterPendingBatches('unreimbursed')" id="batch-filter-unreimbursed" class="px-3 py-1 rounded-lg text-xs font-bold text-blue-700 hover:bg-white/60 transition-all flex items-center gap-1">Unreimbursed (<span id="batch-count-unreimbursed">0</span>)</button>
+                    </div>
+                </div>
+
                 <div id="reimbursement-batches" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Batches injected via JS -->
                 </div>
-            </div>
 
-            <!-- View: Important Notes -->
-            <div id="view-notes" class="space-y-8 hidden animate-in fade-in duration-500">
-                <div class="bg-amber-500 text-white p-8 rounded-[2rem] shadow-xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-8 opacity-10"><i data-lucide="sticky-note" class="w-48 h-48"></i></div>
-                    <div class="relative z-10">
-                        <h2 class="text-3xl font-black mb-2 tracking-tight">Important Notes</h2>
-                        <p class="text-amber-100 font-bold opacity-80 uppercase text-[10px] tracking-widest">Collaborative notes & reminders for the team</p>
-                    </div>
-                </div>
-
-                <!-- New Note Area -->
-                <div class="modern-card p-6 border-l-4 border-l-amber-500">
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-2 mb-2">
-                            <i data-lucide="plus-circle" class="w-4 h-4 text-amber-600"></i>
-                            <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest">Create New Note</h3>
-                        </div>
-                        <textarea id="note-input" placeholder="Type your important note here..." class="modern-input w-full p-4 rounded-xl font-medium text-sm text-slate-800 min-h-[100px] outline-none focus:border-amber-500" rows="3"></textarea>
-                        <div class="flex justify-end">
-                            <button onclick="window.saveNewNote()" id="btn-save-note" class="bg-amber-500 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-amber-600 transition-all flex items-center gap-2">
-                                <i data-lucide="save" class="w-4 h-4"></i> Save Note
+                <!-- Modal: Partial Batch Reimbursement -->
+                <div id="partial-reimburse-modal" class="hidden fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden border border-slate-100 max-h-[92vh] flex flex-col">
+                        <!-- Header -->
+                        <div class="p-6 bg-gradient-to-r from-slate-900 to-blue-950 text-white flex justify-between items-start shrink-0">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500/30 text-blue-300 border border-blue-500/40">Partial Settlement</span>
+                                    <h3 class="text-xl font-black tracking-tight text-white" id="pr-modal-title">Batch Reimbursement</h3>
+                                </div>
+                                <p id="pr-modal-subtitle" class="text-xs text-slate-300 mt-1">Select categories or invoices to receive into Cash in Box</p>
+                            </div>
+                            <button onclick="window.closePartialReimburseModal()" class="text-slate-400 hover:text-white p-1 rounded-xl hover:bg-white/10 transition-colors">
+                                <i data-lucide="x" class="w-5 h-5"></i>
                             </button>
                         </div>
+
+                        <!-- Body -->
+                        <div class="p-6 overflow-y-auto space-y-5 flex-1">
+                            <!-- Summary Stats for this Batch -->
+                            <div class="grid grid-cols-3 gap-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center">
+                                <div>
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Batch Amount</div>
+                                    <div id="pr-batch-total" class="text-base font-black text-slate-800">AED 0.00</div>
+                                    <div id="pr-batch-count" class="text-[10px] text-slate-400 font-semibold">0 invoices</div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Already Received</div>
+                                    <div id="pr-batch-received" class="text-base font-black text-emerald-600">AED 0.00</div>
+                                    <div id="pr-batch-received-count" class="text-[10px] text-emerald-600/80 font-semibold">0 invoices</div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-amber-600">Still Pending</div>
+                                    <div id="pr-batch-pending" class="text-base font-black text-amber-600">AED 0.00</div>
+                                    <div id="pr-batch-pending-count" class="text-[10px] text-amber-600/80 font-semibold">0 invoices</div>
+                                </div>
+                            </div>
+
+                            <!-- Invoices Selection Grouped by Category -->
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                        <i data-lucide="folder-check" class="w-4 h-4 text-blue-600"></i> Select Invoices to Reimburse:
+                                    </h4>
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" onclick="window.toggleAllPRCheckboxes(true)" class="text-[10px] font-bold text-blue-600 hover:underline">Select All Unpaid</button>
+                                        <span class="text-slate-300">|</span>
+                                        <button type="button" onclick="window.toggleAllPRCheckboxes(false)" class="text-[10px] font-bold text-slate-500 hover:underline">Deselect All</button>
+                                    </div>
+                                </div>
+                                <div id="pr-categories-list" class="space-y-3">
+                                    <!-- Populated dynamically via JS -->
+                                </div>
+                            </div>
+
+                            <!-- Auto-Credit Box Option (Allows reconciling invoices already added manually) -->
+                            <div class="p-3.5 bg-blue-50/80 border border-blue-200/80 rounded-2xl flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <input type="checkbox" id="pr-credit-box-toggle" checked class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer">
+                                    <label for="pr-credit-box-toggle" class="text-xs font-bold text-slate-800 cursor-pointer select-none">
+                                        Credit Cash in Box automatically
+                                        <span class="block text-[10px] text-slate-500 font-normal">Adds a "Receive Money" entry to your petty cash ledger. Uncheck if you already manually added this cash to your box earlier.</span>
+                                    </label>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200 shrink-0">Box Credit</span>
+                            </div>
+
+                            <!-- Payment Details (Date & Note) -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-slate-100">
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Receipt Date (Received into Box)</label>
+                                    <input type="date" id="pr-receipt-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Reference / Note (Optional)</label>
+                                    <input type="text" id="pr-receipt-note" placeholder="e.g. ADNOC fuel payment from accounts" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-blue-500 focus:bg-white transition-all">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sticky Footer Action -->
+                        <div class="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-slate-500">Selected for Box:</span>
+                                <span id="pr-selected-count" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-800">0 Invoices</span>
+                                <span id="pr-selected-total" class="text-base font-black text-emerald-700">AED 0.00</span>
+                            </div>
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <button onclick="window.closePartialReimburseModal()" class="flex-1 sm:flex-none px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-all">
+                                    Cancel
+                                </button>
+                                <button id="btn-confirm-partial-reimburse" onclick="window.confirmPartialReimbursement()" class="flex-1 sm:flex-none px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                                    <i data-lucide="check-circle" class="w-4 h-4"></i> Receive Cash into Box
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                                                                        <!-- View: Important Notes / Staff Khata -->
+            <div id="view-notes" class="space-y-6 hidden animate-in fade-in duration-500">
+                <!-- Top Summary Header -->
+                <div class="bg-blue-600 text-white p-6 md:p-8 rounded-[2rem] shadow-xl relative overflow-hidden space-y-6">
+                    <div class="absolute -top-10 -right-10 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center font-black">
+                                    <i data-lucide="book-open-check" class="w-5 h-5"></i>
+                                </div>
+                                <h2 class="text-2xl md:text-3xl font-black tracking-tight text-white">Staff Notes & Account Ledger</h2>
+                            </div>
+                            <p class="text-blue-100 font-medium text-xs">Record informal debts, vehicle fines, ticket bookings & general memos • Completely separate from petty cash</p>
+                        </div>
+                        
+                        <!-- Global Quick Metrics -->
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div class="bg-white/10 border border-white/20 rounded-2xl px-4 py-2.5 backdrop-blur-md">
+                                <div class="text-[10px] font-black uppercase tracking-wider text-amber-200 flex items-center gap-1.5">
+                                    <i data-lucide="sticky-note" class="w-3.5 h-3.5"></i> General Memos
+                                </div>
+                                <div id="notes-total-memos" class="text-lg font-black text-white">0</div>
+                            </div>
+                            <div class="bg-rose-500/20 border border-rose-300/30 rounded-2xl px-4 py-2.5 backdrop-blur-md">
+                                <div class="text-[10px] font-black uppercase tracking-wider text-rose-200 flex items-center gap-1.5">
+                                    <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i> Total Staff Dues
+                                </div>
+                                <div id="notes-total-dues" class="text-lg font-black text-rose-100">AED 0.00</div>
+                            </div>
+                            <div class="bg-emerald-500/20 border border-emerald-300/30 rounded-2xl px-4 py-2.5 backdrop-blur-md">
+                                <div class="text-[10px] font-black uppercase tracking-wider text-emerald-200 flex items-center gap-1.5">
+                                    <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Total Receivables
+                                </div>
+                                <div id="notes-total-receivables" class="text-lg font-black text-emerald-100">AED 0.00</div>
+                            </div>
+                            <div class="bg-white/10 border border-white/20 rounded-2xl px-4 py-2.5 backdrop-blur-md">
+                                <div class="text-[10px] font-black uppercase tracking-wider text-sky-200 flex items-center gap-1.5">
+                                    <i data-lucide="users" class="w-3.5 h-3.5"></i> Staff with Dues
+                                </div>
+                                <div id="notes-staff-with-dues" class="text-lg font-black text-white">0</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
-                        <i data-lucide="list" class="text-amber-500 w-6 h-6"></i> Saved Notes
-                    </h3>
-                    <div id="notes-status" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Syncing...</div>
+                <!-- Main Split Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <!-- Left Sidebar: Staff Directory -->
+                    <div class="lg:col-span-4 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-4 space-y-3">
+                        <!-- Pinned General Notes at Top -->
+                        <div onclick="window.selectNotesPerson('General Notes')" id="nav-person-general" class="p-3.5 rounded-2xl cursor-pointer transition-all flex items-center justify-between bg-amber-50/80 border border-amber-200/80 shadow-sm group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+                                    📌
+                                </div>
+                                <div>
+                                    <div class="text-xs font-black text-amber-950">General Notes</div>
+                                    <div class="text-[10px] text-amber-700/80 font-semibold" id="sidebar-general-count">All team memos</div>
+                                </div>
+                            </div>
+                            <span id="badge-general-memos" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-200/60 text-amber-800">0</span>
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-100 flex items-center justify-between px-1">
+                            <h3 class="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                                <i data-lucide="users" class="w-4 h-4 text-indigo-600"></i> Staff Books
+                            </h3>
+                            <button onclick="window.promptAddPerson()" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-xs rounded-xl flex items-center gap-1 transition-colors">
+                                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add Staff
+                            </button>
+                        </div>
+
+                        <!-- Search Box -->
+                        <div class="relative">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                            <input id="notes-person-search" oninput="window.filterNotesPeople()" type="text" placeholder="Search staff name..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                        </div>
+
+                        <!-- Staff List -->
+                        <div id="notes-people-list" class="space-y-1.5 max-h-[550px] overflow-y-auto pr-1">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right Workspace: Selected Staff / General Notes Ledger -->
+                    <div class="lg:col-span-8 space-y-6">
+                        <!-- Header Card -->
+                        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 relative overflow-hidden">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex items-center gap-4">
+                                    <div id="notes-person-avatar" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-xl shadow-md shrink-0">
+                                        📌
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h3 id="notes-person-name" class="text-2xl font-black text-slate-800 tracking-tight">General Notes</h3>
+                                            <button id="btn-delete-person" onclick="window.deleteCurrentPerson()" class="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors hidden" title="Remove Staff">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                        <div id="notes-person-subtitle" class="text-xs font-medium text-slate-400 mt-0.5">Team memos & reminders</div>
+                                    </div>
+                                </div>
+
+                                <!-- Balance & WhatsApp Action -->
+                                <div class="flex items-center gap-3">
+                                    <div id="notes-bal-container" class="flex items-center gap-2 sm:gap-3 flex-wrap justify-end hidden">
+                                        <div class="bg-rose-50 border border-rose-200/80 rounded-2xl px-3.5 py-2 text-right shadow-xs">
+                                            <div class="text-[9px] font-black uppercase tracking-wider text-rose-500">To Pay (Dues)</div>
+                                            <div id="notes-person-dues" class="text-sm sm:text-base font-black text-rose-700">AED 0.00</div>
+                                        </div>
+                                        <div class="bg-emerald-50 border border-emerald-200/80 rounded-2xl px-3.5 py-2 text-right shadow-xs">
+                                            <div class="text-[9px] font-black uppercase tracking-wider text-emerald-600">To Collect (Receivable)</div>
+                                            <div id="notes-person-receivables" class="text-sm sm:text-base font-black text-emerald-700">AED 0.00</div>
+                                        </div>
+                                        <div class="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-right hidden sm:block">
+                                            <div class="text-[9px] font-black uppercase tracking-wider text-slate-400">Net Position</div>
+                                            <div id="notes-person-net" class="text-xs sm:text-sm font-black text-slate-700">Balanced</div>
+                                        </div>
+                                        <div id="notes-person-balance" class="hidden">AED 0.00</div>
+                                    </div>
+                                    <button id="btn-whatsapp-summary" onclick="window.copyWhatsAppNotesSummary()" class="p-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shadow-sm hidden" title="Copy WhatsApp Summary">
+                                        <i data-lucide="share-2" class="w-4 h-4"></i>
+                                        <span class="hidden sm:inline">WhatsApp</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Tabs: Active vs Settled vs Trash + Active Sub-filters -->
+                            <div class="flex flex-wrap items-center justify-between gap-3 mt-6 pt-4 border-t border-slate-100">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <button onclick="window.setNotesTab('active')" id="notes-tab-active" class="px-4 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5">
+                                        <i data-lucide="list-todo" class="w-3.5 h-3.5"></i>
+                                        <span id="tab-label-active">Active</span>
+                                        <span id="badge-active-count" class="px-1.5 py-0.5 rounded-full text-[10px] bg-white/20">0</span>
+                                    </button>
+                                    <button onclick="window.setNotesTab('settled')" id="notes-tab-settled" class="px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-500 hover:bg-slate-100 flex items-center gap-1.5">
+                                        <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
+                                        <span>Settled / Done</span>
+                                        <span id="badge-settled-count" class="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 text-slate-600">0</span>
+                                    </button>
+                                    <button onclick="window.setNotesTab('trash')" id="notes-tab-trash" class="px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-500 hover:bg-slate-100 flex items-center gap-1.5">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                        <span>Trash</span>
+                                        <span id="badge-trash-count" class="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 text-slate-600">0</span>
+                                    </button>
+                                </div>
+
+                                <!-- Sub-filter for Active Tab (All / Payables / Receivables) -->
+                                <div id="notes-active-subfilters" class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl hidden">
+                                    <button type="button" onclick="window.setNotesActiveFilter('all')" id="btn-subfilter-all" class="px-2.5 py-1 rounded-lg text-[10px] font-black bg-white text-slate-800 shadow-2xs transition-all">All</button>
+                                    <button type="button" onclick="window.setNotesActiveFilter('payables')" id="btn-subfilter-payables" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-rose-600 hover:bg-white/60 transition-all flex items-center gap-1">
+                                        <span>Dues</span>
+                                        <span id="badge-subfilter-payables" class="px-1 py-0.2 rounded-full text-[9px] bg-rose-100">0</span>
+                                    </button>
+                                    <button type="button" onclick="window.setNotesActiveFilter('receivables')" id="btn-subfilter-receivables" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-700 hover:bg-white/60 transition-all flex items-center gap-1">
+                                        <span>Receivables</span>
+                                        <span id="badge-subfilter-receivables" class="px-1 py-0.2 rounded-full text-[9px] bg-emerald-100">0</span>
+                                    </button>
+                                </div>
+
+                                <div id="notes-sync-status" class="ml-auto text-[10px] font-bold text-slate-400 uppercase tracking-widest">Synced</div>
+                            </div>
+                        </div>
+
+                        <!-- Composer (Shown on Active Tab) -->
+                        <div id="notes-composer" class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 space-y-4">
+                            <!-- Composer Title -->
+                            <div class="flex items-center justify-between">
+                                <h4 id="composer-title" class="text-xs font-black uppercase tracking-widest text-slate-700 flex items-center gap-2">
+                                    <i data-lucide="plus-circle" class="w-4 h-4 text-amber-500"></i> Add Note
+                                </h4>
+                            </div>
+
+                            <!-- Quick Suggestion Chips (Only for Staff Books) -->
+                            <div id="composer-quick-chips" class="flex flex-wrap items-center gap-1.5 pt-1">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Quick Tags:</span>
+                                <button type="button" onclick="window.quickTagComposer('🚗 Vehicle Fine - ')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[10px] rounded-lg transition-all">🚗 Vehicle Fine</button>
+                                <button type="button" onclick="window.quickTagComposer('✈️ Air Ticket - ')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[10px] rounded-lg transition-all">✈️ Air Ticket</button>
+                                <button type="button" onclick="window.quickTagComposer('💵 Pocket Credit - ')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[10px] rounded-lg transition-all">💵 Pocket Credit</button>
+                                <button type="button" onclick="window.quickTagComposer('⛽ Fuel/Gas - ')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[10px] rounded-lg transition-all">⛽ Fuel / Gas</button>
+                            </div>
+
+                            <div class="space-y-3">
+                                <textarea id="note-composer-text" placeholder="Type your note or record..." rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs font-medium text-slate-800 outline-none focus:border-indigo-500 focus:bg-white transition-all"></textarea>
+                                
+                                <!-- Staff Specific Fields: Amount, Direction & Other Party (Hidden when in General Notes) -->
+                                <div id="composer-staff-fields" class="space-y-3">
+                                    <!-- Two-Way Direction Selector -->
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Record Flow / Relationship</label>
+                                        <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-2xl">
+                                            <button type="button" id="btn-dir-borrowed" onclick="window.setComposerDirection('borrowed')" class="py-2 px-3 rounded-xl text-xs font-black transition-all bg-white text-rose-700 shadow-sm flex items-center justify-center gap-1.5">
+                                                <i data-lucide="arrow-down-left" class="w-3.5 h-3.5 text-rose-500"></i>
+                                                <span id="label-dir-borrowed">Owed by Staff (Due)</span>
+                                            </button>
+                                            <button type="button" id="btn-dir-lent" onclick="window.setComposerDirection('lent')" class="py-2 px-3 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-emerald-700 flex items-center justify-center gap-1.5">
+                                                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-emerald-500"></i>
+                                                <span id="label-dir-lent">Lent to Someone (Receivable)</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <!-- Amount Field -->
+                                        <div class="relative">
+                                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Amount (AED) - Optional</label>
+                                            <div class="relative">
+                                                <span class="absolute left-3.5 top-2.5 text-xs font-black text-slate-400">AED</span>
+                                                <input id="note-composer-amount" type="number" step="0.01" min="0" placeholder="0.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-14 pr-4 py-2 text-xs font-black text-slate-800 outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                                            </div>
+                                        </div>
+
+                                        <!-- Who gave the money / Who received -->
+                                        <div class="relative">
+                                            <label id="label-composer-party" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                                <span>Paid By / Given By</span>
+                                            </label>
+                                            <select id="note-composer-paid-by" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                                                <!-- Injected via JS -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end pt-1">
+                                    <button onclick="window.saveNewPersonNote()" id="btn-save-person-note" class="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                                        <i data-lucide="save" class="w-4 h-4"></i> Save Record
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Timeline / Cards Stream -->
+                        <div id="notes-timeline" class="space-y-3">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Notes Grid -->
-                <div id="notes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Notes will be injected here via JS -->
-                    <div class="col-span-full text-center py-12 text-slate-400 font-bold text-xs uppercase bg-slate-50 border-2 border-dashed border-slate-100 rounded-2xl">
-                        Loading notes...
+                <!-- Dedicated Partial & Full Settlement Modal for Staff Notes -->
+                <div id="notes-partial-settle-modal" class="hidden fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100 max-h-[90vh] flex flex-col">
+                        <!-- Modal Header -->
+                        <div class="p-6 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex justify-between items-start shrink-0">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span id="settle-modal-badge" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/30 text-indigo-300 border border-indigo-500/40">Settlement</span>
+                                    <h3 class="text-lg font-black tracking-tight text-white">Record Settlement / Payment</h3>
+                                </div>
+                                <p id="settle-modal-subtitle" class="text-xs text-slate-300 mt-1 line-clamp-1">Staff Note Settlement</p>
+                            </div>
+                            <button onclick="window.closeNotesSettlementModal()" class="text-slate-400 hover:text-white p-1 rounded-xl hover:bg-white/10 transition-colors">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+
+                        <div class="p-6 overflow-y-auto space-y-5 flex-1">
+                            <!-- Balance Overview Box -->
+                            <div class="grid grid-cols-3 gap-2.5 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-center">
+                                <div>
+                                    <div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Total Amount</div>
+                                    <div id="settle-modal-total-amt" class="text-sm font-black text-slate-800">AED 0.00</div>
+                                </div>
+                                <div>
+                                    <div class="text-[9px] font-bold uppercase tracking-wider text-emerald-600">Already Settled</div>
+                                    <div id="settle-modal-settled-amt" class="text-sm font-black text-emerald-600">AED 0.00</div>
+                                </div>
+                                <div>
+                                    <div class="text-[9px] font-bold uppercase tracking-wider text-rose-600">Remaining Balance</div>
+                                    <div id="settle-modal-remaining-amt" class="text-sm font-black text-rose-600">AED 0.00</div>
+                                </div>
+                            </div>
+
+                            <!-- Settlement Input Form -->
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="text-[10px] font-black text-slate-600 uppercase tracking-widest">Amount to Pay / Settle (AED)</label>
+                                        <button type="button" onclick="window.fillFullSettlement()" class="text-[10px] font-bold text-indigo-600 hover:underline">Settle Full Balance</button>
+                                    </div>
+                                    <div class="relative">
+                                        <span class="absolute left-3.5 top-3 text-xs font-black text-slate-400">AED</span>
+                                        <input id="settle-modal-input-amount" type="number" step="0.01" min="0.01" placeholder="0.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-14 pr-4 py-2.5 text-base font-black text-slate-800 outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                                    </div>
+                                    <!-- Quick Percentage Chips -->
+                                    <div class="flex items-center gap-1.5 mt-2">
+                                        <button type="button" onclick="window.setSettlementPercent(1)" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] rounded-lg transition-all">100% Full</button>
+                                        <button type="button" onclick="window.setSettlementPercent(0.5)" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] rounded-lg transition-all">50% Half</button>
+                                        <button type="button" onclick="window.setSettlementPercent(0.25)" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] rounded-lg transition-all">25% Quarter</button>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Settlement Method / Note</label>
+                                        <input id="settle-modal-input-note" type="text" placeholder="e.g. Cash, Bank transfer, Handover" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Payment Date</label>
+                                        <input id="settle-modal-input-date" type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                                    </div>
+                                </div>
+
+                                <button id="btn-confirm-note-settle" onclick="window.confirmNotesSettlement()" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                                    <i data-lucide="check-circle" class="w-4 h-4"></i> Record Settlement
+                                </button>
+                            </div>
+
+                            <!-- Settlement Payment History -->
+                            <div class="border-t border-slate-100 pt-4">
+                                <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-1.5">
+                                    <i data-lucide="history" class="w-3 h-3"></i> Past Payments on this Record
+                                </h4>
+                                <div id="settle-modal-history-list" class="space-y-2 max-h-40 overflow-y-auto">
+                                    <!-- Injected via JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
+                            <button type="button" id="btn-reopen-entire-note" onclick="window.reopenCurrentSettlementNote()" class="text-rose-600 hover:text-rose-700 font-bold text-xs flex items-center gap-1">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reopen / Reset Settled
+                            </button>
+                            <button onclick="window.closeNotesSettlementModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-all">
+                                Close
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -4404,58 +4880,76 @@
                     txs.forEach(t => {
                         const ttype = (t.type || '').toLowerCase();
                         if (ttype === 'expense' && t.batchId && t.batchId !== 'staged' && t.batchId !== 'legacy' && t.batchId !== 'received') {
-                            if (!batchMap[t.batchId]) batchMap[t.batchId] = { id: t.batchId, count: 0, total: 0, received: false, date: t.subDate, txs: [] };
+                            if (!batchMap[t.batchId]) {
+                                batchMap[t.batchId] = {
+                                    id: t.batchId,
+                                    count: 0,
+                                    total: 0,
+                                    receivedTotal: 0,
+                                    receivedCount: 0,
+                                    date: t.batchDate || t.subDate,
+                                    txs: [],
+                                    cats: {}
+                                };
+                            }
+                            const amt = (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0);
                             batchMap[t.batchId].count++;
-                            batchMap[t.batchId].total += (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0);
+                            batchMap[t.batchId].total += amt;
                             batchMap[t.batchId].txs.push(t);
-                            if (t.subDate < batchMap[t.batchId].date) batchMap[t.batchId].date = t.subDate;
-                        }
-                        if (ttype === 'receive' && t.batchId) {
-                            if (!batchMap[t.batchId]) batchMap[t.batchId] = { id: t.batchId, count: 0, total: 0, received: true, date: t.subDate, txs: [] };
-                            batchMap[t.batchId].received = true;
+
+                            if (t.reimbursed) {
+                                batchMap[t.batchId].receivedTotal += amt;
+                                batchMap[t.batchId].receivedCount++;
+                            }
+
+                            const cat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized');
+                            if (!batchMap[t.batchId].cats[cat]) {
+                                batchMap[t.batchId].cats[cat] = { total: 0, receivedTotal: 0, count: 0, receivedCount: 0 };
+                            }
+                            batchMap[t.batchId].cats[cat].total += amt;
+                            batchMap[t.batchId].cats[cat].count++;
+                            if (t.reimbursed) {
+                                batchMap[t.batchId].cats[cat].receivedTotal += amt;
+                                batchMap[t.batchId].cats[cat].receivedCount++;
+                            }
+
+                            if (t.subDate && t.subDate < batchMap[t.batchId].date) batchMap[t.batchId].date = t.subDate;
                         }
                     });
 
+                    // Compute derived pending / completion state
+                    Object.values(batchMap).forEach(b => {
+                        b.pendingTotal = Math.max(0, b.total - b.receivedTotal);
+                        b.pendingCount = b.count - b.receivedCount;
+                        b.isFullyReimbursed = (b.pendingTotal <= 0.01 && b.count > 0);
+                        b.isPartiallyReimbursed = (b.receivedTotal > 0 && b.pendingTotal > 0.01);
+                        b.percent = b.total > 0 ? Math.round((b.receivedTotal / b.total) * 100) : 0;
+                    });
+
                     window.globalBatchMap = batchMap;
-                    const pendingBatches = Object.values(batchMap).filter(b => !b.received && b.total > 0).sort((a, b) => b.id.localeCompare(a.id));
+                    const allPendingBatches = Object.values(batchMap).filter(b => b.total > 0).sort((a, b) => b.id.localeCompare(a.id));
 
-                    const batchContainer = document.getElementById('reimbursement-batches');
-                    if (batchContainer) {
-                        if (pendingBatches.length === 0) {
-                            batchContainer.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 font-bold text-xs border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50">No pending reimbursement batches</div>';
-                        } else {
-                            batchContainer.innerHTML = pendingBatches.map(b => `
-                                <div class="bg-blue-50/50 border border-blue-100 p-5 rounded-2xl relative overflow-hidden group flex flex-col h-full">
-                                    <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] font-black px-3 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm flex items-center gap-1.5">
-                                        Processing
-                                        <button onclick="window.undoBatch('${b.id}')" title="Undo Batch (Return to Staged)" class="hover:text-amber-300 transition-colors ml-1 border-l border-white/20 pl-2 flex items-center">
-                                            <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
-                                        </button>
-                                    </div>
-                                    <div class="text-[10px] text-blue-400 font-bold mb-1 uppercase tracking-wider">${window.formatSafeDate(b.date) || b.id}</div>
-                                    <div class="text-2xl font-black text-blue-900 mb-0.5 tracking-tight">${b.total.toFixed(2)} <span class="text-xs text-blue-500 font-bold">AED</span></div>
-                                    <div class="text-[10px] font-bold text-blue-600 uppercase tracking-wide mb-5 bg-blue-100/50 inline-block px-2 py-0.5 rounded-md">${b.count} Expenses</div>
-                                    
-                                    <div class="mt-auto flex flex-col gap-2">
-                                        <button onclick="window.exportBatchExcel('${b.id}')" class="w-full bg-emerald-50 border-2 border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
-                                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel Report
-                                        </button>
-                                        <button onclick="window.printBatchPDFReport('${b.id}')" class="w-full bg-slate-50 border-2 border-slate-200 text-slate-700 hover:bg-slate-600 hover:text-white hover:border-slate-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
-                                            <i data-lucide="file-text" class="w-4 h-4"></i> PDF Report
-                                        </button>
-                                        <button onclick="window.printBatchInvoices('${b.id}')" class="w-full bg-slate-50 border-2 border-slate-200 text-slate-500 hover:bg-slate-100 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
-                                            <i data-lucide="printer" class="w-4 h-4"></i> Print Invoices
-                                        </button>
-                                        <button onclick="window.receiveBatchCash('${b.id}', ${b.total})" class="w-full bg-white border-2 border-teal-200 text-teal-700 hover:bg-teal-600 hover:text-white hover:border-teal-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
-                                            <i data-lucide="check-circle-2" class="w-4 h-4"></i> Workflow Completed
-                                        </button>
-                                    </div>
-                                </div>
-                            `).join('');
-                        }
-                    }
+                    // --- UPDATE REIMBURSEMENT PIPELINE DASHBOARD ---
+                    let totalSubmitted = 0;
+                    let totalReceived = 0;
+                    const catExposureMap = {};
 
-                    // Render Staged Folders
+                    allPendingBatches.forEach(b => {
+                        totalSubmitted += b.total;
+                        totalReceived += b.receivedTotal;
+
+                        Object.entries(b.cats).forEach(([cat, cdata]) => {
+                            const pendingCat = Math.max(0, cdata.total - cdata.receivedTotal);
+                            if (pendingCat > 0.01) {
+                                catExposureMap[cat] = (catExposureMap[cat] || 0) + pendingCat;
+                            }
+                        });
+                    });
+
+                    const totalPending = Math.max(0, totalSubmitted - totalReceived);
+                    const recoveryRate = totalSubmitted > 0 ? Math.round((totalReceived / totalSubmitted) * 100) : 0;
+
+                    // Staged metrics
                     const stagedTxs = txs.filter(t => (t.type || '').toLowerCase() === 'expense' && t.batchId === 'staged' && t.status !== 'Voided');
                     const stagedMap = {};
                     stagedTxs.forEach(t => {
@@ -4465,10 +4959,174 @@
                         stagedMap[cat].total += (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0);
                         stagedMap[cat].txs.push(t);
                     });
-
                     const stagedFolders = Object.values(stagedMap).sort((a, b) => a.cat.localeCompare(b.cat));
                     window.currentStagedFolders = stagedFolders;
 
+                    const totalStagedAmt = stagedFolders.reduce((s, f) => s + f.total, 0);
+
+                    // Unbatched expenses ready for processing
+                    const readyTxs = txs.filter(t => (t.type || '').toLowerCase() === 'expense' && !t.batchId && t.status !== 'Voided' && !t.isShortage);
+                    const totalReadyAmt = readyTxs.reduce((s, t) => s + (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0), 0);
+
+                    // Update Dashboard KPI Elements
+                    const kpiSub = document.getElementById('rb-kpi-submitted');
+                    const kpiSubSub = document.getElementById('rb-kpi-submitted-sub');
+                    const kpiRec = document.getElementById('rb-kpi-received');
+                    const kpiRecSub = document.getElementById('rb-kpi-received-sub');
+                    const kpiPen = document.getElementById('rb-kpi-pending');
+                    const kpiPenSub = document.getElementById('rb-kpi-pending-sub');
+                    const kpiReady = document.getElementById('rb-kpi-ready') || document.getElementById('rb-kpi-staged');
+                    const kpiReadySub = document.getElementById('rb-kpi-ready-sub') || document.getElementById('rb-kpi-staged-sub');
+                    const kpiRate = document.getElementById('rb-recovery-rate-badge');
+                    const kpiChips = document.getElementById('rb-category-chips');
+
+                    if (kpiSub) kpiSub.innerText = `AED ${totalSubmitted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    if (kpiSubSub) kpiSubSub.innerText = `${allPendingBatches.length} batch(es) active`;
+
+                    if (kpiRec) kpiRec.innerText = `AED ${totalReceived.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    if (kpiRecSub) kpiRecSub.innerText = `Credited directly to Box`;
+
+                    if (kpiPen) kpiPen.innerText = `AED ${totalPending.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    if (kpiPenSub) kpiPenSub.innerText = `Awaiting collection`;
+
+                    if (kpiReady) kpiReady.innerText = `AED ${totalReadyAmt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    if (kpiReadySub) kpiReadySub.innerText = `${readyTxs.length} unbatched invoice${readyTxs.length === 1 ? '' : 's'}`;
+
+                    if (kpiRate) kpiRate.innerText = `${recoveryRate}% Recovered`;
+
+                    if (kpiChips) {
+                        const entries = Object.entries(catExposureMap).sort((a, b) => b[1] - a[1]);
+                        if (entries.length === 0) {
+                            kpiChips.innerHTML = '<span class="text-emerald-400 font-bold text-[10px]">All pending batches 100% recovered!</span>';
+                        } else {
+                            kpiChips.innerHTML = entries.map(([cat, amt]) => `
+                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-white/10 text-slate-300 border border-white/10 flex items-center gap-1">
+                                    <span class="text-white">${window.escapeHTML(cat)}:</span>
+                                    <span class="text-amber-400 font-black">AED ${Math.round(amt)}</span>
+                                </span>
+                            `).join('');
+                        }
+                    }
+
+                    // Update Batch Filters Count
+                    const partialCount = allPendingBatches.filter(b => b.isPartiallyReimbursed).length;
+                    const unreimbursedCount = allPendingBatches.filter(b => b.receivedTotal === 0).length;
+
+                    document.getElementById('batch-count-all')?.replaceChildren(document.createTextNode(allPendingBatches.length.toString()));
+                    document.getElementById('batch-count-partial')?.replaceChildren(document.createTextNode(partialCount.toString()));
+                    document.getElementById('batch-count-unreimbursed')?.replaceChildren(document.createTextNode(unreimbursedCount.toString()));
+
+                    // Filter batches based on active pill
+                    let filteredBatches = allPendingBatches;
+                    window.currentPendingBatchFilter = window.currentPendingBatchFilter || 'all';
+
+                    if (window.currentPendingBatchFilter === 'partial') {
+                        filteredBatches = allPendingBatches.filter(b => b.isPartiallyReimbursed);
+                    } else if (window.currentPendingBatchFilter === 'unreimbursed') {
+                        filteredBatches = allPendingBatches.filter(b => b.receivedTotal === 0);
+                    }
+
+                    const batchContainer = document.getElementById('reimbursement-batches');
+                    if (batchContainer) {
+                        if (filteredBatches.length === 0) {
+                            batchContainer.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 font-bold text-xs border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50">No pending reimbursement batches found for this filter.</div>';
+                        } else {
+                            batchContainer.innerHTML = filteredBatches.map(b => {
+                                let badgeHtml = '';
+                                let cardBorder = 'border-blue-100 bg-blue-50/50';
+
+                                if (b.isFullyReimbursed) {
+                                    cardBorder = 'border-emerald-200 bg-emerald-50/40';
+                                    badgeHtml = `
+                                        <div class="absolute top-0 right-0 bg-emerald-600 text-white text-[9px] font-black px-3 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm flex items-center gap-1.5">
+                                            <i data-lucide="check-check" class="w-3 h-3"></i> 100% Reimbursed
+                                            <button onclick="window.undoBatch('${b.id}')" title="Undo Batch" class="hover:text-amber-300 transition-colors ml-1 border-l border-white/20 pl-2 flex items-center">
+                                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                            </button>
+                                        </div>
+                                    `;
+                                } else if (b.isPartiallyReimbursed) {
+                                    cardBorder = 'border-amber-200 bg-amber-50/40';
+                                    badgeHtml = `
+                                        <div class="absolute top-0 right-0 bg-amber-600 text-white text-[9px] font-black px-3 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm flex items-center gap-1.5">
+                                            <i data-lucide="pie-chart" class="w-3 h-3"></i> Partial (${b.percent}%)
+                                            <button onclick="window.undoBatch('${b.id}')" title="Undo Batch" class="hover:text-amber-300 transition-colors ml-1 border-l border-white/20 pl-2 flex items-center">
+                                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                            </button>
+                                        </div>
+                                    `;
+                                } else {
+                                    badgeHtml = `
+                                        <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] font-black px-3 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm flex items-center gap-1.5">
+                                            Processing
+                                            <button onclick="window.undoBatch('${b.id}')" title="Undo Batch (Return to Staged)" class="hover:text-amber-300 transition-colors ml-1 border-l border-white/20 pl-2 flex items-center">
+                                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                            </button>
+                                        </div>
+                                    `;
+                                }
+
+                                // Category pills for the batch
+                                const catBadges = Object.entries(b.cats).map(([cat, cdata]) => {
+                                    const isPaid = (cdata.total - cdata.receivedTotal) <= 0.01;
+                                    return `
+                                        <span class="px-2 py-0.5 rounded-md text-[9px] font-bold ${isPaid ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'}">
+                                            ${isPaid ? '✓ ' : ''}${window.escapeHTML(cat)}: AED ${cdata.total.toFixed(0)}
+                                        </span>
+                                    `;
+                                }).join('');
+
+                                return `
+                                <div class="${cardBorder} border p-5 rounded-2xl relative overflow-hidden group flex flex-col h-full shadow-xs hover:shadow-md transition-all">
+                                    ${badgeHtml}
+                                    <div class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">${window.formatSafeDate(b.date) || b.id}</div>
+                                    <div class="text-2xl font-black text-slate-800 mb-0.5 tracking-tight">${b.total.toFixed(2)} <span class="text-xs text-slate-500 font-bold">AED</span></div>
+                                    
+                                    <!-- Progress & Breakdown -->
+                                    <div class="space-y-1.5 mb-4 mt-2">
+                                        <div class="flex items-center justify-between text-[10px] font-bold">
+                                            <span class="text-emerald-700">Received: AED ${b.receivedTotal.toFixed(2)} (${b.receivedCount}/${b.count})</span>
+                                            <span class="text-amber-700">Pending: AED ${b.pendingTotal.toFixed(2)}</span>
+                                        </div>
+                                        <div class="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden">
+                                            <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: ${b.percent}%"></div>
+                                        </div>
+                                        <div class="flex items-center gap-1 flex-wrap pt-1">
+                                            ${catBadges}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-auto flex flex-col gap-2 pt-2 border-t border-slate-200/60">
+                                        <!-- Primary Partial Reimburse Action -->
+                                        <button onclick="window.openPartialReimburseModal('${b.id}')" class="w-full bg-emerald-600 text-white hover:bg-emerald-700 py-2.5 rounded-xl text-xs font-black shadow-md transition-all flex items-center justify-center gap-2">
+                                            <i data-lucide="wallet-cards" class="w-4 h-4"></i>
+                                            <span>${b.isPartiallyReimbursed ? 'Continue Partial Reimburse' : 'Partial / Settle Invoices'}</span>
+                                        </button>
+
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <button onclick="window.exportBatchExcel('${b.id}')" class="bg-white border border-slate-200 text-slate-700 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-700 py-2 rounded-xl text-[11px] font-bold transition-all shadow-xs flex items-center justify-center gap-1.5">
+                                                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-emerald-600"></i> Excel
+                                            </button>
+                                            <button onclick="window.printBatchPDFReport('${b.id}')" class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 py-2 rounded-xl text-[11px] font-bold transition-all shadow-xs flex items-center justify-center gap-1.5">
+                                                <i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-600"></i> PDF
+                                            </button>
+                                        </div>
+
+                                        <button onclick="window.printBatchInvoices('${b.id}')" class="w-full bg-slate-100 text-slate-600 hover:bg-slate-200 py-2 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5">
+                                            <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print Invoices
+                                        </button>
+
+                                        <button onclick="window.receiveBatchCash('${b.id}', ${b.total})" class="w-full ${b.isFullyReimbursed ? 'bg-emerald-50 border-2 border-emerald-300 text-emerald-800 hover:bg-emerald-600 hover:text-white' : 'bg-white border-2 border-slate-200 text-slate-500 hover:bg-slate-100'} py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2">
+                                            <i data-lucide="check-circle-2" class="w-4 h-4"></i> Workflow Completed
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                            }).join('');
+                        }
+                    }
+
+                    // Render Staged Folders
                     const stagedContainer = document.getElementById('reimbursement-staged-folders');
                     if (stagedContainer) {
                         if (stagedFolders.length === 0) {
@@ -5494,34 +6152,372 @@
 
             window.receiveBatchCash = async (batchId, amount) => {
                 if (!currentUser) return;
-                if (!confirm(`Mark this batch (${amount.toFixed(2)} AED) as received and complete the workflow?\n\nNote: No historical data will be lost, this simply archives the batch.`)) return;
+                const batchTxs = txs.filter(t => t.batchId === batchId && (t.type || '').toLowerCase() === 'expense');
+                if (batchTxs.length === 0) {
+                    window.showStatus("Error: No transactions found for this batch ID.", true);
+                    return;
+                }
+
+                const unpaidTxs = batchTxs.filter(t => !t.reimbursed);
+                const unpaidTotal = unpaidTxs.reduce((sum, t) => sum + (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0), 0);
+
+                // SAFETY CHECK: If any invoices in the batch are still unpaid, block completion and alert user!
+                if (unpaidTxs.length > 0) {
+                    const unpaidCatSet = new Set(unpaidTxs.map(t => (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized')));
+                    const unpaidCats = Array.from(unpaidCatSet).join(', ');
+
+                    window.customConfirm({
+                        title: "Invoices Not Fully Reimbursed!",
+                        body: `⚠️ Warning: ${unpaidTxs.length} invoice(s) totaling AED ${unpaidTotal.toFixed(2)} (${unpaidCats}) have NOT been reimbursed yet!\n\nYou must settle all invoices into Cash in Box before completing this workflow. Would you like to open Partial Reimburse now?`,
+                        icon: "alert-triangle",
+                        iconBg: "bg-amber-100",
+                        okText: "Open Partial Reimburse",
+                        cancelText: "Cancel",
+                        onOk: () => {
+                            window.openPartialReimburseModal(batchId);
+                        }
+                    });
+                    return;
+                }
+
+                // If all invoices are fully reimbursed, confirm and complete workflow:
+                window.customConfirm({
+                    title: "Complete Batch Workflow?",
+                    body: `All ${batchTxs.length} invoices in batch ${batchId} are fully reimbursed (AED ${amount.toFixed(2)}).\n\nArchive this batch to Processed Archives? All partial parts remain safely grouped in one batch folder.`,
+                    icon: "check-circle",
+                    iconBg: "bg-emerald-100",
+                    okText: "Complete & Archive",
+                    onOk: async () => {
+                        try {
+                            window.showStatus("Archiving batch workflow...", false);
+                            const batchObj = writeBatch(db);
+                            const today = window.getLocalDate();
+
+                            batchTxs.forEach(t => {
+                                const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
+                                batchObj.update(ref, {
+                                    batch_id: 'received',
+                                    receivedBatchId: batchId,
+                                    receivedDate: t.reimbursedDate || today
+                                });
+                            });
+
+                            await batchObj.commit();
+                            window.showStatus("Workflow Completed & Archived! ✅");
+                            batchTxs.forEach(t => {
+                                t.batchId = 'received';
+                                t.receivedBatchId = batchId;
+                            });
+                            window.renderAll();
+                        } catch (err) {
+                            window.showStatus("Error: " + err.message, true);
+                        }
+                    }
+                });
+            };
+
+            // ------------------------------------------------------------------
+            // PARTIAL REIMBURSEMENT SYSTEM & CASH-IN-BOX INTEGRATION
+            // ------------------------------------------------------------------
+            window.currentPRBatchId = null;
+            window.selectedPRInvoiceIds = new Set();
+            window.currentPendingBatchFilter = 'all';
+
+            window.filterPendingBatches = (filter) => {
+                window.currentPendingBatchFilter = filter;
+                ['all', 'partial', 'unreimbursed'].forEach(f => {
+                    const btn = document.getElementById(`batch-filter-${f}`);
+                    if (btn) {
+                        if (f === filter) {
+                            btn.className = 'px-3 py-1 rounded-lg text-xs font-black bg-white text-slate-800 shadow-xs transition-all';
+                        } else {
+                            btn.className = 'px-3 py-1 rounded-lg text-xs font-bold text-slate-500 hover:bg-white/60 transition-all';
+                        }
+                    }
+                });
+                window.renderAll();
+            };
+
+            window.openPartialReimburseModal = (batchId) => {
+                window.currentPRBatchId = batchId;
+                window.selectedPRInvoiceIds.clear();
+
+                const batch = window.globalBatchMap ? window.globalBatchMap[batchId] : null;
+                if (!batch) {
+                    window.showStatus("Batch not found", true);
+                    return;
+                }
+
+                const modal = document.getElementById('partial-reimburse-modal');
+                if (!modal) return;
+
+                document.getElementById('pr-modal-title').innerText = `Reimburse Batch: ${batchId}`;
+                document.getElementById('pr-batch-total').innerText = `AED ${batch.total.toFixed(2)}`;
+                document.getElementById('pr-batch-count').innerText = `${batch.count} invoices`;
+                document.getElementById('pr-batch-received').innerText = `AED ${batch.receivedTotal.toFixed(2)}`;
+                document.getElementById('pr-batch-received-count').innerText = `${batch.receivedCount} invoices`;
+                document.getElementById('pr-batch-pending').innerText = `AED ${batch.pendingTotal.toFixed(2)}`;
+                document.getElementById('pr-batch-pending-count').innerText = `${batch.pendingCount} invoices`;
+
+                const dateInput = document.getElementById('pr-receipt-date');
+                if (dateInput) dateInput.value = window.getLocalDate();
+                const noteInput = document.getElementById('pr-receipt-note');
+                if (noteInput) noteInput.value = '';
+                const creditToggle = document.getElementById('pr-credit-box-toggle');
+                if (creditToggle) creditToggle.checked = true;
+
+                // Render Invoices grouped by category
+                const catContainer = document.getElementById('pr-categories-list');
+                if (catContainer) {
+                    const catMap = {};
+                    batch.txs.forEach(t => {
+                        const cat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized');
+                        if (!catMap[cat]) catMap[cat] = [];
+                        catMap[cat].push(t);
+                    });
+
+                    catContainer.innerHTML = Object.entries(catMap).map(([cat, invoices]) => {
+                        const unpaidInvoices = invoices.filter(t => !t.reimbursed);
+                        const paidInvoices = invoices.filter(t => t.reimbursed);
+                        const catTotal = invoices.reduce((s, t) => s + (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0), 0);
+                        const catUnpaidTotal = unpaidInvoices.reduce((s, t) => s + (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0), 0);
+                        const allPaid = unpaidInvoices.length === 0;
+
+                        const invoiceRows = invoices.map(t => {
+                            const isPaid = !!t.reimbursed;
+                            const amt = (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0);
+                            const dateStr = window.formatSafeDate(t.invoiceDate || t.subDate);
+                            const desc = window.escapeHTML(t.desc || 'No description');
+                            const vendor = t.vendor ? `<span class="text-slate-400 font-normal">(${window.escapeHTML(t.vendor)})</span>` : '';
+
+                            return `
+                                <div class="flex items-center justify-between py-2 px-3 rounded-xl border ${isPaid ? 'bg-emerald-50/50 border-emerald-100 opacity-80' : 'bg-white border-slate-200 hover:border-blue-300'} transition-all">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <input type="checkbox" id="pr-tx-${t.id}" data-txid="${t.id}" data-amount="${amt}" data-cat="${window.escapeHTML(cat)}" ${isPaid ? 'checked disabled' : 'onchange="window.togglePRInvoiceCheck(this.dataset.txid)"'} class="pr-invoice-cb w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer">
+                                        <div class="min-w-0">
+                                            <div class="text-xs font-bold text-slate-800 truncate">${desc} ${vendor}</div>
+                                            <div class="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
+                                                <span>${dateStr}</span>
+                                                ${t.invoiceNo ? `<span>• Inv #${window.escapeHTML(t.invoiceNo)}</span>` : ''}
+                                                ${isPaid ? `<span class="text-emerald-700 font-black">• Paid (Part ${t.reimbursementPart || 1})</span>` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right shrink-0">
+                                        <div class="text-xs font-black ${isPaid ? 'text-emerald-700' : 'text-slate-800'}">AED ${amt.toFixed(2)}</div>
+                                        <div class="text-[9px] font-bold ${isPaid ? 'text-emerald-600' : 'text-slate-400'} uppercase">${isPaid ? 'Reimbursed' : 'Unpaid'}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+
+                        return `
+                            <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/60 p-3 space-y-2">
+                                <div class="flex items-center justify-between pb-2 border-b border-slate-200/80">
+                                    <div class="flex items-center gap-2">
+                                        <input type="checkbox" id="pr-cat-cb-${window.escapeHTML(cat)}" data-cat="${window.escapeHTML(cat)}" onchange="window.togglePRCategoryCheck(this.dataset.cat, this.checked)" ${allPaid ? 'checked disabled' : ''} class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer">
+                                        <label for="pr-cat-cb-${window.escapeHTML(cat)}" class="text-xs font-black text-slate-800 cursor-pointer flex items-center gap-1.5">
+                                            <span>${window.escapeHTML(cat)}</span>
+                                            <span class="text-[10px] text-slate-400 font-bold">(${invoices.length} invoices)</span>
+                                            ${allPaid ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">100% Reimbursed</span>' : ''}
+                                        </label>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-xs font-black text-slate-800">AED ${catTotal.toFixed(2)}</span>
+                                        ${!allPaid && paidInvoices.length > 0 ? `<span class="block text-[9px] text-amber-600 font-bold">AED ${catUnpaidTotal.toFixed(2)} left</span>` : ''}
+                                    </div>
+                                </div>
+                                <div class="space-y-1.5 pt-1">
+                                    ${invoiceRows}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                window.updatePRSelectedTotals();
+                modal.classList.remove('hidden');
+                lucide.createIcons();
+            };
+
+            window.closePartialReimburseModal = () => {
+                const modal = document.getElementById('partial-reimburse-modal');
+                if (modal) modal.classList.add('hidden');
+                window.currentPRBatchId = null;
+                window.selectedPRInvoiceIds.clear();
+            };
+
+            window.togglePRInvoiceCheck = (txId) => {
+                const cb = document.getElementById(`pr-tx-${txId}`);
+                if (!cb) return;
+
+                if (cb.checked) {
+                    window.selectedPRInvoiceIds.add(txId);
+                } else {
+                    window.selectedPRInvoiceIds.delete(txId);
+                }
+                window.updatePRSelectedTotals();
+            };
+
+            window.togglePRCategoryCheck = (cat, isChecked) => {
+                const modal = document.getElementById('partial-reimburse-modal');
+                if (!modal) return;
+
+                const cbs = modal.querySelectorAll('.pr-invoice-cb:not(:disabled)');
+                cbs.forEach(cb => {
+                    if (cb.dataset.cat === cat) {
+                        cb.checked = isChecked;
+                        const txId = cb.dataset.txid;
+                        if (isChecked) {
+                            window.selectedPRInvoiceIds.add(txId);
+                        } else {
+                            window.selectedPRInvoiceIds.delete(txId);
+                        }
+                    }
+                });
+                window.updatePRSelectedTotals();
+            };
+
+            window.toggleAllPRCheckboxes = (isChecked) => {
+                const modal = document.getElementById('partial-reimburse-modal');
+                if (!modal) return;
+
+                const cbs = modal.querySelectorAll('.pr-invoice-cb:not(:disabled)');
+                cbs.forEach(cb => {
+                    cb.checked = isChecked;
+                    const txId = cb.dataset.txid;
+                    if (isChecked) {
+                        window.selectedPRInvoiceIds.add(txId);
+                    } else {
+                        window.selectedPRInvoiceIds.delete(txId);
+                    }
+                });
+
+                // Update category master checkboxes
+                const catCbs = modal.querySelectorAll('input[id^="pr-cat-cb-"]:not(:disabled)');
+                catCbs.forEach(cb => { cb.checked = isChecked; });
+
+                window.updatePRSelectedTotals();
+            };
+
+            window.updatePRSelectedTotals = () => {
+                let total = 0;
+                let count = 0;
+
+                window.selectedPRInvoiceIds.forEach(id => {
+                    const cb = document.getElementById(`pr-tx-${id}`);
+                    if (cb && !cb.disabled) {
+                        total += parseFloat(cb.dataset.amount || 0);
+                        count++;
+                    }
+                });
+
+                const countEl = document.getElementById('pr-selected-count');
+                const totalEl = document.getElementById('pr-selected-total');
+                const btn = document.getElementById('btn-confirm-partial-reimburse');
+
+                if (countEl) countEl.innerText = `${count} Invoice${count === 1 ? '' : 's'}`;
+                if (totalEl) totalEl.innerText = `AED ${total.toFixed(2)}`;
+                if (btn) btn.disabled = (count === 0);
+            };
+
+            window.confirmPartialReimbursement = async () => {
+                if (!currentUser) return;
+                const batchId = window.currentPRBatchId;
+                if (!batchId) return;
+
+                const selectedIds = Array.from(window.selectedPRInvoiceIds);
+                if (selectedIds.length === 0) {
+                    window.showStatus("Please select at least one invoice to reimburse.", true);
+                    return;
+                }
+
+                const batch = window.globalBatchMap ? window.globalBatchMap[batchId] : null;
+                if (!batch) return;
+
+                const selectedTxs = batch.txs.filter(t => selectedIds.includes(t.id));
+                const totalReimburseAmt = selectedTxs.reduce((sum, t) => sum + (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0), 0);
+
+                const dateInput = document.getElementById('pr-receipt-date');
+                const receiptDate = dateInput && dateInput.value ? dateInput.value : window.getLocalDate();
+                const noteInput = document.getElementById('pr-receipt-note');
+                const receiptNote = noteInput ? noteInput.value.trim() : '';
+
+                // Calculate next part number
+                const existingParts = new Set();
+                batch.txs.forEach(t => {
+                    if (t.reimbursed && t.reimbursementPart) existingParts.add(t.reimbursementPart);
+                });
+                const nextPartNumber = existingParts.size + 1;
+
+                // Category summary for note
+                const catsInvolved = [...new Set(selectedTxs.map(t => (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized')))].join(', ');
+
+                const shouldCreditBox = document.getElementById('pr-credit-box-toggle')?.checked ?? true;
+
+                const btn = document.getElementById('btn-confirm-partial-reimburse');
+                const origHtml = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> ${shouldCreditBox ? 'Crediting Box...' : 'Reimbursing...'}`;
+                lucide.createIcons();
 
                 try {
-                    window.showStatus("Archiving batch workflow...", false);
+                    window.showStatus(shouldCreditBox ? `Crediting AED ${totalReimburseAmt.toFixed(2)} to Cash in Box...` : `Marking AED ${totalReimburseAmt.toFixed(2)} as Reimbursed...`, false);
+                    const batchObj = writeBatch(db);
 
-                    const batchTxs = txs.filter(t => t.batchId === batchId);
-                    if (batchTxs.length === 0) {
-                        console.error("Batch Archive Error: No transactions found for ID", batchId, "All Txs:", txs);
-                        window.showStatus("Error: No transactions found for this batch ID.", true);
-                        return;
+                    // 1. Mark each selected invoice as reimbursed
+                    selectedTxs.forEach(t => {
+                        const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
+                        batchObj.update(ref, {
+                            reimbursed: true,
+                            reimbursedDate: receiptDate,
+                            reimbursementPart: nextPartNumber,
+                            reimbursementNote: receiptNote || (shouldCreditBox ? '' : 'Already added to box manually')
+                        });
+                        // update locally immediately
+                        t.reimbursed = true;
+                        t.reimbursedDate = receiptDate;
+                        t.reimbursementPart = nextPartNumber;
+                        t.reimbursementNote = receiptNote || (shouldCreditBox ? '' : 'Already added to box manually');
+                    });
+
+                    // 2. Insert cash receive transaction into petty cash ledger (CREDITING CASH IN BOX ONLY IF CHECKED)
+                    if (shouldCreditBox) {
+                        const receiveDocRef = doc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'));
+                        const descText = `Reimbursement Received: ${batchId} (Part ${nextPartNumber} - ${catsInvolved})${receiptNote ? ' • ' + receiptNote : ''}`;
+
+                        batchObj.set(receiveDocRef, {
+                            type: 'receive',
+                            amount: totalReimburseAmt,
+                            person: 'Accounts',
+                            desc_text: descText,
+                            sub_date: receiptDate,
+                            timestamp: new Date().toISOString(),
+                            user_id: currentUser.uid,
+                            paid_from_box: -totalReimburseAmt,
+                            staff_owed: 0,
+                            manager_owed: 0,
+                            batch_id: batchId,
+                            reimbursement_part: nextPartNumber,
+                            reimbursement_note: receiptNote,
+                            status: 'Active'
+                        });
                     }
 
-                    const updatePromises = batchTxs.map(t => {
-                        const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
-                        return updateDoc(ref, {
-                            batch_id: 'received',
-                            receivedBatchId: batchId,
-                            receivedDate: window.getLocalDate()
-                        });
-                    });
-                    await Promise.all(updatePromises);
+                    await batchObj.commit();
 
-                    window.showStatus(`Successfully Archived! ✅`);
-                    // Force immediate local update in case snapshot is slow
-                    batchTxs.forEach(t => t.batchId = 'received');
+                    window.closePartialReimburseModal();
+                    window.showStatus(shouldCreditBox 
+                        ? `Reimbursement of AED ${totalReimburseAmt.toFixed(2)} Received into Box! ✅` 
+                        : `Invoices marked Reimbursed (Box balance kept as is, no double credit) ✅`);
                     window.renderAll();
                 } catch (err) {
+                    console.error("Partial Reimburse Error", err);
                     window.showStatus("Error: " + err.message, true);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = origHtml;
+                    lucide.createIcons();
                 }
             };
 
@@ -6020,7 +7016,7 @@
 
                 window.customConfirm({
                     title: "Finalize Batch?",
-                    body: `Finalize batch for ${selectedCats.length} category folder(s)?`,
+                    body: `Finalize batch for ${selectedCats.length} category folder(s)? This will move them to Pending Reimbursements with today's date.`,
                     icon: "check-circle",
                     iconBg: "bg-emerald-100",
                     okText: "Finalize",
@@ -6028,12 +7024,20 @@
                         try {
                             window.showStatus("Finalizing batch...", true);
                             const batch = writeBatch(db);
-                            const d = new Date();
-                            const dd = d.getDate().toString().padStart(2, '0');
-                            const mm = (d.getMonth() + 1).toString().padStart(2, '0');
-                            const yyyy = d.getFullYear();
-                            const batchId = `EIC/PETTYCASH${dd}${mm}${yyyy}`;
-                            const today = d.toISOString();
+                            
+                            // Batch ID formatted using the exact date it enters Pending Reimbursements
+                            const localDateStr = window.getLocalDate(); // yyyy-mm-dd
+                            const [yyyy, mm, dd] = localDateStr.split('-');
+                            const baseId = `EIC/PETTYCASH${dd}${mm}${yyyy}`;
+                            
+                            let batchId = baseId;
+                            let counter = 2;
+                            while (txs.some(t => t.batchId === batchId || t.receivedBatchId === batchId)) {
+                                batchId = `${baseId}-${counter}`;
+                                counter++;
+                            }
+
+                            const today = new Date().toISOString();
 
                             selectedCats.forEach(cat => {
                                 const folderData = window.currentStagedFolders.find(f => f.cat === cat);
@@ -6042,15 +7046,17 @@
                                         const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
                                         batch.update(docRef, {
                                             batch_id: batchId,
+                                            batch_date: localDateStr,
                                             staged_date: today,
-                                            status: 'Batching'
+                                            status: 'Batching',
+                                            reimbursed: false
                                         });
                                     });
                                 }
                             });
 
                             await batch.commit();
-                            window.showStatus("Batch Finalized!");
+                            window.showStatus("Batch Finalized & Moved to Pending! ✅");
                             window.renderAll();
                         } catch (err) {
                             window.showStatus("Error: " + err.message, true);
@@ -7647,6 +8653,10 @@
                     batchId: dbTx.batch_id || dbTx.batchId || null,
                     receivedBatchId: dbTx.receivedBatchId || dbTx.received_batch_id || null,
                     receivedDate: dbTx.receivedDate || dbTx.received_date || null,
+                    reimbursed: !!(dbTx.reimbursed || dbTx.batch_id === 'received' || dbTx.batchId === 'received'),
+                    reimbursedDate: dbTx.reimbursedDate || dbTx.reimbursed_date || dbTx.receivedDate || null,
+                    reimbursementPart: dbTx.reimbursementPart || dbTx.reimbursement_part || null,
+                    reimbursementNote: dbTx.reimbursementNote || dbTx.reimbursement_note || '',
                     voidReason: dbTx.void_reason || '',
                     editReason: dbTx.edit_reason || '',
                     invoiceUrl: dbTx.invoice_url || '',
@@ -7756,142 +8766,1168 @@
                 });
             }
 
-            // --- NOTES LOGIC ---
+                                                                        // --- NOTES LOGIC: GENERAL MEMOS & TWO-WAY KHATA LEDGER ---
             let notes = [];
+            let staffList = ['Sanu', 'Nejeem', 'Vijith', 'Salam', 'Hasan', 'Mazin', 'Ahmed', 'Harris', 'Sulfi', 'Muhannad'];
+            let currentNotesPerson = 'General Notes'; // Defaults to General Notes
+            let currentNotesTab = 'active'; // 'active' | 'settled' | 'trash'
+            let currentNotesActiveFilter = 'all'; // 'all' | 'payables' | 'receivables'
+            let currentComposerDirection = 'borrowed'; // 'borrowed' (target owes paidBy) | 'lent' (currentPerson paid, other owes)
+            let currentSettlementNoteId = null;
+
+            // Helper to normalize names for seamless matching (case, whitespace, titles like 'Mr.', suffix '(Me)')
+            function normalizePersonName(name) {
+                if (!name) return '';
+                return name.toString().trim().toLowerCase().replace(/^mr\.?\s+/i, '').replace(/\s*\(me\)/i, '').trim();
+            }
+
+            function getPersonAvatarColor(name) {
+                if (name === 'General Notes') return 'from-amber-500 to-amber-600';
+                const colors = [
+                    'from-indigo-500 to-indigo-600',
+                    'from-emerald-500 to-teal-600',
+                    'from-violet-500 to-purple-600',
+                    'from-rose-500 to-pink-600',
+                    'from-teal-500 to-emerald-600',
+                    'from-orange-500 to-amber-600',
+                    'from-cyan-500 to-blue-600'
+                ];
+                let hash = 0;
+                for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+                return colors[Math.abs(hash) % colors.length];
+            }
+
+            // Calculation helpers for partial settlement & balance
+            function getNoteRemainingBalance(n) {
+                const total = parseFloat(n.amount) || 0;
+                if (total <= 0) return 0;
+                if (n.completed && (n.settledAmount === undefined || n.settledAmount === null)) return 0;
+                const settled = parseFloat(n.settledAmount) || 0;
+                if (n.completed && settled >= total) return 0;
+                return Math.max(0, total - settled);
+            }
+
+            function getNoteSettledAmount(n) {
+                const total = parseFloat(n.amount) || 0;
+                if (total <= 0) return 0;
+                if (n.settledAmount !== undefined && n.settledAmount !== null) {
+                    return Math.min(total, parseFloat(n.settledAmount) || 0);
+                }
+                if (n.completed) return total;
+                return 0;
+            }
+
+            // Determine relationship of a note relative to a specific staff member
+            function getNoteRoleForPerson(n, personName) {
+                if (!personName || personName === 'General Notes') return 'general';
+                const normP = normalizePersonName(personName);
+                const normTarget = normalizePersonName(n.targetPerson);
+                const normPaidBy = normalizePersonName(n.paidBy);
+
+                // Is it a payable? (Person received money / owes someone else)
+                if (normTarget === normP && normPaidBy !== normP) {
+                    return 'payable';
+                }
+                // Is it a receivable? (Person paid / lent money to someone else)
+                if (normPaidBy === normP && normTarget !== normP && n.targetPerson && n.targetPerson !== 'General Notes') {
+                    return 'receivable';
+                }
+                // Self note or general memo explicitly assigned
+                if (normTarget === normP) {
+                    return 'self';
+                }
+                return 'none';
+            }
+
+            // Get notes for current selection (2-way linking: debtor, creditor, or memo)
+            function getNotesForPerson(personName) {
+                if (personName === 'General Notes') {
+                    return notes.filter(n => !n.targetPerson || n.targetPerson === 'General Notes');
+                }
+                return notes.filter(n => getNoteRoleForPerson(n, personName) !== 'none');
+            }
+
+            // Calculate dues, receivables, and net for a staff member
+            function calculateStaffBalances(personName) {
+                if (personName === 'General Notes') {
+                    return { dues: 0, receivables: 0, net: 0, activePayablesCount: 0, activeReceivablesCount: 0 };
+                }
+                const pNotes = getNotesForPerson(personName).filter(n => !n.deleted && !n.completed);
+                let dues = 0;
+                let receivables = 0;
+                let activePayablesCount = 0;
+                let activeReceivablesCount = 0;
+
+                pNotes.forEach(n => {
+                    const remaining = getNoteRemainingBalance(n);
+                    const role = getNoteRoleForPerson(n, personName);
+                    if (role === 'payable') {
+                        dues += remaining;
+                        activePayablesCount++;
+                    } else if (role === 'receivable') {
+                        receivables += remaining;
+                        activeReceivablesCount++;
+                    }
+                });
+
+                return {
+                    dues,
+                    receivables,
+                    net: receivables - dues,
+                    activePayablesCount,
+                    activeReceivablesCount
+                };
+            }
+
+            function calculateStaffDues(personName) {
+                return calculateStaffBalances(personName).dues;
+            }
+
             window.setupNotesRealtime = () => {
                 if (!currentUser) return;
                 if (window.unsubNotes) return; // Already listening
 
+                // Listen to saved custom staff list
+                const configRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'notes_staff_list');
+                getDoc(configRef).then(snap => {
+                    if (snap.exists() && Array.isArray(snap.data().list)) {
+                        snap.data().list.forEach(s => {
+                            if (!staffList.includes(s) && s !== 'General Notes') staffList.push(s);
+                        });
+                    }
+                }).catch(e => console.warn('Load staff list warning', e));
+
                 const notesRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'important_notes');
                 const q = query(notesRef);
-                
+
                 window.unsubNotes = onSnapshot(q, (snapshot) => {
-                    notes = snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
+                    notes = snapshot.docs.map(d => {
+                        const data = d.data();
+                        const targetPerson = data.targetPerson || 'General Notes';
+                        const amount = parseFloat(data.amount) || 0;
+                        const settledAmount = (data.settledAmount !== undefined && data.settledAmount !== null) ? parseFloat(data.settledAmount) : (data.completed ? amount : 0);
+
+                        if (targetPerson !== 'General Notes' && !staffList.includes(targetPerson)) {
+                            staffList.push(targetPerson);
+                        }
+                        if (data.paidBy && data.paidBy !== 'Shanid (Me)' && data.paidBy !== '__other__' && !staffList.includes(data.paidBy)) {
+                            staffList.push(data.paidBy);
+                        }
+
+                        return {
+                            id: d.id,
+                            ...data,
+                            targetPerson,
+                            amount,
+                            settledAmount,
+                            partialSettlements: Array.isArray(data.partialSettlements) ? data.partialSettlements : [],
+                            deleted: !!data.deleted
+                        };
+                    });
+
                     // Sort: Pinned first, then by date descending
                     notes.sort((a, b) => {
                         if (a.pinned !== b.pinned) return b.pinned ? 1 : -1;
                         return (b.createdAt || '').localeCompare(a.createdAt || '');
                     });
-                    
-                    const statusEl = document.getElementById('notes-status');
-                    if (statusEl) statusEl.innerText = `Last update: ${new Date().toLocaleTimeString()}`;
-                    
-                    window.renderNotes();
+
+                    const statusEl = document.getElementById('notes-sync-status');
+                    if (statusEl) statusEl.innerText = `Synced ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+                    window.renderNotesAll();
                 });
             };
 
-            window.saveNewNote = async () => {
-                const input = document.getElementById('note-input');
-                if (!input || !input.value.trim()) return window.showStatus("Note cannot be empty", true);
+            window.renderNotesAll = () => {
+                window.updateNotesSummaryMetrics();
+                window.renderNotesPeople();
+                window.populatePaidByDropdown();
+                window.renderSelectedPersonView();
+            };
 
-                const btn = document.getElementById('btn-save-note');
-                const origContent = btn.innerHTML;
+            window.updateNotesSummaryMetrics = () => {
+                const generalNotes = notes.filter(n => (!n.targetPerson || n.targetPerson === 'General Notes') && !n.deleted);
+                let totalStaffDues = 0;
+                let totalReceivables = 0;
+                const staffWithDues = new Set();
+
+                notes.forEach(n => {
+                    if (n.deleted || n.completed) return;
+                    const remaining = getNoteRemainingBalance(n);
+                    if (remaining <= 0) return;
+
+                    if (n.targetPerson && n.targetPerson !== 'General Notes') {
+                        totalStaffDues += remaining;
+                        staffWithDues.add(n.targetPerson);
+                        if (n.paidBy && normalizePersonName(n.paidBy) !== normalizePersonName(n.targetPerson)) {
+                            totalReceivables += remaining;
+                        }
+                    }
+                });
+
+                document.getElementById('notes-total-memos')?.replaceChildren(document.createTextNode(generalNotes.length.toString()));
+                document.getElementById('notes-total-dues')?.replaceChildren(document.createTextNode(`AED ${totalStaffDues.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`));
+                document.getElementById('notes-total-receivables')?.replaceChildren(document.createTextNode(`AED ${totalReceivables.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`));
+                document.getElementById('notes-staff-with-dues')?.replaceChildren(document.createTextNode(staffWithDues.size.toString()));
+                document.getElementById('badge-general-memos')?.replaceChildren(document.createTextNode(generalNotes.length.toString()));
+            };
+
+            window.renderNotesPeople = () => {
+                const listEl = document.getElementById('notes-people-list');
+                if (!listEl) return;
+
+                const searchInput = document.getElementById('notes-person-search');
+                const filterTerm = (searchInput ? searchInput.value : '').toLowerCase().trim();
+
+                const filteredStaff = staffList.filter(s => {
+                    if (!filterTerm) return true;
+                    return s.toLowerCase().includes(filterTerm);
+                });
+
+                listEl.innerHTML = filteredStaff.map(staffName => {
+                    const isSelected = staffName === currentNotesPerson;
+                    const pNotes = getNotesForPerson(staffName).filter(n => !n.deleted);
+                    const activePNotes = pNotes.filter(n => !n.completed);
+                    const { dues, receivables, activePayablesCount, activeReceivablesCount } = calculateStaffBalances(staffName);
+
+                    let badges = [];
+                    if (dues > 0) {
+                        badges.push(`<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-50 text-rose-700 border border-rose-200" title="Dues to pay">Due: AED ${Math.round(dues)}</span>`);
+                    }
+                    if (receivables > 0) {
+                        badges.push(`<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200" title="Receivables to collect">+AED ${Math.round(receivables)}</span>`);
+                    }
+                    if (badges.length === 0 && activePNotes.length > 0) {
+                        badges.push(`<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">${activePNotes.length}</span>`);
+                    }
+
+                    const initials = staffName.substring(0, 2).toUpperCase();
+                    const avatarBg = getPersonAvatarColor(staffName);
+
+                    let subtitle = `${activePNotes.length} record${activePNotes.length === 1 ? '' : 's'}`;
+                    if (activePayablesCount > 0 && activeReceivablesCount > 0) {
+                        subtitle = `${activePayablesCount} due • ${activeReceivablesCount} recv`;
+                    } else if (activePayablesCount > 0) {
+                        subtitle = `${activePayablesCount} pending due${activePayablesCount === 1 ? '' : 's'}`;
+                    } else if (activeReceivablesCount > 0) {
+                        subtitle = `${activeReceivablesCount} receivable${activeReceivablesCount === 1 ? '' : 's'}`;
+                    }
+
+                    return `
+                        <div onclick="window.selectNotesPerson('${staffName.replace(/'/g, "\\'")}')" class="p-3 rounded-2xl cursor-pointer transition-all flex items-center justify-between group ${isSelected ? 'bg-indigo-50/80 border border-indigo-200 shadow-sm' : 'hover:bg-slate-50 border border-transparent'}">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr ${avatarBg} text-white flex items-center justify-center font-black text-xs shrink-0 shadow-sm">
+                                    ${initials}
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-bold ${isSelected ? 'text-indigo-950 font-black' : 'text-slate-800'} truncate">${staffName}</div>
+                                    <div class="text-[10px] text-slate-400 font-medium">${subtitle}</div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end gap-1 shrink-0">
+                                <div class="flex items-center gap-1">${badges.join('')}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Highlight General Notes card if selected
+                const genCard = document.getElementById('nav-person-general');
+                if (genCard) {
+                    if (currentNotesPerson === 'General Notes') {
+                        genCard.className = 'p-3.5 rounded-2xl cursor-pointer transition-all flex items-center justify-between bg-amber-100/90 border border-amber-300 shadow-sm group';
+                    } else {
+                        genCard.className = 'p-3.5 rounded-2xl cursor-pointer transition-all flex items-center justify-between bg-amber-50/60 hover:bg-amber-50 border border-amber-200/60 group';
+                    }
+                }
+
+                lucide.createIcons();
+            };
+
+            window.filterNotesPeople = () => {
+                window.renderNotesPeople();
+            };
+
+            window.setComposerDirection = (dir) => {
+                currentComposerDirection = dir;
+                const btnBorrowed = document.getElementById('btn-dir-borrowed');
+                const btnLent = document.getElementById('btn-dir-lent');
+                const partyLabel = document.getElementById('label-composer-party');
+
+                if (dir === 'borrowed') {
+                    if (btnBorrowed) btnBorrowed.className = 'py-2 px-3 rounded-xl text-xs font-black transition-all bg-white text-rose-700 shadow-sm flex items-center justify-center gap-1.5';
+                    if (btnLent) btnLent.className = 'py-2 px-3 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-emerald-700 flex items-center justify-center gap-1.5';
+                    if (partyLabel) partyLabel.innerHTML = '<span>Paid By / Given By (Who gave the money?)</span>';
+                } else {
+                    if (btnBorrowed) btnBorrowed.className = 'py-2 px-3 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-rose-700 flex items-center justify-center gap-1.5';
+                    if (btnLent) btnLent.className = 'py-2 px-3 rounded-xl text-xs font-black transition-all bg-white text-emerald-700 shadow-sm flex items-center justify-center gap-1.5';
+                    if (partyLabel) partyLabel.innerHTML = '<span>Given To / Beneficiary (Who received the money?)</span>';
+                }
+                window.populatePaidByDropdown();
+            };
+
+            window.populatePaidByDropdown = () => {
+                const select = document.getElementById('note-composer-paid-by');
+                if (!select) return;
+
+                const curr = select.value;
+                const options = [];
+
+                if (currentComposerDirection === 'borrowed') {
+                    options.push('<option value="Shanid (Me)">Shanid (Me)</option>');
+                    staffList.forEach(s => {
+                        if (normalizePersonName(s) !== normalizePersonName(currentNotesPerson)) {
+                            options.push(`<option value="${s.replace(/"/g, '&quot;')}">${s}</option>`);
+                        }
+                    });
+                    options.push('<option value="__other__">+ Enter Other Name...</option>');
+                } else {
+                    staffList.forEach(s => {
+                        if (normalizePersonName(s) !== normalizePersonName(currentNotesPerson)) {
+                            options.push(`<option value="${s.replace(/"/g, '&quot;')}">${s}</option>`);
+                        }
+                    });
+                    options.push('<option value="__other__">+ Enter Other Staff/Beneficiary...</option>');
+                }
+
+                select.innerHTML = options.join('');
+                if (curr && select.querySelector(`option[value="${curr}"]`)) {
+                    select.value = curr;
+                } else if (options.length > 0) {
+                    select.selectedIndex = 0;
+                }
+            };
+
+            window.quickTagComposer = (prefix) => {
+                const input = document.getElementById('note-composer-text');
+                if (!input) return;
+                if (!input.value.startsWith(prefix)) {
+                    input.value = prefix + input.value;
+                }
+                input.focus();
+            };
+
+            window.selectNotesPerson = (name) => {
+                currentNotesPerson = name;
+                currentNotesTab = 'active';
+                currentNotesActiveFilter = 'all';
+                currentComposerDirection = 'borrowed';
+                window.renderNotesPeople();
+                window.renderSelectedPersonView();
+            };
+
+            window.setNotesTab = (tab) => {
+                currentNotesTab = tab;
+                ['active', 'settled', 'trash'].forEach(t => {
+                    const btn = document.getElementById(`notes-tab-${t}`);
+                    if (btn) {
+                        if (t === tab) {
+                            btn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5';
+                        } else {
+                            btn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-500 hover:bg-slate-100 flex items-center gap-1.5';
+                        }
+                    }
+                });
+
+                const composer = document.getElementById('notes-composer');
+                if (composer) composer.classList.toggle('hidden', tab !== 'active');
+
+                const subfilterContainer = document.getElementById('notes-active-subfilters');
+                if (subfilterContainer) {
+                    subfilterContainer.classList.toggle('hidden', tab !== 'active' || currentNotesPerson === 'General Notes');
+                }
+
+                window.renderPersonTimeline();
+            };
+
+            window.setNotesActiveFilter = (filter) => {
+                currentNotesActiveFilter = filter;
+                ['all', 'payables', 'receivables'].forEach(f => {
+                    const btn = document.getElementById(`btn-subfilter-${f}`);
+                    if (btn) {
+                        if (f === filter) {
+                            btn.className = 'px-2.5 py-1 rounded-lg text-[10px] font-black bg-white text-slate-800 shadow-2xs transition-all';
+                        } else {
+                            btn.className = 'px-2.5 py-1 rounded-lg text-[10px] font-bold text-slate-500 hover:bg-white/60 transition-all';
+                        }
+                    }
+                });
+                window.renderPersonTimeline();
+            };
+
+            window.renderSelectedPersonView = () => {
+                const isGeneral = (currentNotesPerson === 'General Notes');
+
+                const nameEl = document.getElementById('notes-person-name');
+                const avatarEl = document.getElementById('notes-person-avatar');
+                const subEl = document.getElementById('notes-person-subtitle');
+                const balContainer = document.getElementById('notes-bal-container');
+                const delPersonBtn = document.getElementById('btn-delete-person');
+                const whatsappBtn = document.getElementById('btn-whatsapp-summary');
+                const composerTitle = document.getElementById('composer-title');
+                const staffFields = document.getElementById('composer-staff-fields');
+                const quickChips = document.getElementById('composer-quick-chips');
+                const subfilterContainer = document.getElementById('notes-active-subfilters');
+
+                if (nameEl) nameEl.innerText = isGeneral ? 'General Notes & Memos' : `${currentNotesPerson}'s Book`;
+                if (subEl) subEl.innerText = isGeneral ? 'All general memos & team reminders' : `Account ledger & notes for ${currentNotesPerson}`;
+                if (composerTitle) composerTitle.innerText = isGeneral ? 'Add New General Memo' : `Record Entry for ${currentNotesPerson}`;
+
+                if (avatarEl) {
+                    avatarEl.innerText = isGeneral ? '📌' : currentNotesPerson.substring(0, 2).toUpperCase();
+                    avatarEl.className = `w-14 h-14 rounded-2xl bg-gradient-to-tr ${getPersonAvatarColor(currentNotesPerson)} text-white flex items-center justify-center font-black text-xl shadow-md shrink-0`;
+                }
+
+                if (delPersonBtn) delPersonBtn.classList.toggle('hidden', isGeneral);
+                if (balContainer) balContainer.classList.toggle('hidden', isGeneral);
+                if (whatsappBtn) whatsappBtn.classList.toggle('hidden', isGeneral);
+                if (staffFields) staffFields.classList.toggle('hidden', isGeneral);
+                if (quickChips) quickChips.classList.toggle('hidden', isGeneral);
+
+                // Update label on direction buttons
+                const labelBorrowed = document.getElementById('label-dir-borrowed');
+                const labelLent = document.getElementById('label-dir-lent');
+                if (labelBorrowed) labelBorrowed.innerText = `Owed by ${currentNotesPerson} (Due)`;
+                if (labelLent) labelLent.innerText = `Lent by ${currentNotesPerson} (Receivable)`;
+
+                // Update Tab badges
+                const personAllNotes = getNotesForPerson(currentNotesPerson);
+                const activeNotes = personAllNotes.filter(n => !n.deleted && !n.completed);
+                const settledNotes = personAllNotes.filter(n => !n.deleted && n.completed);
+                const trashNotes = personAllNotes.filter(n => n.deleted);
+
+                document.getElementById('badge-active-count')?.replaceChildren(document.createTextNode(activeNotes.length.toString()));
+                document.getElementById('badge-settled-count')?.replaceChildren(document.createTextNode(settledNotes.length.toString()));
+                document.getElementById('badge-trash-count')?.replaceChildren(document.createTextNode(trashNotes.length.toString()));
+
+                // Update 3 Balances (Dues, Receivables, Net)
+                if (!isGeneral) {
+                    const { dues, receivables, net, activePayablesCount, activeReceivablesCount } = calculateStaffBalances(currentNotesPerson);
+
+                    const duesEl = document.getElementById('notes-person-dues');
+                    const recEl = document.getElementById('notes-person-receivables');
+                    const netEl = document.getElementById('notes-person-net');
+
+                    if (duesEl) duesEl.innerText = `AED ${dues.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    if (recEl) recEl.innerText = `AED ${receivables.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+                    if (netEl) {
+                        if (net > 0) {
+                            netEl.innerHTML = `<span class="text-emerald-600 font-black">+AED ${net.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> <span class="text-[9px] uppercase font-bold text-emerald-500 block">To Receive</span>`;
+                        } else if (net < 0) {
+                            netEl.innerHTML = `<span class="text-rose-600 font-black">-AED ${Math.abs(net).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> <span class="text-[9px] uppercase font-bold text-rose-500 block">To Pay</span>`;
+                        } else {
+                            netEl.innerHTML = `<span class="text-slate-400 font-bold">AED 0.00</span> <span class="text-[9px] uppercase font-bold text-slate-400 block">Balanced</span>`;
+                        }
+                    }
+
+                    // Subfilters
+                    if (subfilterContainer) {
+                        subfilterContainer.classList.toggle('hidden', currentNotesTab !== 'active');
+                        const badgePay = document.getElementById('badge-subfilter-payables');
+                        const badgeRec = document.getElementById('badge-subfilter-receivables');
+                        if (badgePay) badgePay.innerText = activePayablesCount.toString();
+                        if (badgeRec) badgeRec.innerText = activeReceivablesCount.toString();
+                    }
+                } else {
+                    if (subfilterContainer) subfilterContainer.classList.add('hidden');
+                }
+
+                window.populatePaidByDropdown();
+                window.setNotesTab(currentNotesTab);
+            };
+
+            window.renderPersonTimeline = () => {
+                const timeline = document.getElementById('notes-timeline');
+                if (!timeline) return;
+
+                const isGeneral = (currentNotesPerson === 'General Notes');
+                const personAllNotes = getNotesForPerson(currentNotesPerson);
+                let listToRender = [];
+
+                if (currentNotesTab === 'active') {
+                    listToRender = personAllNotes.filter(n => !n.deleted && !n.completed);
+                    if (!isGeneral && currentNotesActiveFilter !== 'all') {
+                        listToRender = listToRender.filter(n => {
+                            const role = getNoteRoleForPerson(n, currentNotesPerson);
+                            if (currentNotesActiveFilter === 'payables') return role === 'payable' || role === 'self';
+                            if (currentNotesActiveFilter === 'receivables') return role === 'receivable';
+                            return true;
+                        });
+                    }
+                } else if (currentNotesTab === 'settled') {
+                    listToRender = personAllNotes.filter(n => !n.deleted && n.completed);
+                } else if (currentNotesTab === 'trash') {
+                    listToRender = personAllNotes.filter(n => n.deleted);
+                }
+
+                if (listToRender.length === 0) {
+                    let emptyMsg = isGeneral ? "No active memos. Add one above!" : `No active records for ${currentNotesPerson}. Add one above!`;
+                    let emptyIcon = isGeneral ? "sticky-note" : "list-todo";
+                    if (currentNotesTab === 'settled') {
+                        emptyMsg = "No settled history yet.";
+                        emptyIcon = "check-check";
+                    } else if (currentNotesTab === 'trash') {
+                        emptyMsg = "Trash is empty.";
+                        emptyIcon = "trash-2";
+                    }
+
+                    timeline.innerHTML = `
+                        <div class="col-span-full text-center py-16 px-4 bg-slate-50/70 border-2 border-dashed border-slate-200 rounded-3xl">
+                            <i data-lucide="${emptyIcon}" class="w-10 h-10 mx-auto text-slate-300 mb-3"></i>
+                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">${emptyMsg}</div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                timeline.innerHTML = listToRender.map(n => {
+                    const dateStr = n.createdAt ? new Date(n.createdAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+                    const isCompleted = !!n.completed;
+                    const isTrash = !!n.deleted;
+
+                    const role = getNoteRoleForPerson(n, currentNotesPerson);
+                    const amt = parseFloat(n.amount) || 0;
+                    const settledAmt = getNoteSettledAmount(n);
+                    const remainingAmt = getNoteRemainingBalance(n);
+                    const hasPartialSettlement = (settledAmt > 0 && remainingAmt > 0);
+
+                    let borderAccent = 'border-l-indigo-500';
+                    let roleBadge = '';
+
+                    if (isGeneral) {
+                        borderAccent = 'border-l-amber-500';
+                    } else if (role === 'receivable') {
+                        borderAccent = 'border-l-emerald-500 bg-emerald-50/20';
+                        roleBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1"><i data-lucide="arrow-up-right" class="w-3 h-3 text-emerald-600"></i> Receivable from ${n.targetPerson}</span>`;
+                    } else if (role === 'payable') {
+                        borderAccent = 'border-l-rose-500 bg-white';
+                        roleBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1"><i data-lucide="arrow-down-left" class="w-3.5 h-3.5 text-rose-500"></i> Payable to ${n.paidBy || 'Shanid (Me)'}</span>`;
+                    }
+
+                    if (isCompleted) {
+                        borderAccent = 'border-l-slate-400 opacity-80 bg-slate-50';
+                    }
+
+                    let amountDisplayHtml = '';
+                    if (amt > 0) {
+                        if (isCompleted) {
+                            amountDisplayHtml = `
+                                <div class="text-right">
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-200/80 text-slate-700 border border-slate-300 flex items-center gap-1">
+                                        <i data-lucide="check-check" class="w-3 h-3 text-emerald-600"></i> Fully Settled (AED ${amt.toFixed(2)})
+                                    </span>
+                                </div>
+                            `;
+                        } else if (hasPartialSettlement) {
+                            const percent = Math.min(100, Math.round((settledAmt / amt) * 100));
+                            amountDisplayHtml = `
+                                <div class="text-right min-w-[130px]">
+                                    <div class="text-[10px] font-bold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-md border border-amber-200/80 inline-block mb-0.5">Partially Settled (${percent}%)</div>
+                                    <div class="text-sm font-black text-rose-600">Remaining: AED ${remainingAmt.toFixed(2)}</div>
+                                    <div class="text-[9px] text-slate-400 font-semibold">Total: AED ${amt.toFixed(2)} | Paid: AED ${settledAmt.toFixed(2)}</div>
+                                    <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
+                                        <div class="bg-emerald-500 h-1.5 rounded-full transition-all" style="width: ${percent}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            amountDisplayHtml = `
+                                <div class="text-right">
+                                    <div class="text-base font-black ${role === 'receivable' ? 'text-emerald-600' : 'text-rose-600'}">AED ${amt.toFixed(2)}</div>
+                                    <div class="text-[9px] font-bold ${role === 'receivable' ? 'text-emerald-500' : 'text-rose-400'} uppercase">${role === 'receivable' ? 'To Collect' : 'Pending Due'}</div>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    let actionButtons = '';
+                    if (isTrash) {
+                        actionButtons = `
+                            <button onclick="window.restoreNoteFromTrash('${n.id}')" class="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl transition-all flex items-center gap-1 text-[10px] font-bold" title="Restore Record">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Restore
+                            </button>
+                            <button onclick="window.deleteNotePermanently('${n.id}')" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl transition-all flex items-center gap-1 text-[10px] font-bold" title="Delete Forever">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i> Permanently Delete
+                            </button>
+                        `;
+                    } else {
+                        let settleBtnHtml = '';
+                        if (amt > 0) {
+                            if (isCompleted) {
+                                settleBtnHtml = `
+                                    <button onclick="window.openNotesSettlementModal('${n.id}')" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-all font-bold text-[10px] flex items-center gap-1.5" title="View Settlement / Reopen">
+                                        <i data-lucide="receipt" class="w-3.5 h-3.5 text-slate-500"></i>
+                                        <span>Settlement History</span>
+                                    </button>
+                                `;
+                            } else {
+                                const btnLabel = (role === 'receivable') ? 'Record Received' : 'Settle / Pay';
+                                settleBtnHtml = `
+                                    <button onclick="window.openNotesSettlementModal('${n.id}')" class="p-2 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/60 rounded-xl transition-all font-bold text-[10px] flex items-center gap-1.5 shadow-2xs" title="Settle in full or partially">
+                                        <i data-lucide="wallet" class="w-3.5 h-3.5 text-indigo-600"></i>
+                                        <span>${hasPartialSettlement ? 'Settle Balance' : btnLabel}</span>
+                                    </button>
+                                `;
+                            }
+                        } else {
+                            settleBtnHtml = `
+                                <button onclick="window.toggleNoteSettled('${n.id}', ${isCompleted})" class="p-2 ${isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700'} rounded-xl transition-all font-bold text-[10px] flex items-center gap-1.5" title="${isCompleted ? 'Reopen' : 'Mark Done'}">
+                                    <i data-lucide="${isCompleted ? 'check-circle-2' : 'square'}" class="w-3.5 h-3.5"></i>
+                                    <span>${isCompleted ? 'Done' : 'Mark Done'}</span>
+                                </button>
+                            `;
+                        }
+
+                        actionButtons = `
+                            <button onclick="window.toggleNotePin('${n.id}', ${n.pinned})" class="p-2 ${n.pinned ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400 hover:text-slate-600'} rounded-xl transition-all" title="${n.pinned ? 'Unpin' : 'Pin to top'}">
+                                <i data-lucide="pin" class="w-3.5 h-3.5 ${n.pinned ? 'fill-amber-600' : ''}"></i>
+                            </button>
+                            ${settleBtnHtml}
+                            <button onclick="window.moveNoteToTrash('${n.id}')" class="p-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-400 rounded-xl transition-all" title="Move to Trash">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        `;
+                    }
+
+                    let partialHistoryStrip = '';
+                    if (Array.isArray(n.partialSettlements) && n.partialSettlements.length > 0) {
+                        const count = n.partialSettlements.length;
+                        const latest = n.partialSettlements[n.partialSettlements.length - 1];
+                        const latestDate = latest.date ? new Date(latest.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '';
+                        partialHistoryStrip = `
+                            <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                                <span class="flex items-center gap-1.5 font-medium">
+                                    <i data-lucide="check" class="w-3 h-3 text-emerald-600"></i>
+                                    <span><strong>${count}</strong> payment(s) recorded • latest: <strong>AED ${parseFloat(latest.amount).toFixed(2)}</strong> on ${latestDate}${latest.note ? ` (${latest.note})` : ''}</span>
+                                </span>
+                                <button type="button" onclick="window.openNotesSettlementModal('${n.id}')" class="text-indigo-600 hover:underline font-bold">Details</button>
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm border-l-4 ${borderAccent} transition-all duration-300 relative group">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2.5">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    ${n.pinned ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-700">📌 Pinned</span>' : ''}
+                                    ${roleBadge}
+                                    <span class="text-[10px] font-bold text-slate-400">${dateStr}</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    ${amountDisplayHtml}
+                                    <div class="flex items-center gap-1.5">
+                                        ${actionButtons}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-xs font-semibold ${isCompleted ? 'line-through text-slate-400' : 'text-slate-800'} whitespace-pre-wrap leading-relaxed">
+                                ${n.text}
+                            </div>
+                            ${partialHistoryStrip}
+                        </div>
+                    `;
+                }).join('');
+
+                lucide.createIcons();
+            };
+
+            window.saveNewPersonNote = async () => {
+                const textInput = document.getElementById('note-composer-text');
+                const text = textInput ? textInput.value.trim() : '';
+                if (!text) return window.showStatus('Note description cannot be empty', true);
+
+                const isGeneral = (currentNotesPerson === 'General Notes');
+                let amount = 0;
+                let targetPerson = currentNotesPerson;
+                let paidBy = '';
+
+                if (!isGeneral) {
+                    const amtInput = document.getElementById('note-composer-amount');
+                    amount = parseFloat(amtInput ? amtInput.value : 0) || 0;
+
+                    const paidBySelect = document.getElementById('note-composer-paid-by');
+                    let selectedParty = paidBySelect ? paidBySelect.value : '';
+
+                    if (selectedParty === '__other__') {
+                        const promptMsg = (currentComposerDirection === 'lent') ? 'Enter name of who received the money:' : 'Enter who gave the money:';
+                        const customVal = prompt(promptMsg);
+                        selectedParty = customVal ? customVal.trim() : (currentComposerDirection === 'lent' ? 'Other' : 'Shanid (Me)');
+                    }
+
+                    if (currentComposerDirection === 'lent') {
+                        // currentNotesPerson gave money to selectedParty
+                        targetPerson = selectedParty;
+                        paidBy = currentNotesPerson;
+                    } else {
+                        // currentNotesPerson received money from selectedParty
+                        targetPerson = currentNotesPerson;
+                        paidBy = selectedParty || 'Shanid (Me)';
+                    }
+                }
+
+                const btn = document.getElementById('btn-save-person-note');
+                const origHtml = btn.innerHTML;
                 btn.disabled = true;
                 btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Saving...`;
                 lucide.createIcons();
 
                 try {
-                    const note = {
-                        text: input.value.trim(),
-                        createdAt: new Date().toISOString(),
-                        pinned: false,
+                    const docData = {
+                        text,
+                        targetPerson,
+                        paidBy,
+                        amount,
+                        settledAmount: 0,
+                        partialSettlements: [],
                         completed: false,
+                        pinned: false,
+                        deleted: false,
+                        createdAt: new Date().toISOString(),
                         author: currentUser.email || 'Admin'
                     };
-                    
-                    await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'important_notes'), note);
-                    input.value = '';
-                    window.showStatus("Note Saved!");
+
+                    const notesCol = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'important_notes');
+                    await addDoc(notesCol, docData);
+
+                    textInput.value = '';
+                    const amtInput = document.getElementById('note-composer-amount');
+                    if (amtInput) amtInput.value = '';
+
+                    let feedbackMsg = isGeneral ? 'Memo Saved in General Notes!' : `Record added to ${currentNotesPerson}'s Book!`;
+                    if (!isGeneral && currentComposerDirection === 'lent') {
+                        feedbackMsg = `Recorded! Linked as receivable in ${currentNotesPerson}'s book and due in ${targetPerson}'s book.`;
+                    } else if (!isGeneral && paidBy && paidBy !== 'Shanid (Me)') {
+                        feedbackMsg = `Recorded! Linked as due in ${targetPerson}'s book and receivable in ${paidBy}'s book.`;
+                    }
+
+                    window.showStatus(feedbackMsg);
                 } catch (e) {
-                    console.error("Save Note Error", e);
-                    window.showStatus("Failed to save note", true);
+                    console.error('Save Note Error', e);
+                    window.showStatus('Failed to save record', true);
                 } finally {
                     btn.disabled = false;
-                    btn.innerHTML = origContent;
+                    btn.innerHTML = origHtml;
                     lucide.createIcons();
                 }
             };
 
-            window.deleteNote = async (id) => {
-                if (!confirm("Are you sure you want to delete this note?")) return;
+            // Modal & Partial Settlement Methods
+            window.openNotesSettlementModal = (noteId) => {
+                const note = notes.find(n => n.id === noteId);
+                if (!note) return;
+                currentSettlementNoteId = noteId;
+
+                const modal = document.getElementById('notes-partial-settle-modal');
+                if (!modal) return;
+
+                const amt = parseFloat(note.amount) || 0;
+                const settledAmt = getNoteSettledAmount(note);
+                const remainingAmt = getNoteRemainingBalance(note);
+
+                const totalEl = document.getElementById('settle-modal-total-amt');
+                const settledEl = document.getElementById('settle-modal-settled-amt');
+                const remainingEl = document.getElementById('settle-modal-remaining-amt');
+                const subtitleEl = document.getElementById('settle-modal-subtitle');
+                const inputAmt = document.getElementById('settle-modal-input-amount');
+                const inputNote = document.getElementById('settle-modal-input-note');
+                const inputDate = document.getElementById('settle-modal-input-date');
+                const badgeEl = document.getElementById('settle-modal-badge');
+                const reopenBtn = document.getElementById('btn-reopen-entire-note');
+
+                if (totalEl) totalEl.innerText = `AED ${amt.toFixed(2)}`;
+                if (settledEl) settledEl.innerText = `AED ${settledAmt.toFixed(2)}`;
+                if (remainingEl) remainingEl.innerText = `AED ${remainingAmt.toFixed(2)}`;
+
+                let subtitleText = note.text || '';
+                if (note.targetPerson && note.targetPerson !== 'General Notes') {
+                    const pBy = note.paidBy || 'Shanid (Me)';
+                    subtitleText = `${note.targetPerson} (Owes ${pBy}): "${subtitleText}"`;
+                }
+                if (subtitleEl) subtitleEl.innerText = subtitleText;
+
+                if (badgeEl) {
+                    if (note.completed || remainingAmt <= 0.001) {
+                        badgeEl.innerText = 'Fully Settled';
+                        badgeEl.className = 'px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+                    } else if (settledAmt > 0) {
+                        badgeEl.innerText = 'Partially Settled';
+                        badgeEl.className = 'px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40';
+                    } else {
+                        badgeEl.innerText = 'Unsettled';
+                        badgeEl.className = 'px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40';
+                    }
+                }
+
+                if (reopenBtn) reopenBtn.classList.toggle('hidden', !note.completed && settledAmt <= 0);
+
+                if (inputAmt) {
+                    inputAmt.value = remainingAmt > 0 ? remainingAmt.toFixed(2) : '';
+                    inputAmt.max = remainingAmt > 0 ? remainingAmt : amt;
+                }
+                if (inputNote) inputNote.value = '';
+                if (inputDate) inputDate.value = new Date().toISOString().split('T')[0];
+
+                const historyList = document.getElementById('settle-modal-history-list');
+                if (historyList) {
+                    const payments = Array.isArray(note.partialSettlements) ? note.partialSettlements : [];
+                    if (payments.length === 0) {
+                        historyList.innerHTML = `<div class="text-[11px] text-slate-400 font-medium italic py-2">No payment entries recorded yet.</div>`;
+                    } else {
+                        historyList.innerHTML = payments.map(p => {
+                            const d = p.date ? new Date(p.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+                            return `
+                                <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs">
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-black text-emerald-700">AED ${parseFloat(p.amount).toFixed(2)}</span>
+                                            <span class="text-[10px] font-bold text-slate-400">• ${d}</span>
+                                        </div>
+                                        <div class="text-[11px] text-slate-600 font-medium mt-0.5">${p.note || 'Settlement payment'} <span class="text-slate-400 text-[10px]">(by ${p.settledBy || 'Admin'})</span></div>
+                                    </div>
+                                    <button type="button" onclick="window.deletePartialPayment('${note.id}', '${p.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors" title="Delete payment entry">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                modal.classList.remove('hidden');
+                lucide.createIcons();
+            };
+
+            window.closeNotesSettlementModal = () => {
+                const modal = document.getElementById('notes-partial-settle-modal');
+                if (modal) modal.classList.add('hidden');
+                currentSettlementNoteId = null;
+            };
+
+            window.fillFullSettlement = () => {
+                if (!currentSettlementNoteId) return;
+                const note = notes.find(n => n.id === currentSettlementNoteId);
+                if (!note) return;
+                const remaining = getNoteRemainingBalance(note);
+                const input = document.getElementById('settle-modal-input-amount');
+                if (input) input.value = remaining.toFixed(2);
+            };
+
+            window.setSettlementPercent = (fraction) => {
+                if (!currentSettlementNoteId) return;
+                const note = notes.find(n => n.id === currentSettlementNoteId);
+                if (!note) return;
+                const remaining = getNoteRemainingBalance(note);
+                const targetAmt = Math.round(remaining * fraction * 100) / 100;
+                const input = document.getElementById('settle-modal-input-amount');
+                if (input) input.value = targetAmt.toFixed(2);
+            };
+
+            window.confirmNotesSettlement = async () => {
+                if (!currentSettlementNoteId) return;
+                const note = notes.find(n => n.id === currentSettlementNoteId);
+                if (!note) return;
+
+                const inputAmt = document.getElementById('settle-modal-input-amount');
+                const settleAmt = parseFloat(inputAmt ? inputAmt.value : 0) || 0;
+                if (settleAmt <= 0) return window.showStatus('Please enter a valid payment amount', true);
+
+                const totalAmt = parseFloat(note.amount) || 0;
+                const currentSettled = getNoteSettledAmount(note);
+                const remaining = getNoteRemainingBalance(note);
+
+                if (settleAmt > remaining + 0.01) {
+                    return window.showStatus(`Payment cannot exceed remaining balance (AED ${remaining.toFixed(2)})`, true);
+                }
+
+                const inputNote = document.getElementById('settle-modal-input-note');
+                const inputDate = document.getElementById('settle-modal-input-date');
+                const noteVal = inputNote ? inputNote.value.trim() : '';
+                const dateVal = inputDate && inputDate.value ? inputDate.value : new Date().toISOString().split('T')[0];
+
+                const btn = document.getElementById('btn-confirm-note-settle');
+                const origHtml = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Recording...`;
+                lucide.createIcons();
+
                 try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'important_notes', id));
-                    window.showStatus("Note deleted");
+                    const newSettled = currentSettled + settleAmt;
+                    const isFullySettled = (newSettled >= totalAmt - 0.01);
+
+                    const newPayment = {
+                        id: 'pay_' + Date.now(),
+                        amount: settleAmt,
+                        date: dateVal,
+                        note: noteVal,
+                        settledBy: currentUser.email || 'Admin',
+                        recordedAt: new Date().toISOString()
+                    };
+
+                    const existingPayments = Array.isArray(note.partialSettlements) ? [...note.partialSettlements] : [];
+                    existingPayments.push(newPayment);
+
+                    await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'important_notes', currentSettlementNoteId), {
+                        settledAmount: newSettled,
+                        completed: isFullySettled,
+                        settledAt: isFullySettled ? new Date().toISOString() : null,
+                        partialSettlements: existingPayments
+                    });
+
+                    window.closeNotesSettlementModal();
+                    window.showStatus(isFullySettled ? 'Record fully settled!' : `Recorded partial payment: AED ${settleAmt.toFixed(2)}`);
                 } catch (e) {
-                    console.error("Delete Note Error", e);
-                    window.showStatus("Failed to delete", true);
+                    console.error('Settlement Error', e);
+                    window.showStatus('Failed to record settlement', true);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = origHtml;
+                    lucide.createIcons();
                 }
             };
 
-            window.togglePinNote = async (id, currentStatus) => {
+            window.deletePartialPayment = async (noteId, paymentId) => {
+                if (!confirm('Delete this payment entry?')) return;
+                const note = notes.find(n => n.id === noteId);
+                if (!note) return;
+
+                const existingPayments = Array.isArray(note.partialSettlements) ? note.partialSettlements : [];
+                const pToRemove = existingPayments.find(p => p.id === paymentId);
+                if (!pToRemove) return;
+
+                const newPayments = existingPayments.filter(p => p.id !== paymentId);
+                const currentSettled = getNoteSettledAmount(note);
+                const newSettled = Math.max(0, currentSettled - (parseFloat(pToRemove.amount) || 0));
+                const totalAmt = parseFloat(note.amount) || 0;
+                const isCompleted = (newSettled >= totalAmt - 0.01) && totalAmt > 0;
+
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'important_notes', noteId), {
+                        settledAmount: newSettled,
+                        completed: isCompleted,
+                        settledAt: isCompleted ? (note.settledAt || new Date().toISOString()) : null,
+                        partialSettlements: newPayments
+                    });
+                    window.showStatus('Payment entry deleted');
+                    if (currentSettlementNoteId === noteId) {
+                        window.openNotesSettlementModal(noteId);
+                    }
+                } catch (e) {
+                    console.error('Delete payment error', e);
+                    window.showStatus('Failed to remove payment', true);
+                }
+            };
+
+            window.reopenCurrentSettlementNote = async () => {
+                if (!currentSettlementNoteId) return;
+                if (!confirm('Reopen this record as active and reset settlement?')) return;
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'important_notes', currentSettlementNoteId), {
+                        completed: false,
+                        settledAt: null,
+                        settledAmount: 0,
+                        partialSettlements: []
+                    });
+                    window.closeNotesSettlementModal();
+                    window.showStatus('Record reopened as active');
+                } catch (e) {
+                    console.error('Reopen Error', e);
+                    window.showStatus('Failed to reopen record', true);
+                }
+            };
+
+            window.toggleNoteSettled = async (id, currentStatus) => {
+                try {
+                    const note = notes.find(n => n.id === id);
+                    const amt = parseFloat(note ? note.amount : 0) || 0;
+
+                    // If note has monetary amount, open the settlement modal instead of raw toggle
+                    if (amt > 0 && !currentStatus) {
+                        window.openNotesSettlementModal(id);
+                        return;
+                    }
+
+                    const newStatus = !currentStatus;
+                    const now = newStatus ? new Date().toISOString() : null;
+
+                    const updateData = {
+                        completed: newStatus,
+                        settledAt: now
+                    };
+                    if (newStatus && amt > 0) {
+                        updateData.settledAmount = amt;
+                    }
+
+                    await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'important_notes', id), updateData);
+
+                    window.showStatus(newStatus ? 'Marked as Settled' : 'Reopened Record');
+                } catch (e) {
+                    console.error('Toggle Settle Error', e);
+                    window.showStatus('Failed to update status', true);
+                }
+            };
+
+            window.toggleNotePin = async (id, currentStatus) => {
                 try {
                     await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'important_notes', id), {
                         pinned: !currentStatus
                     });
                 } catch (e) {
-                    console.error("Pin Note Error", e);
+                    console.error('Pin Note Error', e);
                 }
             };
 
-            window.toggleNoteCompletion = async (id, currentStatus) => {
+            window.moveNoteToTrash = async (id) => {
                 try {
                     await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'important_notes', id), {
-                        completed: !currentStatus
+                        deleted: true,
+                        deletedAt: new Date().toISOString()
                     });
+                    window.showStatus('Moved to Trash');
                 } catch (e) {
-                    console.error("Complete Note Error", e);
+                    console.error('Trash Error', e);
+                    window.showStatus('Failed to delete', true);
                 }
             };
 
-            window.renderNotes = () => {
-                const grid = document.getElementById('notes-grid');
-                if (!grid) return;
-
-                if (notes.length === 0) {
-                    grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-400 font-bold text-xs uppercase bg-slate-50 border-2 border-dashed border-slate-100 rounded-2xl">No notes found. Create one above!</div>';
-                    return;
+            window.restoreNoteFromTrash = async (id) => {
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'important_notes', id), {
+                        deleted: false,
+                        deletedAt: null
+                    });
+                    window.showStatus('Record restored successfully');
+                } catch (e) {
+                    console.error('Restore Error', e);
+                    window.showStatus('Failed to restore record', true);
                 }
-
-                grid.innerHTML = notes.map(n => {
-                    const dateStr = n.createdAt ? new Date(n.createdAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
-                    const isCompleted = !!n.completed;
-                    
-                    return `
-                        <div class="modern-card p-6 border-l-4 ${n.pinned ? 'border-l-amber-500 bg-amber-50/20' : (isCompleted ? 'border-l-emerald-500 bg-slate-50 opacity-75' : 'border-l-slate-300')} flex flex-col h-full relative group transition-all duration-300">
-                            <div class="absolute top-4 right-4 flex gap-2 z-10">
-                                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onclick="window.togglePinNote('${n.id}', ${n.pinned})" class="p-2 ${n.pinned ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'} hover:scale-110 rounded-xl transition-all" title="${n.pinned ? 'Unpin' : 'Pin to top'}">
-                                        <i data-lucide="pin" class="w-4 h-4 ${n.pinned ? 'fill-amber-600' : ''}"></i>
-                                    </button>
-                                    <button onclick="window.deleteNote('${n.id}')" class="p-2 bg-rose-50 text-rose-500 hover:scale-110 rounded-xl transition-all" title="Delete Note">
-                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                    </button>
-                                </div>
-                                <button onclick="window.toggleNoteCompletion('${n.id}', ${isCompleted})" class="p-1.5 ${isCompleted ? 'text-emerald-500 hover:text-slate-400' : 'text-slate-300 hover:text-emerald-500'} transition-colors" title="${isCompleted ? 'Mark as incomplete' : 'Mark as completed'}">
-                                    <i data-lucide="${isCompleted ? 'check-square' : 'square'}" class="w-5 h-5"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="flex items-center gap-2 mb-4 pr-12">
-                                <div class="w-8 h-8 ${n.pinned ? 'bg-amber-100 text-amber-600' : (isCompleted ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500')} rounded-lg flex items-center justify-center shrink-0">
-                                    <i data-lucide="${isCompleted ? 'check-circle' : 'sticky-note'}" class="w-4 h-4"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span class="text-[9px] font-black uppercase ${isCompleted ? 'text-emerald-500' : 'text-slate-400'} tracking-widest">${n.author}</span>
-                                    <span class="text-[9px] font-bold text-slate-400">${dateStr}</span>
-                                </div>
-                            </div>
-                            
-                            <div class="text-sm font-medium ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-700'} whitespace-pre-wrap flex-grow">${n.text}</div>
-                        </div>
-                    `;
-                }).join('');
-                lucide.createIcons();
             };
 
+            window.deleteNotePermanently = async (id) => {
+                if (!confirm('Are you sure you want to PERMANENTLY erase this record?')) return;
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'important_notes', id));
+                    window.showStatus('Permanently deleted');
+                } catch (e) {
+                    console.error('Permanent Delete Error', e);
+                    window.showStatus('Failed to delete', true);
+                }
+            };
+
+            window.promptAddPerson = async () => {
+                const name = prompt('Enter Staff Name:');
+                if (!name || !name.trim()) return null;
+                const cleanName = name.trim();
+                if (!staffList.includes(cleanName) && cleanName !== 'General Notes') {
+                    staffList.push(cleanName);
+                    try {
+                        await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'notes_staff_list'), {
+                            list: staffList,
+                            updatedAt: new Date().toISOString()
+                        }, { merge: true });
+                    } catch (e) {
+                        console.warn('Save staff error', e);
+                    }
+                }
+                window.selectNotesPerson(cleanName);
+                window.showStatus(`Staff book opened: ${cleanName}`);
+                return cleanName;
+            };
+
+            window.deleteCurrentPerson = async () => {
+                if (currentNotesPerson === 'General Notes') return;
+                const personNotes = getNotesForPerson(currentNotesPerson).filter(n => !n.deleted);
+                if (personNotes.length > 0) {
+                    if (!confirm(`"${currentNotesPerson}" has ${personNotes.length} records. Remove from staff directory?`)) return;
+                } else {
+                    if (!confirm(`Remove "${currentNotesPerson}" from staff directory?`)) return;
+                }
+
+                staffList = staffList.filter(s => s !== currentNotesPerson);
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'notes_staff_list'), {
+                        list: staffList,
+                        updatedAt: new Date().toISOString()
+                    }, { merge: true });
+                } catch (e) {
+                    console.warn('Delete staff config error', e);
+                }
+                window.selectNotesPerson('General Notes');
+                window.showStatus('Staff removed');
+            };
+
+            window.copyWhatsAppNotesSummary = () => {
+                if (currentNotesPerson === 'General Notes') return;
+                const personNotes = getNotesForPerson(currentNotesPerson).filter(n => !n.deleted && !n.completed);
+
+                if (personNotes.length === 0) {
+                    return window.showStatus(`No active records for ${currentNotesPerson}`);
+                }
+
+                const { dues, receivables, net } = calculateStaffBalances(currentNotesPerson);
+                let lines = [`📋 *Staff Account Summary: ${currentNotesPerson}*`, `_Date: ${new Date().toLocaleDateString('en-GB')}_`, ''];
+
+                const payables = personNotes.filter(n => getNoteRoleForPerson(n, currentNotesPerson) === 'payable');
+                const recvs = personNotes.filter(n => getNoteRoleForPerson(n, currentNotesPerson) === 'receivable');
+                const memos = personNotes.filter(n => getNoteRoleForPerson(n, currentNotesPerson) === 'self');
+
+                if (payables.length > 0) {
+                    lines.push(`🔴 *Pending Dues (Owed by ${currentNotesPerson})*:`);
+                    payables.forEach(n => {
+                        const amt = parseFloat(n.amount) || 0;
+                        const remaining = getNoteRemainingBalance(n);
+                        const settled = getNoteSettledAmount(n);
+                        let amtStr = `[AED ${remaining.toFixed(2)}]`;
+                        if (settled > 0) amtStr = `[AED ${remaining.toFixed(2)} remaining of ${amt.toFixed(2)}]`;
+                        lines.push(`• ${amtStr} ${n.text} _(Paid by: ${n.paidBy || 'Shanid (Me)'})_`);
+                    });
+                    lines.push(`*Total Dues: AED ${dues.toFixed(2)}*`);
+                    lines.push('');
+                }
+
+                if (recvs.length > 0) {
+                    lines.push(`🟢 *Receivables (Owed to ${currentNotesPerson})*:`);
+                    recvs.forEach(n => {
+                        const amt = parseFloat(n.amount) || 0;
+                        const remaining = getNoteRemainingBalance(n);
+                        const settled = getNoteSettledAmount(n);
+                        let amtStr = `[AED ${remaining.toFixed(2)}]`;
+                        if (settled > 0) amtStr = `[AED ${remaining.toFixed(2)} remaining of ${amt.toFixed(2)}]`;
+                        lines.push(`• ${amtStr} ${n.text} _(From: ${n.targetPerson})_`);
+                    });
+                    lines.push(`*Total Receivables: AED ${receivables.toFixed(2)}*`);
+                    lines.push('');
+                }
+
+                if (memos.length > 0) {
+                    lines.push(`📝 *General Notes / Reminders*:`);
+                    memos.forEach(n => {
+                        lines.push(`• ${n.text}`);
+                    });
+                    lines.push('');
+                }
+
+                if (net > 0) {
+                    lines.push(`👉 *Net Position: +AED ${net.toFixed(2)} (To Receive)*`);
+                } else if (net < 0) {
+                    lines.push(`👉 *Net Position: -AED ${Math.abs(net).toFixed(2)} (To Pay)*`);
+                } else {
+                    lines.push(`👉 *Net Position: Balanced (AED 0.00)*`);
+                }
+
+                const textToCopy = lines.join('\n');
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        window.showStatus(`WhatsApp summary copied for ${currentNotesPerson}!`);
+                    }).catch(() => {
+                        window.showStatus(`Copied summary for ${currentNotesPerson}`);
+                    });
+                } else {
+                    prompt('Copy WhatsApp Text:', textToCopy);
+                }
+            };
             // --- SYSTEM HEALTH CHECK ---
             window.autoLinkOrphanedPhotos = async () => {
                 try {
