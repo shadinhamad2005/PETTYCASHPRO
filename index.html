@@ -655,101 +655,71 @@
 
             <!-- View: Reimbursements -->
             <div id="view-reimbursements" class="space-y-8 hidden animate-in fade-in duration-500">
-                <div class="bg-blue-600 text-white p-8 rounded-[2rem] shadow-xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-8 opacity-10"><i data-lucide="refresh-cw"
-                            class="w-48 h-48"></i></div>
+                <div class="bg-blue-600 text-white p-6 md:p-8 rounded-[2rem] shadow-xl relative overflow-hidden space-y-6">
+                    <div class="absolute top-0 right-0 p-8 opacity-10"><i data-lucide="refresh-cw" class="w-48 h-48"></i></div>
                     <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
-                            <h2 class="text-3xl font-black mb-2 tracking-tight">Reimbursements</h2>
-                            <p class="text-blue-100 font-bold opacity-80 uppercase text-[10px] tracking-widest">Submit &
-                                track batches for Accounts replenishment</p>
+                            <h2 class="text-3xl font-black mb-1.5 tracking-tight">Reimbursements</h2>
+                            <p class="text-blue-100 font-bold opacity-80 uppercase text-[10px] tracking-widest">Submit & track batches for Accounts replenishment</p>
                         </div>
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <button onclick="window.openProcessedModal()"
+                                class="bg-white/15 hover:bg-white/25 text-white border border-white/25 px-5 py-3 rounded-2xl font-black text-xs shadow-md hover:scale-105 transition-all flex items-center gap-2 backdrop-blur-sm">
+                                <i data-lucide="archive" class="w-4 h-4 text-emerald-300"></i> View Archive
+                            </button>
                             <button onclick="window.openMakerChecker()"
-                                class="bg-amber-400 text-amber-900 px-6 py-3 rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all flex items-center gap-2">
+                                class="bg-amber-400 text-amber-900 px-5 py-3 rounded-2xl font-black text-xs shadow-xl hover:scale-105 transition-all flex items-center gap-2">
                                 <i data-lucide="check-square" class="w-5 h-5"></i> Audit Invoices
                             </button>
                             <button onclick="window.submitToAccounts()"
-                                class="bg-white text-blue-600 px-6 py-3 rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all flex items-center gap-2">
+                                class="bg-white text-blue-600 px-5 py-3 rounded-2xl font-black text-xs shadow-xl hover:scale-105 transition-all flex items-center gap-2">
                                 <i data-lucide="plus-circle" class="w-5 h-5"></i> Stage New Invoices
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Reimbursement Pipeline Command Dashboard -->
-                <div class="bg-blue-600 text-white p-6 md:p-8 rounded-[2rem] shadow-xl relative overflow-hidden space-y-6">
-                    <div class="absolute -top-10 -right-10 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-                    
-                    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/20 text-white border border-white/30 backdrop-blur-sm">Accounts Pipeline</span>
-                                <h3 class="text-xl md:text-2xl font-black tracking-tight text-white">Reimbursement Command Center</h3>
-                            </div>
-                            <p class="text-blue-100 font-medium text-xs">Live tracking of batches submitted to Accounts & cash returned to Box</p>
-                        </div>
-                        
-                        <div class="flex items-center gap-2">
-                            <button onclick="window.openProcessedModal()" class="px-4 py-2.5 bg-white/15 hover:bg-white/25 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition-all border border-white/25 shadow-sm backdrop-blur-sm">
-                                <i data-lucide="archive" class="w-4 h-4 text-emerald-300"></i> View Processed Archive
                             </button>
                         </div>
                     </div>
 
                     <!-- 4 Live KPI Cards -->
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 relative z-10">
-                        <!-- Total Submitted in Batches -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 relative z-10 pt-2 border-t border-white/15">
+                        <!-- 1. Total With Accounts -->
                         <div class="bg-white/10 hover:bg-white/15 border border-white/20 rounded-2xl p-4 backdrop-blur-md transition-all">
                             <div class="text-[10px] font-black uppercase tracking-wider text-blue-200 flex items-center gap-1.5 mb-1">
-                                <i data-lucide="folder-clock" class="w-3.5 h-3.5"></i> Total Submitted
+                                <i data-lucide="folder-clock" class="w-3.5 h-3.5 text-blue-200"></i> With Accounts (Pending)
                             </div>
-                            <div id="rb-kpi-submitted" class="text-xl sm:text-2xl font-black text-white">AED 0.00</div>
-                            <div id="rb-kpi-submitted-sub" class="text-[10px] text-blue-100/80 font-semibold mt-0.5">0 batches pending</div>
+                            <div id="rb-kpi-with-accounts" class="text-xl sm:text-2xl font-black text-white">AED 0.00</div>
+                            <div id="rb-kpi-with-accounts-sub" class="text-[10px] text-blue-100/80 font-semibold mt-0.5">0 batches active</div>
                         </div>
 
-                        <!-- Cash Received Back into Box -->
-                        <div class="bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-300/40 rounded-2xl p-4 backdrop-blur-md transition-all">
-                            <div class="text-[10px] font-black uppercase tracking-wider text-emerald-200 flex items-center gap-1.5 mb-1">
-                                <i data-lucide="wallet-cards" class="w-3.5 h-3.5"></i> Received in Box
-                            </div>
-                            <div id="rb-kpi-received" class="text-xl sm:text-2xl font-black text-emerald-100">AED 0.00</div>
-                            <div id="rb-kpi-received-sub" class="text-[10px] text-emerald-100/80 font-semibold mt-0.5">Credited to Box</div>
-                        </div>
-
-                        <!-- Net Outstanding from Finance -->
-                        <div class="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-300/40 rounded-2xl p-4 backdrop-blur-md transition-all">
-                            <div class="text-[10px] font-black uppercase tracking-wider text-amber-200 flex items-center gap-1.5 mb-1">
-                                <i data-lucide="hourglass" class="w-3.5 h-3.5"></i> Still with Finance
-                            </div>
-                            <div id="rb-kpi-pending" class="text-xl sm:text-2xl font-black text-amber-100">AED 0.00</div>
-                            <div id="rb-kpi-pending-sub" class="text-[10px] text-amber-100/80 font-semibold mt-0.5">Awaiting collection</div>
-                        </div>
-
-                        <!-- Invoices Ready for Processing (Unbatched) -->
-                        <div onclick="window.submitToAccounts()" title="Click to view and stage unbatched invoices" class="bg-white/10 hover:bg-white/15 border border-white/20 rounded-2xl p-4 backdrop-blur-md transition-all cursor-pointer group">
+                        <!-- 2. Ready to Stage (Unbatched) -->
+                        <div onclick="window.submitToAccounts()" title="Click to stage unbatched invoices" class="bg-white/10 hover:bg-white/15 border border-white/20 rounded-2xl p-4 backdrop-blur-md transition-all cursor-pointer group">
                             <div class="text-[10px] font-black uppercase tracking-wider text-sky-200 flex items-center justify-between mb-1">
                                 <span class="flex items-center gap-1.5">
-                                    <i data-lucide="receipt" class="w-3.5 h-3.5"></i> Ready for Processing
+                                    <i data-lucide="receipt" class="w-3.5 h-3.5 text-sky-200"></i> Ready to Stage
                                 </span>
                                 <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity"></i>
                             </div>
                             <div id="rb-kpi-ready" class="text-xl sm:text-2xl font-black text-white">AED 0.00</div>
                             <div id="rb-kpi-ready-sub" class="text-[10px] text-blue-100/80 font-semibold mt-0.5">0 unbatched invoices</div>
                         </div>
-                    </div>
 
-                    <!-- Pipeline Recovery Strip & Category Exposure Chips -->
-                    <div class="pt-4 border-t border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs relative z-10">
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <span class="text-[10px] font-black uppercase tracking-widest text-blue-200">Categories Awaiting Cash:</span>
-                            <div id="rb-category-chips" class="flex items-center gap-1.5 flex-wrap">
-                                <!-- Chips dynamically injected -->
+                        <!-- 3. Currently Staged -->
+                        <div class="bg-white/10 hover:bg-white/15 border border-white/20 rounded-2xl p-4 backdrop-blur-md transition-all">
+                            <div class="text-[10px] font-black uppercase tracking-wider text-amber-200 flex items-center gap-1.5 mb-1">
+                                <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-200"></i> Currently Staged
                             </div>
+                            <div id="rb-kpi-staged" class="text-xl sm:text-2xl font-black text-white">AED 0.00</div>
+                            <div id="rb-kpi-staged-sub" class="text-[10px] text-blue-100/80 font-semibold mt-0.5">0 folders ready</div>
                         </div>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <span class="text-[10px] font-bold text-blue-200">Recovery Rate:</span>
-                            <span id="rb-recovery-rate-badge" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-white/20 text-white border border-white/30">0%</span>
+
+                        <!-- 4. Processed & Closed (Archive) -->
+                        <div onclick="window.openProcessedModal()" title="Click to view archived batches" class="bg-white/10 hover:bg-white/15 border border-white/20 rounded-2xl p-4 backdrop-blur-md transition-all cursor-pointer group">
+                            <div class="text-[10px] font-black uppercase tracking-wider text-emerald-200 flex items-center justify-between mb-1">
+                                <span class="flex items-center gap-1.5">
+                                    <i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-200"></i> Processed & Closed
+                                </span>
+                                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity"></i>
+                            </div>
+                            <div id="rb-kpi-archived" class="text-xl sm:text-2xl font-black text-white">AED 0.00</div>
+                            <div id="rb-kpi-archived-sub" class="text-[10px] text-blue-100/80 font-semibold mt-0.5">0 batches archived</div>
                         </div>
                     </div>
                 </div>
@@ -770,119 +740,11 @@
 
                 <hr class="border-slate-200">
 
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 mt-8">
-                    <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
-                        <i data-lucide="archive" class="text-slate-400 w-6 h-6"></i> Pending Reimbursement Batches
-                    </h3>
-                    <!-- Filter Pills -->
-                    <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
-                        <button type="button" onclick="window.filterPendingBatches('all')" id="batch-filter-all" class="px-3 py-1 rounded-lg text-xs font-black bg-white text-slate-800 shadow-xs transition-all">All (<span id="batch-count-all">0</span>)</button>
-                        <button type="button" onclick="window.filterPendingBatches('partial')" id="batch-filter-partial" class="px-3 py-1 rounded-lg text-xs font-bold text-amber-700 hover:bg-white/60 transition-all flex items-center gap-1">Partially Paid (<span id="batch-count-partial">0</span>)</button>
-                        <button type="button" onclick="window.filterPendingBatches('unreimbursed')" id="batch-filter-unreimbursed" class="px-3 py-1 rounded-lg text-xs font-bold text-blue-700 hover:bg-white/60 transition-all flex items-center gap-1">Unreimbursed (<span id="batch-count-unreimbursed">0</span>)</button>
-                    </div>
-                </div>
-
+                <h3
+                    class="text-xl font-black text-slate-800 uppercase tracking-tight mb-4 mt-8 flex items-center gap-2">
+                    <i data-lucide="archive" class="text-slate-400 w-6 h-6"></i> Pending Reimbursement Batches</h3>
                 <div id="reimbursement-batches" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Batches injected via JS -->
-                </div>
-
-                <!-- Modal: Partial Batch Reimbursement -->
-                <div id="partial-reimburse-modal" class="hidden fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden border border-slate-100 max-h-[92vh] flex flex-col">
-                        <!-- Header -->
-                        <div class="p-6 bg-gradient-to-r from-slate-900 to-blue-950 text-white flex justify-between items-start shrink-0">
-                            <div>
-                                <div class="flex items-center gap-2">
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500/30 text-blue-300 border border-blue-500/40">Partial Settlement</span>
-                                    <h3 class="text-xl font-black tracking-tight text-white" id="pr-modal-title">Batch Reimbursement</h3>
-                                </div>
-                                <p id="pr-modal-subtitle" class="text-xs text-slate-300 mt-1">Select categories or invoices to receive into Cash in Box</p>
-                            </div>
-                            <button onclick="window.closePartialReimburseModal()" class="text-slate-400 hover:text-white p-1 rounded-xl hover:bg-white/10 transition-colors">
-                                <i data-lucide="x" class="w-5 h-5"></i>
-                            </button>
-                        </div>
-
-                        <!-- Body -->
-                        <div class="p-6 overflow-y-auto space-y-5 flex-1">
-                            <!-- Summary Stats for this Batch -->
-                            <div class="grid grid-cols-3 gap-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center">
-                                <div>
-                                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Batch Amount</div>
-                                    <div id="pr-batch-total" class="text-base font-black text-slate-800">AED 0.00</div>
-                                    <div id="pr-batch-count" class="text-[10px] text-slate-400 font-semibold">0 invoices</div>
-                                </div>
-                                <div>
-                                    <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Already Received</div>
-                                    <div id="pr-batch-received" class="text-base font-black text-emerald-600">AED 0.00</div>
-                                    <div id="pr-batch-received-count" class="text-[10px] text-emerald-600/80 font-semibold">0 invoices</div>
-                                </div>
-                                <div>
-                                    <div class="text-[10px] font-bold uppercase tracking-wider text-amber-600">Still Pending</div>
-                                    <div id="pr-batch-pending" class="text-base font-black text-amber-600">AED 0.00</div>
-                                    <div id="pr-batch-pending-count" class="text-[10px] text-amber-600/80 font-semibold">0 invoices</div>
-                                </div>
-                            </div>
-
-                            <!-- Invoices Selection Grouped by Category -->
-                            <div class="space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                                        <i data-lucide="folder-check" class="w-4 h-4 text-blue-600"></i> Select Invoices to Reimburse:
-                                    </h4>
-                                    <div class="flex items-center gap-2">
-                                        <button type="button" onclick="window.toggleAllPRCheckboxes(true)" class="text-[10px] font-bold text-blue-600 hover:underline">Select All Unpaid</button>
-                                        <span class="text-slate-300">|</span>
-                                        <button type="button" onclick="window.toggleAllPRCheckboxes(false)" class="text-[10px] font-bold text-slate-500 hover:underline">Deselect All</button>
-                                    </div>
-                                </div>
-                                <div id="pr-categories-list" class="space-y-3">
-                                    <!-- Populated dynamically via JS -->
-                                </div>
-                            </div>
-
-                            <!-- Auto-Credit Box Option (Allows reconciling invoices already added manually) -->
-                            <div class="p-3.5 bg-blue-50/80 border border-blue-200/80 rounded-2xl flex items-center justify-between gap-3">
-                                <div class="flex items-center gap-3">
-                                    <input type="checkbox" id="pr-credit-box-toggle" checked class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer">
-                                    <label for="pr-credit-box-toggle" class="text-xs font-bold text-slate-800 cursor-pointer select-none">
-                                        Credit Cash in Box automatically
-                                        <span class="block text-[10px] text-slate-500 font-normal">Adds a "Receive Money" entry to your petty cash ledger. Uncheck if you already manually added this cash to your box earlier.</span>
-                                    </label>
-                                </div>
-                                <span class="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200 shrink-0">Box Credit</span>
-                            </div>
-
-                            <!-- Payment Details (Date & Note) -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-slate-100">
-                                <div>
-                                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Receipt Date (Received into Box)</label>
-                                    <input type="date" id="pr-receipt-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white transition-all">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Reference / Note (Optional)</label>
-                                    <input type="text" id="pr-receipt-note" placeholder="e.g. ADNOC fuel payment from accounts" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-blue-500 focus:bg-white transition-all">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Sticky Footer Action -->
-                        <div class="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-bold text-slate-500">Selected for Box:</span>
-                                <span id="pr-selected-count" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-800">0 Invoices</span>
-                                <span id="pr-selected-total" class="text-base font-black text-emerald-700">AED 0.00</span>
-                            </div>
-                            <div class="flex items-center gap-2 w-full sm:w-auto">
-                                <button onclick="window.closePartialReimburseModal()" class="flex-1 sm:flex-none px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-all">
-                                    Cancel
-                                </button>
-                                <button id="btn-confirm-partial-reimburse" onclick="window.confirmPartialReimbursement()" class="flex-1 sm:flex-none px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                                    <i data-lucide="check-circle" class="w-4 h-4"></i> Receive Cash into Box
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -891,6 +753,7 @@
                 <!-- Top Summary Header -->
                 <div class="bg-blue-600 text-white p-6 md:p-8 rounded-[2rem] shadow-xl relative overflow-hidden space-y-6">
                     <div class="absolute -top-10 -right-10 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="absolute -top-10 -right-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
                     <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
                             <div class="flex items-center gap-3 mb-2">
@@ -905,25 +768,25 @@
                         <!-- Global Quick Metrics -->
                         <div class="flex flex-wrap items-center gap-3">
                             <div class="bg-white/10 border border-white/20 rounded-2xl px-4 py-2.5 backdrop-blur-md">
-                                <div class="text-[10px] font-black uppercase tracking-wider text-amber-200 flex items-center gap-1.5">
+                                <div class="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
                                     <i data-lucide="sticky-note" class="w-3.5 h-3.5"></i> General Memos
                                 </div>
                                 <div id="notes-total-memos" class="text-lg font-black text-white">0</div>
                             </div>
-                            <div class="bg-rose-500/20 border border-rose-300/30 rounded-2xl px-4 py-2.5 backdrop-blur-md">
-                                <div class="text-[10px] font-black uppercase tracking-wider text-rose-200 flex items-center gap-1.5">
+                            <div class="bg-white/10 border border-white/20 rounded-2xl px-4 py-2.5 backdrop-blur-md">
+                                <div class="text-[10px] font-black uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
                                     <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i> Total Staff Dues
                                 </div>
-                                <div id="notes-total-dues" class="text-lg font-black text-rose-100">AED 0.00</div>
-                            </div>
-                            <div class="bg-emerald-500/20 border border-emerald-300/30 rounded-2xl px-4 py-2.5 backdrop-blur-md">
-                                <div class="text-[10px] font-black uppercase tracking-wider text-emerald-200 flex items-center gap-1.5">
-                                    <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Total Receivables
-                                </div>
-                                <div id="notes-total-receivables" class="text-lg font-black text-emerald-100">AED 0.00</div>
+                                <div id="notes-total-dues" class="text-lg font-black text-white">AED 0.00</div>
                             </div>
                             <div class="bg-white/10 border border-white/20 rounded-2xl px-4 py-2.5 backdrop-blur-md">
-                                <div class="text-[10px] font-black uppercase tracking-wider text-sky-200 flex items-center gap-1.5">
+                                <div class="text-[10px] font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                                    <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Total Receivables
+                                </div>
+                                <div id="notes-total-receivables" class="text-lg font-black text-white">AED 0.00</div>
+                            </div>
+                            <div class="bg-white/10 border border-white/20 rounded-2xl px-4 py-2.5 backdrop-blur-md">
+                                <div class="text-[10px] font-black uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
                                     <i data-lucide="users" class="w-3.5 h-3.5"></i> Staff with Dues
                                 </div>
                                 <div id="notes-staff-with-dues" class="text-lg font-black text-white">0</div>
@@ -4880,76 +4743,58 @@
                     txs.forEach(t => {
                         const ttype = (t.type || '').toLowerCase();
                         if (ttype === 'expense' && t.batchId && t.batchId !== 'staged' && t.batchId !== 'legacy' && t.batchId !== 'received') {
-                            if (!batchMap[t.batchId]) {
-                                batchMap[t.batchId] = {
-                                    id: t.batchId,
-                                    count: 0,
-                                    total: 0,
-                                    receivedTotal: 0,
-                                    receivedCount: 0,
-                                    date: t.batchDate || t.subDate,
-                                    txs: [],
-                                    cats: {}
-                                };
-                            }
-                            const amt = (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0);
+                            if (!batchMap[t.batchId]) batchMap[t.batchId] = { id: t.batchId, count: 0, total: 0, received: false, date: t.subDate, txs: [] };
                             batchMap[t.batchId].count++;
-                            batchMap[t.batchId].total += amt;
+                            batchMap[t.batchId].total += (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0);
                             batchMap[t.batchId].txs.push(t);
-
-                            if (t.reimbursed) {
-                                batchMap[t.batchId].receivedTotal += amt;
-                                batchMap[t.batchId].receivedCount++;
-                            }
-
-                            const cat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized');
-                            if (!batchMap[t.batchId].cats[cat]) {
-                                batchMap[t.batchId].cats[cat] = { total: 0, receivedTotal: 0, count: 0, receivedCount: 0 };
-                            }
-                            batchMap[t.batchId].cats[cat].total += amt;
-                            batchMap[t.batchId].cats[cat].count++;
-                            if (t.reimbursed) {
-                                batchMap[t.batchId].cats[cat].receivedTotal += amt;
-                                batchMap[t.batchId].cats[cat].receivedCount++;
-                            }
-
-                            if (t.subDate && t.subDate < batchMap[t.batchId].date) batchMap[t.batchId].date = t.subDate;
+                            if (t.subDate < batchMap[t.batchId].date) batchMap[t.batchId].date = t.subDate;
+                        }
+                        if (ttype === 'receive' && t.batchId) {
+                            if (!batchMap[t.batchId]) batchMap[t.batchId] = { id: t.batchId, count: 0, total: 0, received: true, date: t.subDate, txs: [] };
+                            batchMap[t.batchId].received = true;
                         }
                     });
 
-                    // Compute derived pending / completion state
-                    Object.values(batchMap).forEach(b => {
-                        b.pendingTotal = Math.max(0, b.total - b.receivedTotal);
-                        b.pendingCount = b.count - b.receivedCount;
-                        b.isFullyReimbursed = (b.pendingTotal <= 0.01 && b.count > 0);
-                        b.isPartiallyReimbursed = (b.receivedTotal > 0 && b.pendingTotal > 0.01);
-                        b.percent = b.total > 0 ? Math.round((b.receivedTotal / b.total) * 100) : 0;
-                    });
-
                     window.globalBatchMap = batchMap;
-                    const allPendingBatches = Object.values(batchMap).filter(b => b.total > 0).sort((a, b) => b.id.localeCompare(a.id));
+                    const pendingBatches = Object.values(batchMap).filter(b => !b.received && b.total > 0).sort((a, b) => b.id.localeCompare(a.id));
 
-                    // --- UPDATE REIMBURSEMENT PIPELINE DASHBOARD ---
-                    let totalSubmitted = 0;
-                    let totalReceived = 0;
-                    const catExposureMap = {};
+                    const batchContainer = document.getElementById('reimbursement-batches');
+                    if (batchContainer) {
+                        if (pendingBatches.length === 0) {
+                            batchContainer.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 font-bold text-xs border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50">No pending reimbursement batches</div>';
+                        } else {
+                            batchContainer.innerHTML = pendingBatches.map(b => `
+                                <div class="bg-blue-50/50 border border-blue-100 p-5 rounded-2xl relative overflow-hidden group flex flex-col h-full">
+                                    <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] font-black px-3 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm flex items-center gap-1.5">
+                                        Processing
+                                        <button onclick="window.undoBatch('${b.id}')" title="Undo Batch (Return to Staged)" class="hover:text-amber-300 transition-colors ml-1 border-l border-white/20 pl-2 flex items-center">
+                                            <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                        </button>
+                                    </div>
+                                    <div class="text-[10px] text-blue-400 font-bold mb-1 uppercase tracking-wider">${window.formatSafeDate(b.date) || b.id}</div>
+                                    <div class="text-2xl font-black text-blue-900 mb-0.5 tracking-tight">${b.total.toFixed(2)} <span class="text-xs text-blue-500 font-bold">AED</span></div>
+                                    <div class="text-[10px] font-bold text-blue-600 uppercase tracking-wide mb-5 bg-blue-100/50 inline-block px-2 py-0.5 rounded-md">${b.count} Expenses</div>
+                                    
+                                    <div class="mt-auto flex flex-col gap-2">
+                                        <button onclick="window.exportBatchExcel('${b.id}')" class="w-full bg-emerald-50 border-2 border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+                                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel Report
+                                        </button>
+                                        <button onclick="window.printBatchPDFReport('${b.id}')" class="w-full bg-slate-50 border-2 border-slate-200 text-slate-700 hover:bg-slate-600 hover:text-white hover:border-slate-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+                                            <i data-lucide="file-text" class="w-4 h-4"></i> PDF Report
+                                        </button>
+                                        <button onclick="window.printBatchInvoices('${b.id}')" class="w-full bg-slate-50 border-2 border-slate-200 text-slate-500 hover:bg-slate-100 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+                                            <i data-lucide="printer" class="w-4 h-4"></i> Print Invoices
+                                        </button>
+                                        <button onclick="window.receiveBatchCash('${b.id}', ${b.total})" class="w-full bg-white border-2 border-teal-200 text-teal-700 hover:bg-teal-600 hover:text-white hover:border-teal-600 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+                                            <i data-lucide="check-circle-2" class="w-4 h-4"></i> Workflow Completed
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('');
+                        }
+                    }
 
-                    allPendingBatches.forEach(b => {
-                        totalSubmitted += b.total;
-                        totalReceived += b.receivedTotal;
-
-                        Object.entries(b.cats).forEach(([cat, cdata]) => {
-                            const pendingCat = Math.max(0, cdata.total - cdata.receivedTotal);
-                            if (pendingCat > 0.01) {
-                                catExposureMap[cat] = (catExposureMap[cat] || 0) + pendingCat;
-                            }
-                        });
-                    });
-
-                    const totalPending = Math.max(0, totalSubmitted - totalReceived);
-                    const recoveryRate = totalSubmitted > 0 ? Math.round((totalReceived / totalSubmitted) * 100) : 0;
-
-                    // Staged metrics
+                    // Render Staged Folders
                     const stagedTxs = txs.filter(t => (t.type || '').toLowerCase() === 'expense' && t.batchId === 'staged' && t.status !== 'Voided');
                     const stagedMap = {};
                     stagedTxs.forEach(t => {
@@ -4959,174 +4804,44 @@
                         stagedMap[cat].total += (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0);
                         stagedMap[cat].txs.push(t);
                     });
+
                     const stagedFolders = Object.values(stagedMap).sort((a, b) => a.cat.localeCompare(b.cat));
                     window.currentStagedFolders = stagedFolders;
 
-                    const totalStagedAmt = stagedFolders.reduce((s, f) => s + f.total, 0);
+                    // Compute 4 Reimbursement Dashboard KPIs
+                    const totalPendingWithAccounts = pendingBatches.reduce((s, b) => s + b.total, 0);
 
-                    // Unbatched expenses ready for processing
                     const readyTxs = txs.filter(t => (t.type || '').toLowerCase() === 'expense' && !t.batchId && t.status !== 'Voided' && !t.isShortage);
                     const totalReadyAmt = readyTxs.reduce((s, t) => s + (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0), 0);
 
-                    // Update Dashboard KPI Elements
-                    const kpiSub = document.getElementById('rb-kpi-submitted');
-                    const kpiSubSub = document.getElementById('rb-kpi-submitted-sub');
-                    const kpiRec = document.getElementById('rb-kpi-received');
-                    const kpiRecSub = document.getElementById('rb-kpi-received-sub');
-                    const kpiPen = document.getElementById('rb-kpi-pending');
-                    const kpiPenSub = document.getElementById('rb-kpi-pending-sub');
-                    const kpiReady = document.getElementById('rb-kpi-ready') || document.getElementById('rb-kpi-staged');
-                    const kpiReadySub = document.getElementById('rb-kpi-ready-sub') || document.getElementById('rb-kpi-staged-sub');
-                    const kpiRate = document.getElementById('rb-recovery-rate-badge');
-                    const kpiChips = document.getElementById('rb-category-chips');
+                    const totalStagedAmt = stagedFolders.reduce((s, f) => s + f.total, 0);
 
-                    if (kpiSub) kpiSub.innerText = `AED ${totalSubmitted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                    if (kpiSubSub) kpiSubSub.innerText = `${allPendingBatches.length} batch(es) active`;
+                    const processedTxs = txs.filter(t => (t.type || '').toLowerCase() === 'expense' && (t.batchId === 'received' || t.receivedBatchId) && t.status !== 'Voided');
+                    const totalProcessedAmt = processedTxs.reduce((s, t) => s + (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0), 0);
+                    const processedBatchCount = new Set(processedTxs.map(t => t.receivedBatchId || t.batch_id).filter(Boolean)).size;
 
-                    if (kpiRec) kpiRec.innerText = `AED ${totalReceived.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                    if (kpiRecSub) kpiRecSub.innerText = `Credited directly to Box`;
+                    // Update DOM for the 4 KPI Cards
+                    const kpiPending = document.getElementById('rb-kpi-with-accounts');
+                    const kpiPendingSub = document.getElementById('rb-kpi-with-accounts-sub');
+                    const kpiReady = document.getElementById('rb-kpi-ready');
+                    const kpiReadySub = document.getElementById('rb-kpi-ready-sub');
+                    const kpiStaged = document.getElementById('rb-kpi-staged');
+                    const kpiStagedSub = document.getElementById('rb-kpi-staged-sub');
+                    const kpiArchived = document.getElementById('rb-kpi-archived');
+                    const kpiArchivedSub = document.getElementById('rb-kpi-archived-sub');
 
-                    if (kpiPen) kpiPen.innerText = `AED ${totalPending.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                    if (kpiPenSub) kpiPenSub.innerText = `Awaiting collection`;
+                    if (kpiPending) kpiPending.innerText = `AED ${totalPendingWithAccounts.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    if (kpiPendingSub) kpiPendingSub.innerText = `${pendingBatches.length} batch${pendingBatches.length === 1 ? '' : 'es'} with Finance`;
 
                     if (kpiReady) kpiReady.innerText = `AED ${totalReadyAmt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                    if (kpiReadySub) kpiReadySub.innerText = `${readyTxs.length} unbatched invoice${readyTxs.length === 1 ? '' : 's'}`;
+                    if (kpiReadySub) kpiReadySub.innerText = `${readyTxs.length} unbatched receipt${readyTxs.length === 1 ? '' : 's'}`;
 
-                    if (kpiRate) kpiRate.innerText = `${recoveryRate}% Recovered`;
+                    if (kpiStaged) kpiStaged.innerText = `AED ${totalStagedAmt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    if (kpiStagedSub) kpiStagedSub.innerText = `${stagedFolders.length} category folder${stagedFolders.length === 1 ? '' : 's'} ready`;
 
-                    if (kpiChips) {
-                        const entries = Object.entries(catExposureMap).sort((a, b) => b[1] - a[1]);
-                        if (entries.length === 0) {
-                            kpiChips.innerHTML = '<span class="text-emerald-400 font-bold text-[10px]">All pending batches 100% recovered!</span>';
-                        } else {
-                            kpiChips.innerHTML = entries.map(([cat, amt]) => `
-                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-white/10 text-slate-300 border border-white/10 flex items-center gap-1">
-                                    <span class="text-white">${window.escapeHTML(cat)}:</span>
-                                    <span class="text-amber-400 font-black">AED ${Math.round(amt)}</span>
-                                </span>
-                            `).join('');
-                        }
-                    }
+                    if (kpiArchived) kpiArchived.innerText = `AED ${totalProcessedAmt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    if (kpiArchivedSub) kpiArchivedSub.innerText = `${processedBatchCount} batch${processedBatchCount === 1 ? '' : 'es'} archived`;
 
-                    // Update Batch Filters Count
-                    const partialCount = allPendingBatches.filter(b => b.isPartiallyReimbursed).length;
-                    const unreimbursedCount = allPendingBatches.filter(b => b.receivedTotal === 0).length;
-
-                    document.getElementById('batch-count-all')?.replaceChildren(document.createTextNode(allPendingBatches.length.toString()));
-                    document.getElementById('batch-count-partial')?.replaceChildren(document.createTextNode(partialCount.toString()));
-                    document.getElementById('batch-count-unreimbursed')?.replaceChildren(document.createTextNode(unreimbursedCount.toString()));
-
-                    // Filter batches based on active pill
-                    let filteredBatches = allPendingBatches;
-                    window.currentPendingBatchFilter = window.currentPendingBatchFilter || 'all';
-
-                    if (window.currentPendingBatchFilter === 'partial') {
-                        filteredBatches = allPendingBatches.filter(b => b.isPartiallyReimbursed);
-                    } else if (window.currentPendingBatchFilter === 'unreimbursed') {
-                        filteredBatches = allPendingBatches.filter(b => b.receivedTotal === 0);
-                    }
-
-                    const batchContainer = document.getElementById('reimbursement-batches');
-                    if (batchContainer) {
-                        if (filteredBatches.length === 0) {
-                            batchContainer.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 font-bold text-xs border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50">No pending reimbursement batches found for this filter.</div>';
-                        } else {
-                            batchContainer.innerHTML = filteredBatches.map(b => {
-                                let badgeHtml = '';
-                                let cardBorder = 'border-blue-100 bg-blue-50/50';
-
-                                if (b.isFullyReimbursed) {
-                                    cardBorder = 'border-emerald-200 bg-emerald-50/40';
-                                    badgeHtml = `
-                                        <div class="absolute top-0 right-0 bg-emerald-600 text-white text-[9px] font-black px-3 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm flex items-center gap-1.5">
-                                            <i data-lucide="check-check" class="w-3 h-3"></i> 100% Reimbursed
-                                            <button onclick="window.undoBatch('${b.id}')" title="Undo Batch" class="hover:text-amber-300 transition-colors ml-1 border-l border-white/20 pl-2 flex items-center">
-                                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
-                                            </button>
-                                        </div>
-                                    `;
-                                } else if (b.isPartiallyReimbursed) {
-                                    cardBorder = 'border-amber-200 bg-amber-50/40';
-                                    badgeHtml = `
-                                        <div class="absolute top-0 right-0 bg-amber-600 text-white text-[9px] font-black px-3 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm flex items-center gap-1.5">
-                                            <i data-lucide="pie-chart" class="w-3 h-3"></i> Partial (${b.percent}%)
-                                            <button onclick="window.undoBatch('${b.id}')" title="Undo Batch" class="hover:text-amber-300 transition-colors ml-1 border-l border-white/20 pl-2 flex items-center">
-                                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
-                                            </button>
-                                        </div>
-                                    `;
-                                } else {
-                                    badgeHtml = `
-                                        <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] font-black px-3 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm flex items-center gap-1.5">
-                                            Processing
-                                            <button onclick="window.undoBatch('${b.id}')" title="Undo Batch (Return to Staged)" class="hover:text-amber-300 transition-colors ml-1 border-l border-white/20 pl-2 flex items-center">
-                                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
-                                            </button>
-                                        </div>
-                                    `;
-                                }
-
-                                // Category pills for the batch
-                                const catBadges = Object.entries(b.cats).map(([cat, cdata]) => {
-                                    const isPaid = (cdata.total - cdata.receivedTotal) <= 0.01;
-                                    return `
-                                        <span class="px-2 py-0.5 rounded-md text-[9px] font-bold ${isPaid ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'}">
-                                            ${isPaid ? '✓ ' : ''}${window.escapeHTML(cat)}: AED ${cdata.total.toFixed(0)}
-                                        </span>
-                                    `;
-                                }).join('');
-
-                                return `
-                                <div class="${cardBorder} border p-5 rounded-2xl relative overflow-hidden group flex flex-col h-full shadow-xs hover:shadow-md transition-all">
-                                    ${badgeHtml}
-                                    <div class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">${window.formatSafeDate(b.date) || b.id}</div>
-                                    <div class="text-2xl font-black text-slate-800 mb-0.5 tracking-tight">${b.total.toFixed(2)} <span class="text-xs text-slate-500 font-bold">AED</span></div>
-                                    
-                                    <!-- Progress & Breakdown -->
-                                    <div class="space-y-1.5 mb-4 mt-2">
-                                        <div class="flex items-center justify-between text-[10px] font-bold">
-                                            <span class="text-emerald-700">Received: AED ${b.receivedTotal.toFixed(2)} (${b.receivedCount}/${b.count})</span>
-                                            <span class="text-amber-700">Pending: AED ${b.pendingTotal.toFixed(2)}</span>
-                                        </div>
-                                        <div class="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden">
-                                            <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: ${b.percent}%"></div>
-                                        </div>
-                                        <div class="flex items-center gap-1 flex-wrap pt-1">
-                                            ${catBadges}
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mt-auto flex flex-col gap-2 pt-2 border-t border-slate-200/60">
-                                        <!-- Primary Partial Reimburse Action -->
-                                        <button onclick="window.openPartialReimburseModal('${b.id}')" class="w-full bg-emerald-600 text-white hover:bg-emerald-700 py-2.5 rounded-xl text-xs font-black shadow-md transition-all flex items-center justify-center gap-2">
-                                            <i data-lucide="wallet-cards" class="w-4 h-4"></i>
-                                            <span>${b.isPartiallyReimbursed ? 'Continue Partial Reimburse' : 'Partial / Settle Invoices'}</span>
-                                        </button>
-
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <button onclick="window.exportBatchExcel('${b.id}')" class="bg-white border border-slate-200 text-slate-700 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-700 py-2 rounded-xl text-[11px] font-bold transition-all shadow-xs flex items-center justify-center gap-1.5">
-                                                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-emerald-600"></i> Excel
-                                            </button>
-                                            <button onclick="window.printBatchPDFReport('${b.id}')" class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 py-2 rounded-xl text-[11px] font-bold transition-all shadow-xs flex items-center justify-center gap-1.5">
-                                                <i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-600"></i> PDF
-                                            </button>
-                                        </div>
-
-                                        <button onclick="window.printBatchInvoices('${b.id}')" class="w-full bg-slate-100 text-slate-600 hover:bg-slate-200 py-2 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5">
-                                            <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print Invoices
-                                        </button>
-
-                                        <button onclick="window.receiveBatchCash('${b.id}', ${b.total})" class="w-full ${b.isFullyReimbursed ? 'bg-emerald-50 border-2 border-emerald-300 text-emerald-800 hover:bg-emerald-600 hover:text-white' : 'bg-white border-2 border-slate-200 text-slate-500 hover:bg-slate-100'} py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2">
-                                            <i data-lucide="check-circle-2" class="w-4 h-4"></i> Workflow Completed
-                                        </button>
-                                    </div>
-                                </div>
-                            `;
-                            }).join('');
-                        }
-                    }
-
-                    // Render Staged Folders
                     const stagedContainer = document.getElementById('reimbursement-staged-folders');
                     if (stagedContainer) {
                         if (stagedFolders.length === 0) {
@@ -6152,372 +5867,34 @@
 
             window.receiveBatchCash = async (batchId, amount) => {
                 if (!currentUser) return;
-                const batchTxs = txs.filter(t => t.batchId === batchId && (t.type || '').toLowerCase() === 'expense');
-                if (batchTxs.length === 0) {
-                    window.showStatus("Error: No transactions found for this batch ID.", true);
-                    return;
-                }
-
-                const unpaidTxs = batchTxs.filter(t => !t.reimbursed);
-                const unpaidTotal = unpaidTxs.reduce((sum, t) => sum + (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0), 0);
-
-                // SAFETY CHECK: If any invoices in the batch are still unpaid, block completion and alert user!
-                if (unpaidTxs.length > 0) {
-                    const unpaidCatSet = new Set(unpaidTxs.map(t => (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized')));
-                    const unpaidCats = Array.from(unpaidCatSet).join(', ');
-
-                    window.customConfirm({
-                        title: "Invoices Not Fully Reimbursed!",
-                        body: `⚠️ Warning: ${unpaidTxs.length} invoice(s) totaling AED ${unpaidTotal.toFixed(2)} (${unpaidCats}) have NOT been reimbursed yet!\n\nYou must settle all invoices into Cash in Box before completing this workflow. Would you like to open Partial Reimburse now?`,
-                        icon: "alert-triangle",
-                        iconBg: "bg-amber-100",
-                        okText: "Open Partial Reimburse",
-                        cancelText: "Cancel",
-                        onOk: () => {
-                            window.openPartialReimburseModal(batchId);
-                        }
-                    });
-                    return;
-                }
-
-                // If all invoices are fully reimbursed, confirm and complete workflow:
-                window.customConfirm({
-                    title: "Complete Batch Workflow?",
-                    body: `All ${batchTxs.length} invoices in batch ${batchId} are fully reimbursed (AED ${amount.toFixed(2)}).\n\nArchive this batch to Processed Archives? All partial parts remain safely grouped in one batch folder.`,
-                    icon: "check-circle",
-                    iconBg: "bg-emerald-100",
-                    okText: "Complete & Archive",
-                    onOk: async () => {
-                        try {
-                            window.showStatus("Archiving batch workflow...", false);
-                            const batchObj = writeBatch(db);
-                            const today = window.getLocalDate();
-
-                            batchTxs.forEach(t => {
-                                const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
-                                batchObj.update(ref, {
-                                    batch_id: 'received',
-                                    receivedBatchId: batchId,
-                                    receivedDate: t.reimbursedDate || today
-                                });
-                            });
-
-                            await batchObj.commit();
-                            window.showStatus("Workflow Completed & Archived! ✅");
-                            batchTxs.forEach(t => {
-                                t.batchId = 'received';
-                                t.receivedBatchId = batchId;
-                            });
-                            window.renderAll();
-                        } catch (err) {
-                            window.showStatus("Error: " + err.message, true);
-                        }
-                    }
-                });
-            };
-
-            // ------------------------------------------------------------------
-            // PARTIAL REIMBURSEMENT SYSTEM & CASH-IN-BOX INTEGRATION
-            // ------------------------------------------------------------------
-            window.currentPRBatchId = null;
-            window.selectedPRInvoiceIds = new Set();
-            window.currentPendingBatchFilter = 'all';
-
-            window.filterPendingBatches = (filter) => {
-                window.currentPendingBatchFilter = filter;
-                ['all', 'partial', 'unreimbursed'].forEach(f => {
-                    const btn = document.getElementById(`batch-filter-${f}`);
-                    if (btn) {
-                        if (f === filter) {
-                            btn.className = 'px-3 py-1 rounded-lg text-xs font-black bg-white text-slate-800 shadow-xs transition-all';
-                        } else {
-                            btn.className = 'px-3 py-1 rounded-lg text-xs font-bold text-slate-500 hover:bg-white/60 transition-all';
-                        }
-                    }
-                });
-                window.renderAll();
-            };
-
-            window.openPartialReimburseModal = (batchId) => {
-                window.currentPRBatchId = batchId;
-                window.selectedPRInvoiceIds.clear();
-
-                const batch = window.globalBatchMap ? window.globalBatchMap[batchId] : null;
-                if (!batch) {
-                    window.showStatus("Batch not found", true);
-                    return;
-                }
-
-                const modal = document.getElementById('partial-reimburse-modal');
-                if (!modal) return;
-
-                document.getElementById('pr-modal-title').innerText = `Reimburse Batch: ${batchId}`;
-                document.getElementById('pr-batch-total').innerText = `AED ${batch.total.toFixed(2)}`;
-                document.getElementById('pr-batch-count').innerText = `${batch.count} invoices`;
-                document.getElementById('pr-batch-received').innerText = `AED ${batch.receivedTotal.toFixed(2)}`;
-                document.getElementById('pr-batch-received-count').innerText = `${batch.receivedCount} invoices`;
-                document.getElementById('pr-batch-pending').innerText = `AED ${batch.pendingTotal.toFixed(2)}`;
-                document.getElementById('pr-batch-pending-count').innerText = `${batch.pendingCount} invoices`;
-
-                const dateInput = document.getElementById('pr-receipt-date');
-                if (dateInput) dateInput.value = window.getLocalDate();
-                const noteInput = document.getElementById('pr-receipt-note');
-                if (noteInput) noteInput.value = '';
-                const creditToggle = document.getElementById('pr-credit-box-toggle');
-                if (creditToggle) creditToggle.checked = true;
-
-                // Render Invoices grouped by category
-                const catContainer = document.getElementById('pr-categories-list');
-                if (catContainer) {
-                    const catMap = {};
-                    batch.txs.forEach(t => {
-                        const cat = (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized');
-                        if (!catMap[cat]) catMap[cat] = [];
-                        catMap[cat].push(t);
-                    });
-
-                    catContainer.innerHTML = Object.entries(catMap).map(([cat, invoices]) => {
-                        const unpaidInvoices = invoices.filter(t => !t.reimbursed);
-                        const paidInvoices = invoices.filter(t => t.reimbursed);
-                        const catTotal = invoices.reduce((s, t) => s + (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0), 0);
-                        const catUnpaidTotal = unpaidInvoices.reduce((s, t) => s + (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0), 0);
-                        const allPaid = unpaidInvoices.length === 0;
-
-                        const invoiceRows = invoices.map(t => {
-                            const isPaid = !!t.reimbursed;
-                            const amt = (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0);
-                            const dateStr = window.formatSafeDate(t.invoiceDate || t.subDate);
-                            const desc = window.escapeHTML(t.desc || 'No description');
-                            const vendor = t.vendor ? `<span class="text-slate-400 font-normal">(${window.escapeHTML(t.vendor)})</span>` : '';
-
-                            return `
-                                <div class="flex items-center justify-between py-2 px-3 rounded-xl border ${isPaid ? 'bg-emerald-50/50 border-emerald-100 opacity-80' : 'bg-white border-slate-200 hover:border-blue-300'} transition-all">
-                                    <div class="flex items-center gap-3 min-w-0">
-                                        <input type="checkbox" id="pr-tx-${t.id}" data-txid="${t.id}" data-amount="${amt}" data-cat="${window.escapeHTML(cat)}" ${isPaid ? 'checked disabled' : 'onchange="window.togglePRInvoiceCheck(this.dataset.txid)"'} class="pr-invoice-cb w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer">
-                                        <div class="min-w-0">
-                                            <div class="text-xs font-bold text-slate-800 truncate">${desc} ${vendor}</div>
-                                            <div class="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
-                                                <span>${dateStr}</span>
-                                                ${t.invoiceNo ? `<span>• Inv #${window.escapeHTML(t.invoiceNo)}</span>` : ''}
-                                                ${isPaid ? `<span class="text-emerald-700 font-black">• Paid (Part ${t.reimbursementPart || 1})</span>` : ''}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="text-right shrink-0">
-                                        <div class="text-xs font-black ${isPaid ? 'text-emerald-700' : 'text-slate-800'}">AED ${amt.toFixed(2)}</div>
-                                        <div class="text-[9px] font-bold ${isPaid ? 'text-emerald-600' : 'text-slate-400'} uppercase">${isPaid ? 'Reimbursed' : 'Unpaid'}</div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
-
-                        return `
-                            <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/60 p-3 space-y-2">
-                                <div class="flex items-center justify-between pb-2 border-b border-slate-200/80">
-                                    <div class="flex items-center gap-2">
-                                        <input type="checkbox" id="pr-cat-cb-${window.escapeHTML(cat)}" data-cat="${window.escapeHTML(cat)}" onchange="window.togglePRCategoryCheck(this.dataset.cat, this.checked)" ${allPaid ? 'checked disabled' : ''} class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer">
-                                        <label for="pr-cat-cb-${window.escapeHTML(cat)}" class="text-xs font-black text-slate-800 cursor-pointer flex items-center gap-1.5">
-                                            <span>${window.escapeHTML(cat)}</span>
-                                            <span class="text-[10px] text-slate-400 font-bold">(${invoices.length} invoices)</span>
-                                            ${allPaid ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">100% Reimbursed</span>' : ''}
-                                        </label>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-xs font-black text-slate-800">AED ${catTotal.toFixed(2)}</span>
-                                        ${!allPaid && paidInvoices.length > 0 ? `<span class="block text-[9px] text-amber-600 font-bold">AED ${catUnpaidTotal.toFixed(2)} left</span>` : ''}
-                                    </div>
-                                </div>
-                                <div class="space-y-1.5 pt-1">
-                                    ${invoiceRows}
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-                }
-
-                window.updatePRSelectedTotals();
-                modal.classList.remove('hidden');
-                lucide.createIcons();
-            };
-
-            window.closePartialReimburseModal = () => {
-                const modal = document.getElementById('partial-reimburse-modal');
-                if (modal) modal.classList.add('hidden');
-                window.currentPRBatchId = null;
-                window.selectedPRInvoiceIds.clear();
-            };
-
-            window.togglePRInvoiceCheck = (txId) => {
-                const cb = document.getElementById(`pr-tx-${txId}`);
-                if (!cb) return;
-
-                if (cb.checked) {
-                    window.selectedPRInvoiceIds.add(txId);
-                } else {
-                    window.selectedPRInvoiceIds.delete(txId);
-                }
-                window.updatePRSelectedTotals();
-            };
-
-            window.togglePRCategoryCheck = (cat, isChecked) => {
-                const modal = document.getElementById('partial-reimburse-modal');
-                if (!modal) return;
-
-                const cbs = modal.querySelectorAll('.pr-invoice-cb:not(:disabled)');
-                cbs.forEach(cb => {
-                    if (cb.dataset.cat === cat) {
-                        cb.checked = isChecked;
-                        const txId = cb.dataset.txid;
-                        if (isChecked) {
-                            window.selectedPRInvoiceIds.add(txId);
-                        } else {
-                            window.selectedPRInvoiceIds.delete(txId);
-                        }
-                    }
-                });
-                window.updatePRSelectedTotals();
-            };
-
-            window.toggleAllPRCheckboxes = (isChecked) => {
-                const modal = document.getElementById('partial-reimburse-modal');
-                if (!modal) return;
-
-                const cbs = modal.querySelectorAll('.pr-invoice-cb:not(:disabled)');
-                cbs.forEach(cb => {
-                    cb.checked = isChecked;
-                    const txId = cb.dataset.txid;
-                    if (isChecked) {
-                        window.selectedPRInvoiceIds.add(txId);
-                    } else {
-                        window.selectedPRInvoiceIds.delete(txId);
-                    }
-                });
-
-                // Update category master checkboxes
-                const catCbs = modal.querySelectorAll('input[id^="pr-cat-cb-"]:not(:disabled)');
-                catCbs.forEach(cb => { cb.checked = isChecked; });
-
-                window.updatePRSelectedTotals();
-            };
-
-            window.updatePRSelectedTotals = () => {
-                let total = 0;
-                let count = 0;
-
-                window.selectedPRInvoiceIds.forEach(id => {
-                    const cb = document.getElementById(`pr-tx-${id}`);
-                    if (cb && !cb.disabled) {
-                        total += parseFloat(cb.dataset.amount || 0);
-                        count++;
-                    }
-                });
-
-                const countEl = document.getElementById('pr-selected-count');
-                const totalEl = document.getElementById('pr-selected-total');
-                const btn = document.getElementById('btn-confirm-partial-reimburse');
-
-                if (countEl) countEl.innerText = `${count} Invoice${count === 1 ? '' : 's'}`;
-                if (totalEl) totalEl.innerText = `AED ${total.toFixed(2)}`;
-                if (btn) btn.disabled = (count === 0);
-            };
-
-            window.confirmPartialReimbursement = async () => {
-                if (!currentUser) return;
-                const batchId = window.currentPRBatchId;
-                if (!batchId) return;
-
-                const selectedIds = Array.from(window.selectedPRInvoiceIds);
-                if (selectedIds.length === 0) {
-                    window.showStatus("Please select at least one invoice to reimburse.", true);
-                    return;
-                }
-
-                const batch = window.globalBatchMap ? window.globalBatchMap[batchId] : null;
-                if (!batch) return;
-
-                const selectedTxs = batch.txs.filter(t => selectedIds.includes(t.id));
-                const totalReimburseAmt = selectedTxs.reduce((sum, t) => sum + (parseFloat(t.amount) || parseFloat(t.paidFromBox) || 0), 0);
-
-                const dateInput = document.getElementById('pr-receipt-date');
-                const receiptDate = dateInput && dateInput.value ? dateInput.value : window.getLocalDate();
-                const noteInput = document.getElementById('pr-receipt-note');
-                const receiptNote = noteInput ? noteInput.value.trim() : '';
-
-                // Calculate next part number
-                const existingParts = new Set();
-                batch.txs.forEach(t => {
-                    if (t.reimbursed && t.reimbursementPart) existingParts.add(t.reimbursementPart);
-                });
-                const nextPartNumber = existingParts.size + 1;
-
-                // Category summary for note
-                const catsInvolved = [...new Set(selectedTxs.map(t => (t.allocations && t.allocations.length > 0 && t.allocations[0].category) ? t.allocations[0].category : (t.category || 'Uncategorized')))].join(', ');
-
-                const shouldCreditBox = document.getElementById('pr-credit-box-toggle')?.checked ?? true;
-
-                const btn = document.getElementById('btn-confirm-partial-reimburse');
-                const origHtml = btn.innerHTML;
-                btn.disabled = true;
-                btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> ${shouldCreditBox ? 'Crediting Box...' : 'Reimbursing...'}`;
-                lucide.createIcons();
+                if (!confirm(`Mark this batch (${amount.toFixed(2)} AED) as received and complete the workflow?\n\nNote: No historical data will be lost, this simply archives the batch.`)) return;
 
                 try {
-                    window.showStatus(shouldCreditBox ? `Crediting AED ${totalReimburseAmt.toFixed(2)} to Cash in Box...` : `Marking AED ${totalReimburseAmt.toFixed(2)} as Reimbursed...`, false);
-                    const batchObj = writeBatch(db);
+                    window.showStatus("Archiving batch workflow...", false);
 
-                    // 1. Mark each selected invoice as reimbursed
-                    selectedTxs.forEach(t => {
-                        const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
-                        batchObj.update(ref, {
-                            reimbursed: true,
-                            reimbursedDate: receiptDate,
-                            reimbursementPart: nextPartNumber,
-                            reimbursementNote: receiptNote || (shouldCreditBox ? '' : 'Already added to box manually')
-                        });
-                        // update locally immediately
-                        t.reimbursed = true;
-                        t.reimbursedDate = receiptDate;
-                        t.reimbursementPart = nextPartNumber;
-                        t.reimbursementNote = receiptNote || (shouldCreditBox ? '' : 'Already added to box manually');
-                    });
-
-                    // 2. Insert cash receive transaction into petty cash ledger (CREDITING CASH IN BOX ONLY IF CHECKED)
-                    if (shouldCreditBox) {
-                        const receiveDocRef = doc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'));
-                        const descText = `Reimbursement Received: ${batchId} (Part ${nextPartNumber} - ${catsInvolved})${receiptNote ? ' • ' + receiptNote : ''}`;
-
-                        batchObj.set(receiveDocRef, {
-                            type: 'receive',
-                            amount: totalReimburseAmt,
-                            person: 'Accounts',
-                            desc_text: descText,
-                            sub_date: receiptDate,
-                            timestamp: new Date().toISOString(),
-                            user_id: currentUser.uid,
-                            paid_from_box: -totalReimburseAmt,
-                            staff_owed: 0,
-                            manager_owed: 0,
-                            batch_id: batchId,
-                            reimbursement_part: nextPartNumber,
-                            reimbursement_note: receiptNote,
-                            status: 'Active'
-                        });
+                    const batchTxs = txs.filter(t => t.batchId === batchId);
+                    if (batchTxs.length === 0) {
+                        console.error("Batch Archive Error: No transactions found for ID", batchId, "All Txs:", txs);
+                        window.showStatus("Error: No transactions found for this batch ID.", true);
+                        return;
                     }
 
-                    await batchObj.commit();
+                    const updatePromises = batchTxs.map(t => {
+                        const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
+                        return updateDoc(ref, {
+                            batch_id: 'received',
+                            receivedBatchId: batchId,
+                            receivedDate: window.getLocalDate()
+                        });
+                    });
+                    await Promise.all(updatePromises);
 
-                    window.closePartialReimburseModal();
-                    window.showStatus(shouldCreditBox 
-                        ? `Reimbursement of AED ${totalReimburseAmt.toFixed(2)} Received into Box! ✅` 
-                        : `Invoices marked Reimbursed (Box balance kept as is, no double credit) ✅`);
+                    window.showStatus(`Successfully Archived! ✅`);
+                    // Force immediate local update in case snapshot is slow
+                    batchTxs.forEach(t => t.batchId = 'received');
                     window.renderAll();
                 } catch (err) {
-                    console.error("Partial Reimburse Error", err);
                     window.showStatus("Error: " + err.message, true);
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = origHtml;
-                    lucide.createIcons();
                 }
             };
 
@@ -7016,7 +6393,7 @@
 
                 window.customConfirm({
                     title: "Finalize Batch?",
-                    body: `Finalize batch for ${selectedCats.length} category folder(s)? This will move them to Pending Reimbursements with today's date.`,
+                    body: `Finalize batch for ${selectedCats.length} category folder(s)?`,
                     icon: "check-circle",
                     iconBg: "bg-emerald-100",
                     okText: "Finalize",
@@ -7024,20 +6401,20 @@
                         try {
                             window.showStatus("Finalizing batch...", true);
                             const batch = writeBatch(db);
-                            
-                            // Batch ID formatted using the exact date it enters Pending Reimbursements
-                            const localDateStr = window.getLocalDate(); // yyyy-mm-dd
-                            const [yyyy, mm, dd] = localDateStr.split('-');
-                            const baseId = `EIC/PETTYCASH${dd}${mm}${yyyy}`;
-                            
-                            let batchId = baseId;
-                            let counter = 2;
-                            while (txs.some(t => t.batchId === batchId || t.receivedBatchId === batchId)) {
-                                batchId = `${baseId}-${counter}`;
-                                counter++;
+                            const d = new Date();
+                            const dd = d.getDate().toString().padStart(2, '0');
+                            const mm = (d.getMonth() + 1).toString().padStart(2, '0');
+                            const yyyy = d.getFullYear();
+                            let batchId = `EIC/PETTYCASH${dd}${mm}${yyyy}`;
+                            const existingBatchIds = new Set(txs.map(t => t.batchId).filter(Boolean));
+                            if (existingBatchIds.has(batchId)) {
+                                let counter = 2;
+                                while (existingBatchIds.has(`${batchId}-${counter}`)) {
+                                    counter++;
+                                }
+                                batchId = `${batchId}-${counter}`;
                             }
-
-                            const today = new Date().toISOString();
+                            const today = d.toISOString();
 
                             selectedCats.forEach(cat => {
                                 const folderData = window.currentStagedFolders.find(f => f.cat === cat);
@@ -7046,17 +6423,15 @@
                                         const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id);
                                         batch.update(docRef, {
                                             batch_id: batchId,
-                                            batch_date: localDateStr,
                                             staged_date: today,
-                                            status: 'Batching',
-                                            reimbursed: false
+                                            status: 'Batching'
                                         });
                                     });
                                 }
                             });
 
                             await batch.commit();
-                            window.showStatus("Batch Finalized & Moved to Pending! ✅");
+                            window.showStatus("Batch Finalized!");
                             window.renderAll();
                         } catch (err) {
                             window.showStatus("Error: " + err.message, true);
@@ -8653,10 +8028,6 @@
                     batchId: dbTx.batch_id || dbTx.batchId || null,
                     receivedBatchId: dbTx.receivedBatchId || dbTx.received_batch_id || null,
                     receivedDate: dbTx.receivedDate || dbTx.received_date || null,
-                    reimbursed: !!(dbTx.reimbursed || dbTx.batch_id === 'received' || dbTx.batchId === 'received'),
-                    reimbursedDate: dbTx.reimbursedDate || dbTx.reimbursed_date || dbTx.receivedDate || null,
-                    reimbursementPart: dbTx.reimbursementPart || dbTx.reimbursement_part || null,
-                    reimbursementNote: dbTx.reimbursementNote || dbTx.reimbursement_note || '',
                     voidReason: dbTx.void_reason || '',
                     editReason: dbTx.edit_reason || '',
                     invoiceUrl: dbTx.invoice_url || '',
